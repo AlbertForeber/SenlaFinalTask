@@ -10,7 +10,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>scooter-rental</module>
-        <module>scooter-rental</module>
     </modules>
 
     <properties>
@@ -23,7 +22,7 @@
 
         <!-- BASE -->
         <spring.version>6.1.4</spring.version>
-        <spring.security.version>6.2.1</spring.security.version>
+        <spring.security.version>6.3.5</spring.security.version> <!-- Версия без уязвимостей -->
 
         <!-- DATA -->
         <hibernate.version>6.4.4.Final</hibernate.version>
@@ -34,12 +33,16 @@
         <kafka.version>3.7.0</kafka.version>
         <spring.kafka.version>3.1.2</spring.kafka.version>
         <minio.version>8.5.9</minio.version>
-        <redis.version>5.1.2</redis.version>
+        <redis.version>6.3.2.RELEASE</redis.version>
         <jjwt.version>0.12.5</jjwt.version>
+
+        <!-- VALIDATION -->
+        <jakarta.validation.version>3.0.2</jakarta.validation.version>
+        <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
 
         <!-- LOGGING -->
         <slf4j.version>2.0.12</slf4j.version>
-        <logback.version>1.14.14</logback.version>
+        <logback.version>1.5.18</logback.version>
 
         <!-- SERIALIZATION -->
         <jackson.version>2.16.1</jackson.version>
@@ -88,154 +91,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- SPRING -->
-        <!-- Версии не указываем, берутся из BOM выше -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId> <!-- Для HibernateTransactionManager -->
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId> <!-- Для @Transactional и PlatformTransactionManager -->
-        </dependency>
-
-        <!-- SPRING SECURITY -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-
-        <!-- JAKARTA EE -->
-        <!-- Spring 6 использует Jakarta -->
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <version>${jakarta.servlet.version}</version>
-            <scope>provided</scope> <!-- Предоставляется Tomcat -->
-        </dependency>
-        <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
-            <version>${jakarta.annotation.version}</version>
-        </dependency>
-
-        <!-- Hibernate + PostGIS -->
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Для маппинга JTS на PostGIS -->
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-spatial</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.locationtech.jts</groupId>
-            <artifactId>jts-core</artifactId>
-            <version>${jts.version}</version>
-        </dependency>
-
-        <!-- POSTGRESQL -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-        </dependency>
-
-        <!-- Connection Pool -->
-        <!-- c3po или HikariCP, второй быстрее, но нужен slf4j -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>${hikari.cp.version}</version>
-        </dependency>
-
-        <!-- LIQUIBASE -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>${liquibase.version}</version>
-        </dependency>
-
-        <!-- KAFKA -->
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>${kafka.version}</version>
-        </dependency>
-
-        <!-- Spring интеграция для Kafka -->
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-            <version>${spring.kafka.version}</version>
-        </dependency>
-
-        <!-- MINIO -->
-        <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-            <version>${minio.version}</version>
-        </dependency>
-
-        <!-- REDIS -->
-        <!-- Lettuce - современный Redis клиент, thread-safe -->
-        <dependency>
-            <groupId>io.lettuce</groupId>
-            <artifactId>lettuce-core</artifactId>
-            <version>${redis.version}</version>
-        </dependency>
-
-        <!-- JWT -->
-        <!-- JJWT - самая популярная Java библиотека для JWT -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>${jjwt.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>${jjwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>${jjwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- JACKSON -->
-        <!-- Версия из jackson-bom -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <!-- Для сериализации дат в Java 8+: LocalDate, Instant -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-
         <!-- MAP STRUCT -->
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -246,7 +101,7 @@
         <!-- LOMBOK -->
         <dependency>
             <groupId>org.projectlombok</groupId>
-            <artifactId>lombock</artifactId>
+            <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -262,41 +117,20 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
-
-        <!-- TESTING -->
-        <!-- Версия из junit-bom -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- TestContainers -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+
+                <configuration>
+                    <configLocation>checkstyle/checkstyle.xml</configLocation>
+                    <failsOnError>true</failsOnError>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
