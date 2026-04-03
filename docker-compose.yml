@@ -1,0 +1,27 @@
+services:
+  db:
+    container_name: "postgres"
+    restart: always
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test
+    volumes:
+      - postgres_data:/var/lib/postgresql/postgres_data
+    networks:
+      - main_network
+
+  app:
+    container_name: "scooter-rental"
+    build: scooter-rental
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    networks:
+      - main_network
+
+networks:
+  main_network:
+
+volumes:
+  postgres_data:
