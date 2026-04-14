@@ -36,6 +36,9 @@
         <redis.version>6.3.2.RELEASE</redis.version>
         <jjwt.version>0.12.5</jjwt.version>
 
+        <!-- ASPECTS -->
+        <aspectj.version>1.9.25.1</aspectj.version>
+
         <!-- VALIDATION -->
         <jakarta.validation.version>3.0.2</jakarta.validation.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
@@ -128,8 +131,19 @@
 
                 <configuration>
                     <configLocation>checkstyle/checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>
                 </configuration>
+
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

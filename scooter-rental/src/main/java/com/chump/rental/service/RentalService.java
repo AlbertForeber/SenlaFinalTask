@@ -1,0 +1,231 @@
+package com.chump.rental.service;
+
+import com.chump.common.exception.InaccessibleAction;
+import com.chump.common.exception.NoSuchEntityException;
+import com.chump.common.exception.UnavaliableAction;
+import com.chump.rental.dao.RentalSpotDao;
+import com.chump.rental.dao.TripDao;
+import com.chump.rental.dao.TripPointDao;
+import com.chump.rental.dto.response.TripConciseResponse;
+import com.chump.rental.dto.response.TripDetailedResponse;
+import com.chump.rental.mapper.TripMapper;
+import com.chump.rental.model.Scooter;
+import com.chump.rental.model.Trip;
+import com.chump.rental.model.TripPoint;
+import com.chump.rental.model.status.ScooterStatus;
+import com.chump.rental.model.status.TripStatus;
+import com.chump.rental.repo.ScooterRepository;
+import com.chump.tariff.dao.TariffDao;
+import com.chump.tariff.model.Tariff;
+import com.chump.tariff.model.TariffType;
+import com.chump.user.dao.UserProfileDao;
+import com.chump.user.dao.UserSubscriptionDao;
+import com.chump.user.model.UserProfile;
+import com.chump.user.model.UserSubscription;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+
+// TODO Связь с Kafka
+// TODO + должен отправлять сообщение самокату, что он разблокирован/заблокирован
+// TODO + самокат должен начать отправлять данные местоположения в соответствующий топик
+// TODO        откуда, система должна их считывать и записывать в Redis
+// TODO + если пользователь захочет посмотреть поездку до ее завершения - данные подтягиваются из Redis
+// TODO + после завершения поездки данные отправляются в БД (упростить линию)
+@Service
+public class RentalService {
+
+    private final ScooterRepository scooterRepository;
+    private final TripDao tripDao;
+    private final TripMapper tripMapper;
+    private final UserProfileDao userProfileDao;
+    private final UserSubscriptionDao userSubscriptionDao;
+    private final TariffDao tariffDao;
+    private final TripPointDao tripPointDao;
+    private final RentalSpotDao rentalSpotDao;
+
+    public RentalService(ScooterRepository scooterRepository,
+                         TripDao tripDao,
+                         TripMapper tripMapper,
+                         UserProfileDao userProfileDao,
+                         UserSubscriptionDao userSubscriptionDao,
+                         TariffDao tariffDao,
+                         TripPointDao tripPointDao,
+                         RentalSpotDao rentalSpotDao) {
+        this.scooterRepository = scooterRepository;
+        this.tripDao = tripDao;
+        this.tripMapper = tripMapper;
+        this.userProfileDao = userProfileDao;
+        this.userSubscriptionDao = userSubscriptionDao;
+        this.tariffDao = tariffDao;
+        this.tripPointDao = tripPointDao;
+        this.rentalSpotDao = rentalSpotDao;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    private static class UserContext {
+        private UserProfile userProfile;
+        private Tariff tariff;
+    }
+
+    @Transactional
+    public TripConciseResponse rentScooter(int scooterId, int userId) {
+        Scooter scooter = findAndValidateScooter(scooterId);
+        UserContext userContext = collectUserContext(userId);
+        UserProfile userProfile = userContext.getUserProfile();
+        Tariff tariff = userContext.getTariff();
+
+        if (userProfile.getBalance().longValue() < 300 && tariff.getType() != TariffType.SUBSCRIPTION) {
+            throw new UnavaliableAction("Not enough money to rent a scooter");
+        }
+
+        scooter.setStatus(ScooterStatus.OCCUPIED);
+        Trip createdTrip = tripDao.save(Trip.builder()
+                .status(TripStatus.ONGOING)
+                .scooter(scooter)
+                .user(userProfile.getUser())
+                .startedAt(Instant.now())
+                .pricePerHour(tariff.getType() == TariffType.HOURLY ? tariff.getBasePrice() : BigDecimal.ZERO)
+                .discountAtStart(userProfile.getDiscount())
+                .build());
+
+        // TODO Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
+        return tripMapper.toConciseResponse(createdTrip);
+    }
+
+    @Transactional
+    public TripConciseResponse pauseScooter(int scooterId, int userId) {
+        Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
+        ongoingTrip.setStatus(TripStatus.PAUSED);
+
+        // TODO Сообщение самокату в Kafka заблокируйся + приостановка отправки в waypoint
+        return tripMapper.toConciseResponse(ongoingTrip);
+    }
+
+    @Transactional
+    public TripConciseResponse resumeScooter(int scooterId, int userId) {
+        Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
+        ongoingTrip.setStatus(TripStatus.ONGOING);
+
+        // TODO Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
+        return tripMapper.toConciseResponse(ongoingTrip);
+    }
+
+    @Transactional
+    public TripDetailedResponse returnScooter(int scooterId, int userId, boolean isForce) {
+        Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
+        finishTrip(ongoingTrip, scooterId, userId, isForce);
+
+        List<TripPoint> waypoints = tripPointDao.findByTripId(ongoingTrip.getId());
+        ongoingTrip.setDistance(calculateDistance(waypoints));
+        // TODO Сообщение самокату в Kafka заблокируйся + больше не отправляй waypoint
+        // TODO Проверка зоны парковки
+
+        return tripMapper.toDetailedResponse(ongoingTrip, waypoints);
+    }
+
+    private Scooter findAndValidateScooter(int scooterId) {
+        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
+                () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
+        );
+
+        if (scooter.getStatus() != ScooterStatus.FREE) {
+            throw new InaccessibleAction("Forbidden to rent occupied scooter");
+        }
+
+        return scooter;
+    }
+
+    private Trip findAndValidateTrip(int scooterId, int userId) {
+        Trip trip = tripDao.findOngoingByScooterId(scooterId).orElseThrow(
+                () -> new NoSuchEntityException("No trip found for scooter with id: " + scooterId)
+        );
+
+        if (!trip.getUser().getId().equals(userId)) {
+            throw new InaccessibleAction("Forbidden to manage someone else's scooter");
+        }
+
+        return trip;
+    }
+
+    private void finishTrip(Trip trip, int scooterId, int userId, boolean isForce) {
+        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
+                () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
+        );
+
+        if (!rentalSpotDao.isInRentalSpot(scooter.getLocation()) && !isForce) {
+            throw new UnavaliableAction("Scooter should be in rental zone");
+        }
+
+        UserProfile userProfile = userProfileDao.findById(userId).orElseThrow(
+                () -> new NoSuchEntityException("No user profile found with id:" + userId)
+        );
+
+        Duration duration = Duration.between(trip.getStartedAt(), Instant.now());
+        trip.setStatus(TripStatus.FINISHED);
+        scooter.setStatus(ScooterStatus.FREE);
+        scooterRepository.updateStatus(scooter.getId(), ScooterStatus.FREE);
+
+        trip.setDurationSeconds((int) duration.toSeconds());
+        trip.setTotalPrice(calculatePrice(trip));
+
+        userProfile.setBalance(userProfile.getBalance().subtract(trip.getTotalPrice()));
+    }
+
+    private float calculateDistance(List<TripPoint> waypoints) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+        LineString line = geometryFactory.createLineString(
+                waypoints.stream()
+                        .map(p -> new Coordinate(p.getLocation().getX(), p.getLocation().getY()))
+                        .toArray(Coordinate[]::new)
+        );
+
+        // TODO временная логика, получаем результат в градусах
+        // TODO умножение на примерное значение, чтобы не писать лишний запрос в БД
+        // TODO далее будет замененно на Redis
+        // TODO + в БД отправляется упрощенный маршрут
+        return (float) line.getLength() * 111000;
+    }
+
+    private BigDecimal calculatePrice(Trip trip) {
+        BigDecimal perHour = trip.getPricePerHour();
+        BigDecimal discount = trip.getDiscountAtStart();
+
+        BigDecimal fullPrice = perHour
+                .multiply(
+                        BigDecimal.valueOf(trip.getDurationSeconds())
+                                .divide(BigDecimal.valueOf(3600), 2, RoundingMode.HALF_UP));
+        return fullPrice.subtract(fullPrice.multiply(discount));
+    }
+
+    private UserContext collectUserContext(int userId) {
+        UserProfile userProfile = userProfileDao.findById(userId).orElseThrow(
+                () -> new NoSuchEntityException("No user profile found for trip with id: " + userId
+                        + ". Contact support service.")
+        );
+
+        UserSubscription userSubscription = userSubscriptionDao.findByUserIdWithTariff(userId).orElse(null);
+
+        Tariff tariff = userSubscription != null ? userSubscription.getTariff() :
+                tariffDao
+                        .getDefaultTariff()
+                        .orElseThrow(
+                                () -> new NoSuchEntityException("No default tariff found. Contact support service.")
+                        );
+
+        return new UserContext(userProfile, tariff);
+    }
+}

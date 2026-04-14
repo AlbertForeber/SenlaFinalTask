@@ -1,0 +1,50 @@
+package com.chump.rental.service.query;
+
+import com.chump.common.dto.param.GeoSearchParams;
+import com.chump.rental.dao.ScooterModelDao;
+import com.chump.rental.dto.response.ScooterModelResponse;
+import com.chump.rental.dto.response.ScooterResponse;
+import com.chump.rental.mapper.ScooterMapper;
+import com.chump.rental.mapper.ScooterModelMapper;
+import com.chump.rental.model.status.ScooterStatus;
+import com.chump.rental.repo.ScooterRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class ScooterQueryService {
+
+    private final ScooterRepository repo;
+    private final ScooterModelDao modelDao;
+    private final ScooterMapper mapper;
+    private final ScooterModelMapper modelMapper;
+
+    public ScooterQueryService(ScooterRepository repo, ScooterModelDao modelDao, ScooterMapper mapper, ScooterModelMapper modelMapper) {
+        this.repo = repo;
+        this.modelDao = modelDao;
+        this.mapper = mapper;
+        this.modelMapper = modelMapper;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScooterResponse> getAllFreeScooters() {
+        return mapper.toResponseList(repo.findByStatus(ScooterStatus.FREE));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScooterResponse> getNearbyScooters(GeoSearchParams params) {
+        return mapper.toResponseList(repo.findAllNearby(params));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScooterResponse> getScooterByStatus(ScooterStatus status) {
+        return mapper.toResponseList(repo.findByStatus(status));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScooterModelResponse> getScooterModels() {
+        return modelMapper.toResponseList(modelDao.findAll());
+    }
+}

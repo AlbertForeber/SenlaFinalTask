@@ -1,0 +1,61 @@
+package com.chump.rental.repo;
+
+import com.chump.common.dto.param.GeoSearchParams;
+import com.chump.rental.dao.ScooterDao;
+import com.chump.rental.model.Scooter;
+import com.chump.rental.model.status.ScooterStatus;
+import org.locationtech.jts.geom.Polygon;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class ScooterRepository {
+
+    private final ScooterDao postgresDao;
+
+    public ScooterRepository(ScooterDao postgresDao) {
+        this.postgresDao = postgresDao;
+    }
+
+    public List<Scooter> findAll() {
+        return postgresDao.findAll();
+    }
+
+    public Optional<Scooter> findById(int scooterId) {
+        return postgresDao.findById(scooterId);
+    }
+
+    public Scooter save(Scooter entity) {
+        return postgresDao.save(entity);
+    }
+
+    public void update(Scooter entity) {
+        postgresDao.update(entity);
+    }
+
+    public void delete(int scooterId) {
+        postgresDao.delete(scooterId);
+    }
+
+    public void updateStatus(int scooterId, ScooterStatus status) {
+        // TODO Логика синхронизации Redis
+    }
+
+    public void updateBattery(int scooterId, int battery) {
+        // TODO Логика синхронизации Redis
+    }
+
+    public List<Scooter> findAllInZone(Polygon polygon) {
+        return postgresDao.findAllInZone(polygon);
+    }
+
+    public List<Scooter> findAllNearby(GeoSearchParams params) {
+        return postgresDao.findAllNearby(params);
+    }
+
+    public List<Scooter> findByStatus(ScooterStatus status) {
+        return postgresDao.findByStatus(status);
+    }
+ }

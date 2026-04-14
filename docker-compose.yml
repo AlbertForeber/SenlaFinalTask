@@ -1,13 +1,17 @@
 services:
   db:
     container_name: "postgres"
+    image: postgis/postgis:16-3.4
     restart: always
     environment:
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
       - POSTGRES_DB=test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test"]
     volumes:
       - postgres_data:/var/lib/postgresql/postgres_data
+      - ./init_scripts:/docker-entrypoint-initdb.d
     networks:
       - main_network
 
@@ -15,10 +19,15 @@ services:
     container_name: "scooter-rental"
     build: scooter-rental
     restart: always
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=dev
     networks:
       - main_network
+    ports:
+      - "8080:8080"
 
 networks:
   main_network:

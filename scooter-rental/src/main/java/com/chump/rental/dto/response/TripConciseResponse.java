@@ -1,0 +1,22 @@
+package com.chump.rental.dto.response;
+
+import com.chump.rental.model.status.TripStatus;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Getter
+@Setter
+@ToString
+public class TripConciseResponse {
+
+    private Integer id;
+    private TripStatus status;
+    private Integer scooterId;
+    private Integer userId;
+    private Instant startedAt;
+    private BigDecimal totalPrice;
+}
