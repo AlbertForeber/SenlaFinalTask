@@ -117,5 +117,6 @@ public class Tests {
 //                .fullName("test_register")
 //                .dateOfBirth(LocalDate.now())
 //                .build()).toString());
+//        logger.info(rentalSpotQueryService.getRentalSpotsHierarchy().toString());
     }
 }

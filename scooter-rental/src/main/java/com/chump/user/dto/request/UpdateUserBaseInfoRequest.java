@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Setter
 public class UpdateUserBaseInfoRequest {
 
-    @Size(min = 8, max = 100, message = "Full name must be between 8 and 100 symbols long")
+    @Size(min = 4, max = 100, message = "Full name must be between 4 and 100 characters long")
     private String fullName;
 
     private LocalDate dateOfBirth;

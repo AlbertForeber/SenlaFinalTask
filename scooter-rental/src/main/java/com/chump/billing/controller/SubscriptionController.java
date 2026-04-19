@@ -1,0 +1,132 @@
+package com.chump.billing.controller;
+
+import com.chump.billing.dto.request.CreateSubscriptionTariffRequest;
+import com.chump.billing.dto.request.UpdateSubscriptionTariffRequest;
+import com.chump.billing.dto.response.CurrentSubscriptionResponse;
+import com.chump.billing.dto.response.SubscribedResponse;
+import com.chump.billing.dto.response.SubscriptionTariffResponse;
+import com.chump.billing.dto.response.TariffConciseResponse;
+import com.chump.billing.mapper.SubscriptionMapper;
+import com.chump.billing.service.BillingService;
+import com.chump.billing.service.SubscriptionService;
+import com.chump.billing.service.query.SubscriptionQueryService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/subscriptions")
+public class SubscriptionController {
+
+    private final SubscriptionService subscriptionService;
+    private final SubscriptionQueryService subscriptionQueryService;
+    private final SubscriptionMapper subscriptionMapper;
+    private final BillingService billingService;
+
+    public SubscriptionController(SubscriptionService subscriptionService,
+                                  SubscriptionQueryService subscriptionQueryService,
+                                  SubscriptionMapper subscriptionMapper, BillingService billingService) {
+        this.subscriptionService = subscriptionService;
+        this.subscriptionQueryService = subscriptionQueryService;
+        this.subscriptionMapper = subscriptionMapper;
+        this.billingService = billingService;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('SCOPE_tariff:view')")
+    public ResponseEntity<List<TariffConciseResponse>> getSubscriptions() {
+        return ResponseEntity.ok(subscriptionQueryService.getAllSubscriptionTariffs());
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_tariff:view')")
+    public ResponseEntity<SubscriptionTariffResponse> getSubscription(
+            @PathVariable Integer id
+    ) {
+        return ResponseEntity.ok(subscriptionQueryService.getSubscriptionTariff(id));
+    }
+
+    @GetMapping("/my")
+    @PreAuthorize("hasAuthority('SCOPE_tariff:view')")
+    public ResponseEntity<CurrentSubscriptionResponse> getMySubscription(
+            @AuthenticationPrincipal Integer userId
+    ) {
+        return ResponseEntity.ok(subscriptionQueryService.getCurrentSubscriptionOfUser(userId));
+    }
+
+    @GetMapping(params = "user_id")
+    @PreAuthorize("hasAuthority('SCOPE_tariff:view_admin')")
+    public ResponseEntity<CurrentSubscriptionResponse> getUserSubscription(
+            @RequestParam(name = "user_id") Integer userId
+    ) {
+        return ResponseEntity.ok(subscriptionQueryService.getCurrentSubscriptionOfUser(userId));
+    }
+
+    @PostMapping("/{id}/subscribe")
+    @PreAuthorize("hasAuthority('SCOPE_tariff:subscribe')")
+    public ResponseEntity<SubscribedResponse> postSubscribe(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal Integer userId
+    ) {
+        SubscribedResponse result = subscriptionService.subscribe(id, userId);
+        // URI вернуть нельзя, т.к. сущность пользователь-подписка недоступна через API
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(result);
+    }
+
+    @DeleteMapping("/unsubscribe")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('SCOPE_tariff:subscribe')")
+    public void deleteSubscribe(
+            @AuthenticationPrincipal Integer userId
+    ) {
+        subscriptionService.unsubscribe(userId);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAuthority('SCOPE_tariff:manage')")
+    public ResponseEntity<SubscriptionTariffResponse> postSubscriptions(
+            @Valid @RequestBody CreateSubscriptionTariffRequest request
+    ) {
+        SubscriptionTariffResponse result = subscriptionService
+                .addSubscriptionTariff(subscriptionMapper.toCreateCommand(request));
+
+        URI uri = URI.create("/api/subscriptions/" + result.getId());
+        return ResponseEntity
+                .created(uri)
+                .body(result);
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_tariff:manage')")
+    public ResponseEntity<SubscriptionTariffResponse> patchSubscription(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateSubscriptionTariffRequest request
+    ) {
+        return ResponseEntity.ok(
+                subscriptionService.updateSubscription(id, request.getDurationDays())
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_tariff:manage')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteSubscription(
+            @PathVariable Integer id,
+            @RequestParam(defaultValue = "false") Boolean force
+    ) {
+        subscriptionService.deleteSubscription(id, force);
+    }
+
+    @GetMapping("/test")
+    public void test() {
+        billingService.processBilling();
+    }
+}

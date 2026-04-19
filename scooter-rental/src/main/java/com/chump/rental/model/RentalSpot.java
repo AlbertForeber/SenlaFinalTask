@@ -32,6 +32,6 @@ public class RentalSpot {
     @Column(name = "area", nullable = false, columnDefinition = "geography(Polygon, 4326)")
     private Polygon area;
 
-    @Column(name = "is_zone", nullable = false)
-    private Boolean isZone;
+    @Column(name = "is_parking", nullable = false)
+    private Boolean isParking;
 }

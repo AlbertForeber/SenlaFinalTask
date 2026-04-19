@@ -1,6 +1,8 @@
 package com.chump.user.dto.request;
 
-import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,9 +12,12 @@ import java.math.BigDecimal;
 @Setter
 public class UpdateUserProtectedInfoRequest {
 
-    @DecimalMin(value = "BigDecimal.ZERO", message = "Balance must not be negative value")
+    @Digits(integer = 8, fraction = 2, message = "8 digits total with 2 digits in the fractional part are allowed")
+    @PositiveOrZero(message = "Balance must not be negative value")
     private BigDecimal balance;
 
-    @DecimalMin(value = "BigDecimal.ZERO", message = "Discount must not be negative value")
+    @Digits(integer = 1, fraction = 2, message = "3 digits total with 2 digits in the fractional part are allowed")
+    @DecimalMax(value = "1", message = "Discount must not be higher than 1 (100%)")
+    @PositiveOrZero(message = "Discount must not be negative value")
     private BigDecimal discount;
 }

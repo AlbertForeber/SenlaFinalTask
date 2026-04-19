@@ -13,7 +13,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = {RoleMapper.class})
 public interface UserMapper {
 
-    UpdateUserProtectedInfoRequest toProtectedInfoCommand(UpdateUserProtectedInfoRequest request);
+    UpdateUserProtectedInfoCommand toProtectedInfoCommand(UpdateUserProtectedInfoRequest request);
     UpdateUserBaseInfoCommand toBaseInfoCommand(UpdateUserBaseInfoRequest request);
 
     @Mapping(source = "user.id", target = "id")

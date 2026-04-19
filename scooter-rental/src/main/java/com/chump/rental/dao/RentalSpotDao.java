@@ -21,12 +21,12 @@ public class RentalSpotDao extends AbstractHibernateDao<RentalSpot, Integer> {
     public List<RentalSpot> findAllNearby(GeoSearchParams params) {
         try {
             String sql = """
-                    SELECT * FROM rent_spots
+                SELECT * FROM rent_spots
                 WHERE ST_DWithin(
                     area,
                     ST_SetSRID(ST_MakePoint(:lon, :lat), 4326),
                     :rad
-                ) AND is_zone=true;
+                ) AND is_parking=true;
                 """;
 
         return getCurrentSession()
@@ -40,7 +40,7 @@ public class RentalSpotDao extends AbstractHibernateDao<RentalSpot, Integer> {
         }
     }
 
-    public boolean isInRentalSpot(Point point) {
+    public boolean isInParkingRentalSpot(Point point) {
         try {
             String sql = """
                 SELECT EXISTS (
@@ -48,7 +48,7 @@ public class RentalSpotDao extends AbstractHibernateDao<RentalSpot, Integer> {
                     WHERE ST_Within(
                         CAST(:point AS geometry),
                         CAST(area AS geometry)
-                    )
+                    ) AND is_parking = true
                 )
                 """;
 
@@ -61,22 +61,50 @@ public class RentalSpotDao extends AbstractHibernateDao<RentalSpot, Integer> {
         }
     }
 
-    public Optional<RentalSpot> findByIdWithChildren(int rentSpotId) {
+    public List<RentalSpot> findAllWithChildren() {
         try {
-            // Кастить с :: не можем, т.к. hibernate воспринимает
-            // как именованный параметр
-            // CAST не используем, данные приходят в виде JTS, которые разбирает hibernate spatial
             String sql = """
                 WITH RECURSIVE tree AS (
-                    SELECT id, name, area, parent_id, is_zone, 0 AS depth
+                    SELECT id, name, area, parent_id, is_parking, 0 AS depth
+                    FROM rent_spots
+                    WHERE parent_id IS NULL
+
+                    UNION ALL
+
+                    SELECT rs.id, rs.name, rs.area, rs.parent_id, rs.is_parking, tree.depth + 1 AS depth
+                    FROM rent_spots rs
+                    JOIN tree ON rs.parent_id = tree.id
+                )
+                SELECT * FROM tree;
+                """;
+
+            List<Object[]> rows = getCurrentSession()
+                    .createNativeQuery(sql, Object[].class)
+                    .getResultList();
+
+            return buildTree(rows);
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to get rental spots hierarchy", e);
+        }
+    }
+
+    public Optional<RentalSpot> findByIdWithParents(int rentSpotId) {
+        try {
+            // 1) Кастить с :: не можем, т.к. hibernate воспринимает как именованный параметр
+            // 2) CAST не используем, данные приходят в виде JTS, которые разбирает hibernate spatial
+            // 3) COALESCE простой способ определить корневой объект, уровень не важен
+            //    важно знать что вернуть, а вернуть нужно корневой объект для корректного отображения
+            String sql = """
+                WITH RECURSIVE tree AS (
+                    SELECT id, name, area, parent_id, is_parking, COALESCE(parent_id, 0) AS depth
                     FROM rent_spots
                     WHERE id = :id
 
                     UNION ALL
 
-                    SELECT rs.id, rs.name, rs.area, rs.parent_id, rs.is_zone, tree.depth + 1 AS depth
+                    SELECT rs.id, rs.name, rs.area, rs.parent_id, rs.is_parking, COALESCE(rs.parent_id, 0) AS depth
                     FROM rent_spots rs
-                    JOIN tree ON rs.parent_id = tree.id
+                    JOIN tree ON rs.id = tree.parent_id
                 )
                 SELECT * FROM tree;
                 """;
@@ -89,16 +117,15 @@ public class RentalSpotDao extends AbstractHibernateDao<RentalSpot, Integer> {
             if (rows.isEmpty())
                 return Optional.empty();
 
-            return Optional.of(buildTree(rows));
+            return Optional.of(buildTree(rows).get(0));
         } catch (Exception e) {
-            throw new DataManipulationException("Failed to find rental spot hierarchy with id: " + rentSpotId, e);
+            throw new DataManipulationException("Failed to find rental spot with parents with id: " + rentSpotId, e);
         }
     }
 
-
-    private RentalSpot buildTree(List<Object[]> rows) {
+    private List<RentalSpot> buildTree(List<Object[]> rows) {
         Map<Integer, RentalSpot> tree = new HashMap<>();
-        RentalSpot root = null;
+        List<RentalSpot> roots = new ArrayList<>();
 
         for (Object[] o : rows) {
             RentalSpot spot = new RentalSpot(
@@ -107,14 +134,14 @@ public class RentalSpotDao extends AbstractHibernateDao<RentalSpot, Integer> {
                     new ArrayList<>(),
                     (String) o[1],                                             // name
                     JTS.to((org.geolatte.geom.Polygon<?>) o[2]),               // area
-                    (Boolean) o[3]
+                    (Boolean) o[4]
             );
 
             tree.put(spot.getId(), spot);
 
             // depth
             if (((Number) o[5]).intValue() == 0) {
-                root = spot;
+                roots.add(spot);
             }
         }
 
@@ -126,11 +153,15 @@ public class RentalSpotDao extends AbstractHibernateDao<RentalSpot, Integer> {
                 RentalSpot current = tree.get(id);
                 RentalSpot parent = tree.get(parentId);
 
-                current.setParent(parent);
-                parent.getChildren().add(current);
+                // Метод нужен для проходу по дереву вниз (прародитель <-X- родитель -> дети -> дети детей)
+                // Поэтому потеря информации о родителе конкретной точки нестрашна
+                if (parent != null) {
+                    current.setParent(parent);
+                    parent.getChildren().add(current);
+                }
             }
         }
 
-        return root;
+        return roots;
     }
 }

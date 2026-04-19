@@ -22,7 +22,7 @@ public class HibernateConfig {
         factory.setPackagesToScan(
                 "com.chump.rental.model",
                 "com.chump.user.model",
-                "com.chump.tariff.model",
+                "com.chump.billing.model",
                 "com.chump.auth.model"
         );
         factory.setHibernateProperties(hibernateProperties());

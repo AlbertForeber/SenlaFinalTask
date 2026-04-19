@@ -4,6 +4,7 @@ import com.chump.common.dto.param.GeoSearchParams;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.rental.dao.RentalSpotDao;
 import com.chump.rental.dto.response.RentalSpotConciseResponse;
+import com.chump.rental.dto.response.RentalSpotDetailedResponse;
 import com.chump.rental.dto.response.RentalSpotHierarchyResponse;
 import com.chump.rental.dto.response.RentalSpotWithScootersResponse;
 import com.chump.rental.mapper.RentalSpotMapper;
@@ -29,8 +30,13 @@ public class RentalSpotQueryService {
     }
 
     @Transactional(readOnly = true)
-    public RentalSpotHierarchyResponse getRentalSpotHierarchy(int rentSpotId) {
-        RentalSpot result =  dao.findByIdWithChildren(rentSpotId).orElseThrow(
+    public List<RentalSpotHierarchyResponse> getAllRentalSpotsHierarchy() {
+        return mapper.toHierarchyResponseList(dao.findAllWithChildren());
+    }
+
+    @Transactional(readOnly = true)
+    public RentalSpotHierarchyResponse getRentalSpotHierarchyUp(int rentSpotId) {
+        RentalSpot result =  dao.findByIdWithParents(rentSpotId).orElseThrow(
                 () -> new NoSuchEntityException("No rental spot found with id: " + rentSpotId)
         );
 
@@ -38,13 +44,22 @@ public class RentalSpotQueryService {
     }
 
     @Transactional(readOnly = true)
-    public RentalSpotWithScootersResponse getRentalSpotInfo(int rentSpotId) {
+    public RentalSpotWithScootersResponse getRentalSpotScooters(int rentSpotId) {
         RentalSpot spot = dao.findById(rentSpotId).orElseThrow(
                 () -> new NoSuchEntityException("No rental spot found with id: " + rentSpotId)
         );
         List<Scooter> scootersInZone = scooterRepository.findAllInZone(spot.getArea());
 
         return mapper.toWithScootersResponse(spot, scootersInZone);
+    }
+
+    @Transactional(readOnly = true)
+    public RentalSpotDetailedResponse getRentalSpotsDetailedInfo(int rentSpotId) {
+        RentalSpot result = dao.findById(rentSpotId).orElseThrow(
+                () -> new NoSuchEntityException("No rental spot found with id: " + rentSpotId)
+        );
+
+        return mapper.toDetailedResponse(result);
     }
 
     @Transactional(readOnly = true)

@@ -1,6 +1,7 @@
 package com.chump.rental.service.query;
 
 import com.chump.common.dto.param.GeoSearchParams;
+import com.chump.common.exception.NoSuchEntityException;
 import com.chump.rental.dao.ScooterModelDao;
 import com.chump.rental.dto.response.ScooterModelResponse;
 import com.chump.rental.dto.response.ScooterResponse;
@@ -26,6 +27,13 @@ public class ScooterQueryService {
         this.modelDao = modelDao;
         this.mapper = mapper;
         this.modelMapper = modelMapper;
+    }
+
+    @Transactional(readOnly = true)
+    public ScooterResponse getScooterInfo(int scooterId) {
+        return mapper.toResponse(repo.findById(scooterId).orElseThrow(
+                () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
+        ));
     }
 
     @Transactional(readOnly = true)

@@ -6,7 +6,7 @@ import com.chump.auth.dto.response.TokenResponse;
 import com.chump.auth.mapper.AuthMapper;
 import com.chump.auth.model.RefreshToken;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableAction;
+import com.chump.common.exception.UnavaliableActionException;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dao.UserDao;
 import com.chump.user.dao.UserProfileDao;
@@ -79,7 +79,7 @@ public class AuthService {
     @Transactional
     public TokenResponse register(RegisterCommand command) {
         if (userDao.existsByUsername(command.getUsername())) {
-            throw new UnavaliableAction("User with such username already exists");
+            throw new UnavaliableActionException("User with such username already exists");
         }
 
         User user = createUser(command);

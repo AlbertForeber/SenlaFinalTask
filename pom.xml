@@ -35,6 +35,7 @@
         <minio.version>8.5.9</minio.version>
         <redis.version>6.3.2.RELEASE</redis.version>
         <jjwt.version>0.12.5</jjwt.version>
+        <shedlock.version>5.10.0</shedlock.version>
 
         <!-- ASPECTS -->
         <aspectj.version>1.9.25.1</aspectj.version>
@@ -49,6 +50,7 @@
 
         <!-- SERIALIZATION -->
         <jackson.version>2.16.1</jackson.version>
+        <jackson.n52.jts.version>2.1.3</jackson.n52.jts.version>
 
         <!-- TESTING -->
         <junit.version>5.10.2</junit.version>

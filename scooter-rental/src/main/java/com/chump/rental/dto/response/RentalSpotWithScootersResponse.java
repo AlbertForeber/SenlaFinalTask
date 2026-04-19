@@ -14,5 +14,6 @@ public class RentalSpotWithScootersResponse {
     private Integer id;
     private String name;
     private Integer parentId;
+    private Integer totalScooterAmount;
     private List<ScooterResponse> scootersInSpot;
 }

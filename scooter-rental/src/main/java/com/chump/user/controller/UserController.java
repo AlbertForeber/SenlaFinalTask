@@ -8,6 +8,7 @@ import com.chump.user.mapper.UserMapper;
 import com.chump.user.service.UserService;
 import com.chump.user.service.query.UserQueryService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,6 +39,7 @@ public class UserController {
     ) {
         return ResponseEntity.ok(tripQueryService.getUserTrips(userId));
     }
+
     @GetMapping("/profile")
     @PreAuthorize("hasAuthority('SCOPE_profile:view')")
     public ResponseEntity<UserProfileResponse> getUserProfile(
@@ -56,5 +58,14 @@ public class UserController {
                 userId,
                 userMapper.toBaseInfoCommand(request)
         ));
+    }
+
+    @DeleteMapping("/profile")
+    @PreAuthorize("hasAuthority('SCOPE_profile:manage')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUserProfile(
+            @AuthenticationPrincipal Integer userId
+    ) {
+        userService.deleteUser(userId);
     }
 }

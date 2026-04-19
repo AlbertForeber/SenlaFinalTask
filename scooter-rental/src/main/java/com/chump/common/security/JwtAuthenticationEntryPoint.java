@@ -30,7 +30,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         objectMapper.writeValue(response.getWriter(), ErrorResponse.builder()
                 .status(401)
                 .error("Unauthorized")
-                .message("No authorization found")
+                .message("No access token found")
                 .build()
         );
     }

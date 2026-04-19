@@ -1,8 +1,8 @@
 package com.chump.rental.service;
 
-import com.chump.common.exception.InaccessibleAction;
+import com.chump.common.exception.InaccessibleActionException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableAction;
+import com.chump.common.exception.UnavaliableActionException;
 import com.chump.rental.dao.RentalSpotDao;
 import com.chump.rental.dao.TripDao;
 import com.chump.rental.dao.TripPointDao;
@@ -15,9 +15,8 @@ import com.chump.rental.model.TripPoint;
 import com.chump.rental.model.status.ScooterStatus;
 import com.chump.rental.model.status.TripStatus;
 import com.chump.rental.repo.ScooterRepository;
-import com.chump.tariff.dao.TariffDao;
-import com.chump.tariff.model.Tariff;
-import com.chump.tariff.model.TariffType;
+import com.chump.billing.dao.TariffDao;
+import com.chump.billing.model.Tariff;
 import com.chump.user.dao.UserProfileDao;
 import com.chump.user.dao.UserSubscriptionDao;
 import com.chump.user.model.UserProfile;
@@ -28,6 +27,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +54,7 @@ public class RentalService {
     private final TariffDao tariffDao;
     private final TripPointDao tripPointDao;
     private final RentalSpotDao rentalSpotDao;
+    private final Integer minToStart;
 
     public RentalService(ScooterRepository scooterRepository,
                          TripDao tripDao,
@@ -62,7 +63,8 @@ public class RentalService {
                          UserSubscriptionDao userSubscriptionDao,
                          TariffDao tariffDao,
                          TripPointDao tripPointDao,
-                         RentalSpotDao rentalSpotDao) {
+                         RentalSpotDao rentalSpotDao,
+                         @Value("${rental.minimal-balance}") String minToStart) {
         this.scooterRepository = scooterRepository;
         this.tripDao = tripDao;
         this.tripMapper = tripMapper;
@@ -71,6 +73,7 @@ public class RentalService {
         this.tariffDao = tariffDao;
         this.tripPointDao = tripPointDao;
         this.rentalSpotDao = rentalSpotDao;
+        this.minToStart = Integer.parseInt(minToStart);
     }
 
     @AllArgsConstructor
@@ -87,8 +90,8 @@ public class RentalService {
         UserProfile userProfile = userContext.getUserProfile();
         Tariff tariff = userContext.getTariff();
 
-        if (userProfile.getBalance().longValue() < 300 && tariff.getType() != TariffType.SUBSCRIPTION) {
-            throw new UnavaliableAction("Not enough money to rent a scooter");
+        if (userProfile.getBalance().longValue() < minToStart && tariff.getBillingIntervalMinutes() != null) {
+            throw new UnavaliableActionException("Not enough money to rent a scooter");
         }
 
         scooter.setStatus(ScooterStatus.OCCUPIED);
@@ -97,7 +100,8 @@ public class RentalService {
                 .scooter(scooter)
                 .user(userProfile.getUser())
                 .startedAt(Instant.now())
-                .pricePerHour(tariff.getType() == TariffType.HOURLY ? tariff.getBasePrice() : BigDecimal.ZERO)
+                .priceAtStart(tariff.getBasePrice())
+                .intervalAtStart(tariff.getBillingIntervalMinutes())
                 .discountAtStart(userProfile.getDiscount())
                 .build());
 
@@ -142,7 +146,7 @@ public class RentalService {
         );
 
         if (scooter.getStatus() != ScooterStatus.FREE) {
-            throw new InaccessibleAction("Forbidden to rent occupied scooter");
+            throw new InaccessibleActionException("Forbidden to rent occupied scooter");
         }
 
         return scooter;
@@ -154,7 +158,7 @@ public class RentalService {
         );
 
         if (!trip.getUser().getId().equals(userId)) {
-            throw new InaccessibleAction("Forbidden to manage someone else's scooter");
+            throw new InaccessibleActionException("Forbidden to manage someone else's scooter");
         }
 
         return trip;
@@ -165,8 +169,8 @@ public class RentalService {
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
 
-        if (!rentalSpotDao.isInRentalSpot(scooter.getLocation()) && !isForce) {
-            throw new UnavaliableAction("Scooter should be in rental zone");
+        if (!rentalSpotDao.isInParkingRentalSpot(scooter.getLocation()) && !isForce) {
+            throw new UnavaliableActionException("Scooter should be in rental zone");
         }
 
         UserProfile userProfile = userProfileDao.findById(userId).orElseThrow(
@@ -175,7 +179,7 @@ public class RentalService {
 
         Duration duration = Duration.between(trip.getStartedAt(), Instant.now());
         trip.setStatus(TripStatus.FINISHED);
-        scooter.setStatus(ScooterStatus.FREE);
+        scooter.setStatus(isForce ? ScooterStatus.MAINTENANCE : ScooterStatus.FREE);
         scooterRepository.updateStatus(scooter.getId(), ScooterStatus.FREE);
 
         trip.setDurationSeconds((int) duration.toSeconds());
@@ -201,14 +205,20 @@ public class RentalService {
     }
 
     private BigDecimal calculatePrice(Trip trip) {
-        BigDecimal perHour = trip.getPricePerHour();
+        BigDecimal price = trip.getPriceAtStart();
+        Integer interval = trip.getIntervalAtStart();
         BigDecimal discount = trip.getDiscountAtStart();
 
-        BigDecimal fullPrice = perHour
-                .multiply(
-                        BigDecimal.valueOf(trip.getDurationSeconds())
-                                .divide(BigDecimal.valueOf(3600), 2, RoundingMode.HALF_UP));
-        return fullPrice.subtract(fullPrice.multiply(discount));
+        BigDecimal fullPrice = null;
+
+        if (interval != null) {
+            fullPrice = price
+                    .multiply(
+                            BigDecimal.valueOf(trip.getDurationSeconds())
+                                    .divide(BigDecimal.valueOf(60L * interval), 2, RoundingMode.UP));
+            fullPrice = fullPrice.subtract(fullPrice.multiply(discount));
+        }
+        return fullPrice;
     }
 
     private UserContext collectUserContext(int userId) {
@@ -217,7 +227,7 @@ public class RentalService {
                         + ". Contact support service.")
         );
 
-        UserSubscription userSubscription = userSubscriptionDao.findByUserIdWithTariff(userId).orElse(null);
+        UserSubscription userSubscription = userSubscriptionDao.findByIdWithTariff(userId).orElse(null);
 
         Tariff tariff = userSubscription != null ? userSubscription.getTariff() :
                 tariffDao

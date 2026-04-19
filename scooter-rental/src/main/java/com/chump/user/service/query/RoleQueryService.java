@@ -3,6 +3,7 @@ package com.chump.user.service.query;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dto.response.RoleResponse;
+import com.chump.user.dto.response.RoleWithScopesResponse;
 import com.chump.user.mapper.RoleMapper;
 import com.chump.user.model.Role;
 import org.springframework.stereotype.Service;
@@ -27,11 +28,11 @@ public class RoleQueryService {
     }
 
     @Transactional(readOnly = true)
-    public RoleResponse getRoleInfo(int roleId) {
-        Role result = roleDao.findById(roleId).orElseThrow(
+    public RoleWithScopesResponse getRoleInfo(int roleId) {
+        Role result = roleDao.findByIdWithScopes(roleId).orElseThrow(
                 () -> new NoSuchEntityException("No role found with id: " + roleId)
         );
 
-        return roleMapper.toResponse(result);
+        return roleMapper.toResponseWithScopes(result);
     }
 }

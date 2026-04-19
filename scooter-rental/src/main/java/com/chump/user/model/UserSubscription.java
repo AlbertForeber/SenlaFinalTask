@@ -1,11 +1,10 @@
 package com.chump.user.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import com.chump.tariff.model.Tariff;
+import lombok.*;
+import com.chump.billing.model.Tariff;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
@@ -14,19 +13,22 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
 public class UserSubscription {
 
     @Id
+    @Column(name = "user_id")
     private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @MapsId
-    private User user;
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private UserProfile userProfile;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tariff_id")
     private Tariff tariff;
 
-    @Column(name = "tariff_expiration_date", nullable = false)
-    private LocalDate tariffExpirationDate;
+    @Column(name = "next_billing_date", nullable = false)
+    private LocalDate nextBillingDate;
 }

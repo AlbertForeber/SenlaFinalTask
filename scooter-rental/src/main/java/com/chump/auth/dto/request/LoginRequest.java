@@ -10,9 +10,9 @@ import lombok.ToString;
 @ToString
 public class LoginRequest {
 
-    @NotBlank(message = "Username field should not be empty")
+    @NotBlank(message = "Field 'username' must not be empty")
     private String username;
 
-    @NotBlank(message = "Password field should not be empty")
+    @NotBlank(message = "Field 'username' must not be empty")
     private String password;
 }

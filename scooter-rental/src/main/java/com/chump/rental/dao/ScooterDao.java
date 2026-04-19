@@ -23,16 +23,32 @@ public class ScooterDao extends AbstractHibernateDao<Scooter, Integer> {
 
     public List<Scooter> findAllInZone(Polygon polygon) {
         try {
+            // Модель подтяигвается сразу в соответствии с требованием
             String sql = """
-                    SELECT * FROM scooters s
-                WHERE ST_Within(
+               SELECT
+                   s.id AS s_id,
+                   s.serial_no AS s_serial_no,
+                   s.model_id AS s_model_id,
+                   s.battery AS s_battery,
+                   s.location AS s_location,
+                   s.status AS s_status,
+                   m.id AS m_id,
+                   m.vendor AS m_vendor,
+                   m.name As m_name
+               FROM scooters s
+               JOIN models m ON s.model_id = m.id
+               WHERE ST_Within(
                     CAST(s.location AS geometry),
                     CAST(:polygon AS geometry)) AND s.status='FREE';
                """;
 
             return getCurrentSession()
-                    .createNativeQuery(sql, Scooter.class).setParameter("polygon", polygon)
-                    .getResultList();
+                    .createNativeQuery(sql, "ScooterWithModelMapping", Object[].class)
+                    .setParameter("polygon", polygon)
+                    .getResultList()
+                    .stream()
+                    .map(o -> (Scooter) o[0])
+                    .toList();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find scooters in zone", e);
         }

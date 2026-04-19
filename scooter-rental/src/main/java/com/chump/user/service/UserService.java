@@ -1,7 +1,7 @@
 package com.chump.user.service;
 
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableAction;
+import com.chump.common.exception.UnavaliableActionException;
 import com.chump.rental.dao.TripDao;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dao.UserDao;
@@ -40,7 +40,7 @@ public class UserService {
 
     @Transactional
     public UserProfileResponse updateUserBaseInfo(int userId, UpdateUserBaseInfoCommand command) {
-        UserProfile result = userProfileDao.findByIdWithUser(userId).orElseThrow(
+        UserProfile result = userProfileDao.findById(userId).orElseThrow(
                 () -> new NoSuchEntityException("No user found with id: " + userId)
         );
 
@@ -50,7 +50,7 @@ public class UserService {
 
     @Transactional
     public UserProfileResponse updateUserProtectedInfo(int userId, UpdateUserProtectedInfoCommand command) {
-        UserProfile result = userProfileDao.findByIdWithUser(userId).orElseThrow(
+        UserProfile result = userProfileDao.findById(userId).orElseThrow(
                 () -> new NoSuchEntityException("No user found with id: " + userId)
         );
 
@@ -74,7 +74,7 @@ public class UserService {
     @Transactional
     public void deleteUser(int userId) {
         if (!tripDao.findOngoingByUserId(userId).isEmpty()) {
-            throw new UnavaliableAction("Forbidden to delete user with ongoing trips");
+            throw new UnavaliableActionException("Forbidden to delete user with ongoing trips");
         }
         userDao.delete(userId);
     }

@@ -11,5 +11,5 @@ public class RentalSpotCommand {
     private Integer parentId;
     private String name;
     private Polygon area;
-    private Boolean isZone;
+    private Boolean isParking;
 }

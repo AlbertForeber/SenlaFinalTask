@@ -55,7 +55,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(
             @AuthenticationPrincipal Integer userId
     ) {

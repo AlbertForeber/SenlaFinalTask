@@ -3,9 +3,9 @@
 -- liquibase formatted sql
 
 -- changeset albert:1-add-test-roles
-INSERT INTO roles VALUES
-    (1, 'test_role'),
-    (2, 'second_test_empty_role');
+INSERT INTO roles(name) VALUES
+    ('test_omni_role'),
+    ('second_test_empty_role');
 -- rollback: DELETE FROM roles WHERE id BETWEEN 1 AND 2;
 
 -- changeset albert:2-add-test-user
@@ -16,11 +16,11 @@ INSERT INTO users(username, password, role_id) VALUES
 
 -- changeset albert:3-add-test-user-details
 INSERT INTO user_details VALUES
-    (1, 'test_full_name', '1999.9.9', 1000, 0.05);
+    (1, 'test_full_name', '1999.9.9', 10000, 0.05);
 -- rollback: DELETE FROM user_details WHERE id=1;
 
 -- changeset albert:4-add-test-rental-spots
-INSERT INTO rent_spots(parent_id, name, area, is_zone) VALUES
+INSERT INTO rent_spots(parent_id, name, area, is_parking) VALUES
     (NULL, 'root_test_spot', ST_GeomFromGeoJSON('{
   "coordinates": [
     [
@@ -98,8 +98,8 @@ INSERT INTO scooters(serial_no, model_id, battery, location, status) VALUES
 -- rollback DELETE FROM scooters WHERE id=1;
 
 -- changeset albert:7-add-test-trip
-INSERT INTO trips(status, scooter_id, user_id, started_at, price_per_hour, discount_at_start) VALUES
-    ('ONGOING', 1, 1, '2026-04-11T11:00:00Z', 600, 0.05);
+INSERT INTO trips(status, scooter_id, user_id, started_at, price_at_start, interval_at_start, discount_at_start) VALUES
+    ('FINISHED', 1, 1, '2026-04-18T8:00:00Z', 10, 1, 0.05);
 -- rollback DELETE FROM trips WHERE id=1;
 
 -- changeset albert:8-add-test-trip-points
@@ -110,18 +110,50 @@ INSERT INTO trip_points VALUES
 -- rollback DELETE FROM trip_points WHERE trip_id=1;
 
 -- changeset albert:9-add-test-tariff-points
-INSERT INTO tariffs(name, base_price, type) VALUES
-    ('per_hour_test', 600, 'HOURLY');
+INSERT INTO tariffs(name, base_price, billing_interval_minutes) VALUES
+    ('per_minute_test', 10, 1),
+    ('per_hour_test', 400, 60),
+    ('per_month_test', 1800, NULL),
+    ('instant_test', 1000, NULL);;
 -- rollback DELETE FROM tariffs WHERE id=1;
 
 -- changeset albert:10-add-test-scopes
 INSERT INTO scopes(name) VALUES
     ('profile:view'),
-    ('profile:manage');
+    ('profile:manage'),
+    ('profile:view_admin'),
+    ('profile:manage_admin'),
+    ('profile:manage_role'),
+    ('spot:view'),
+    ('spot:view_admin'),
+    ('spot:manage'),
+    ('scooter:view'),
+    ('scooter:view_by_status'),
+    ('scooter:manage'),
+    ('scooter:view_admin'),
+    ('scooter:rent'),
+    ('scooter:manage'),
+    ('scooter:manage'),
+    ('scooter:maintenance'),
+    ('trip:view'),
+    ('trip:view_period'),
+    ('trip:view_admin'),
+    ('tariff:view'),
+    ('tariff:view_admin'),
+    ('tariff:subscribe'),
+    ('tariff:manage'),
+    ('role:view'),
+    ('role:manage'),
+    ('role:manage');
 -- rollback DELETE FROM scopes WHERE id BETWEEN 1 AND 2;
 
 -- changeset albert:10-add-test-role-scope
-INSERT INTO role_scope VALUES
-    (1, 1),
-    (1, 2);
+INSERT INTO role_scope
+SELECT 1, id FROM scopes;
 -- rollback DELETE FROM role_scope WHERE role_id=1;
+
+-- changeset albert:11-add-test-subscription-tariffs
+INSERT INTO subscription_tariffs VALUES
+    (3, 30),
+    (4, 0)
+-- rollback DELETE FROM subscription_tariffs WHERE tariff_id=2;

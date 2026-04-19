@@ -1,9 +1,9 @@
 package com.chump.rental.service;
 
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableAction;
+import com.chump.common.exception.UnavaliableActionException;
 import com.chump.rental.dao.ScooterModelDao;
-import com.chump.rental.dto.command.ScooterCommand;
+import com.chump.rental.dto.command.CreateScooterCommand;
 import com.chump.rental.dto.command.UpdateScooterInfoCommand;
 import com.chump.rental.dto.response.ScooterResponse;
 import com.chump.rental.mapper.ScooterMapper;
@@ -28,7 +28,7 @@ public class ScooterService {
     }
 
     @Transactional
-    public ScooterResponse addScooter(ScooterCommand command) {
+    public ScooterResponse addScooter(CreateScooterCommand command) {
         // Тут Integer не нужен, т.к. модель обязательна
         int modelId = command.getModelId();
         ScooterModel model = modelDao.findById(modelId).orElseThrow(
@@ -40,13 +40,35 @@ public class ScooterService {
     }
 
     @Transactional
-    public ScooterResponse startMaintenance(int scooterId) {
+    public ScooterResponse beginMaintenance(int scooterId) {
         Scooter scooter = repo.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
-        scooter.setStatus(ScooterStatus.MAINTENANCE);
 
-        repo.update(scooter); // TODO Явный update, для синхронизации Redis и БД
+        if (scooter.getStatus() != ScooterStatus.FREE) {
+            throw new UnavaliableActionException("Unable to start maintenance for scooter with status: "
+                    + scooter.getStatus());
+        }
+
+        scooter.setStatus(ScooterStatus.MAINTENANCE);
+        repo.updateStatus(scooterId, ScooterStatus.MAINTENANCE); // TODO Явный update, для синхронизации Redis и БД
+
+        return mapper.toResponse(scooter);
+    }
+
+    @Transactional
+    public ScooterResponse finishMaintenance(int scooterId) {
+        Scooter scooter = repo.findById(scooterId).orElseThrow(
+                () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
+        );
+
+        if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
+            throw new UnavaliableActionException("Unable to finish maintenance for scooter without maintenance status");
+        }
+
+        scooter.setStatus(ScooterStatus.FREE);
+        repo.updateStatus(scooterId, ScooterStatus.FREE); // TODO Явный update, для синхронизации Redis и БД
+
         return mapper.toResponse(scooter);
     }
 
@@ -57,7 +79,7 @@ public class ScooterService {
         );
 
         if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
-            throw new UnavaliableAction("Start maintenance to update scooter's info");
+            throw new UnavaliableActionException("Start maintenance to update scooter's info");
         }
 
         Integer modelId = command.getModelId();
@@ -77,8 +99,12 @@ public class ScooterService {
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
 
+        if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
+            throw new UnavaliableActionException("Start maintenance to replace scooter's battery");
+        }
+
         scooter.setBattery(battery);
-        repo.updateBattery(scooterId, battery); // Redis sync
+        repo.updateBattery(scooterId, battery); // TODO Redis sync
         // TODO отправка уведомления в Kafka
 
         return mapper.toResponse(scooter);
@@ -91,7 +117,7 @@ public class ScooterService {
         );
 
         if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
-            throw new UnavaliableAction("Start maintenance to write off scooter");
+            throw new UnavaliableActionException("Start maintenance to write off scooter");
         }
 
         repo.delete(scooterId);

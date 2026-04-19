@@ -49,7 +49,8 @@ public class AbstractHibernateDao<T, ID> implements GenericDao<T, ID> {
     @Override
     public T save(T entity) {
         try {
-            return getCurrentSession().merge(entity);
+            getCurrentSession().persist(entity);
+            return entity;
         } catch (Exception e) {
             throw new DataManipulationException("Failed to save entity", e);
         }

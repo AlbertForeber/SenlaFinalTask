@@ -8,6 +8,30 @@ import lombok.NoArgsConstructor;
 import com.chump.rental.model.status.ScooterStatus;
 import org.locationtech.jts.geom.Point;
 
+@SqlResultSetMapping(
+        name = "ScooterWithModelMapping",
+        entities = {
+                @EntityResult(
+                        entityClass = Scooter.class,
+                        fields = {
+                                @FieldResult(name = "id", column = "s_id"),
+                                @FieldResult(name = "serialNumber", column = "s_serial_no"),
+                                @FieldResult(name = "model", column = "m_id"), // Ссылка по FK
+                                @FieldResult(name = "battery", column = "s_battery"),
+                                @FieldResult(name = "location", column = "s_location"),
+                                @FieldResult(name = "status", column = "s_status")
+                        }
+                ),
+                @EntityResult(
+                        entityClass = ScooterModel.class,
+                        fields = {
+                                @FieldResult(name = "id", column = "m_id"),
+                                @FieldResult(name = "name", column = "m_name"),
+                                @FieldResult(name = "vendor", column = "m_vendor")
+                        }
+                )
+        }
+)
 @Entity
 @Table(name = "scooters")
 @Data

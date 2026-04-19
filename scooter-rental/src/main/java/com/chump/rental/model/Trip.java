@@ -35,8 +35,11 @@ public class Trip {
     @Column(name = "started_at", nullable = false)
     private Instant startedAt;
 
-    @Column(name = "price_per_hour", nullable = false)
-    private BigDecimal pricePerHour;
+    @Column(name = "price_at_start", nullable = false)
+    private BigDecimal priceAtStart;
+
+    @Column(name = "interval_at_start")
+    private Integer intervalAtStart;
 
     @Column(name = "discount_at_start", nullable = false)
     private BigDecimal discountAtStart;

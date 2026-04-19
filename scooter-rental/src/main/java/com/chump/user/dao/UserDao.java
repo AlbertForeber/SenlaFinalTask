@@ -24,7 +24,7 @@ public class UserDao extends AbstractHibernateDao<User, Integer> {
 
             Root<User> root = query.from(User.class);
             Fetch<User, Role> roleJoin = root.fetch("role");
-            roleJoin.fetch("scopes", JoinType.LEFT); // Для обработки пустой роли
+            roleJoin.fetch("scopes", JoinType.LEFT); // LEFT для обработки пустой роли
 
             query.where(criteriaBuilder.equal(root.get("username"), username));
             return getCurrentSession().createQuery(query).uniqueResultOptional();

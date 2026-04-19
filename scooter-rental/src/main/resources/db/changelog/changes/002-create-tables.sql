@@ -21,7 +21,7 @@ CREATE INDEX idx_users_username ON users(username);
 
 -- changeset albert:3-create-user-details-table
 CREATE TABLE IF NOT EXISTS user_details(
-    user_id INTEGER PRIMARY KEY REFERENCES users(id),
+    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     full_name VARCHAR(255) NOT NULL,
     date_of_birth DATE NOT NULL,
     balance DECIMAL(10, 2) NOT NULL,
@@ -39,10 +39,10 @@ CREATE TABLE IF NOT EXISTS scopes(
 -- changeset albert:5-create-rent-spots-table
 CREATE TABLE IF NOT EXISTS rent_spots(
     id SERIAL PRIMARY KEY,
-    parent_id INTEGER REFERENCES rent_spots(id),
+    parent_id INTEGER REFERENCES rent_spots(id) ON DELETE SET NULL,
     name VARCHAR(255) NOT NULL,
     area geography(Polygon, 4326) NOT NULL,
-    is_zone BOOLEAN NOT NULL
+    is_parking BOOLEAN NOT NULL
 );
 CREATE INDEX idx_rent_spots_area ON rent_spots USING GIST(area);
 -- rollback DROP TABLE rent_sports;
@@ -72,22 +72,22 @@ CREATE TABLE IF NOT EXISTS tariffs(
     id SERIAL PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
     base_price DECIMAL(10, 2) NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('HOURLY', 'SUBSCRIPTION'))
+    billing_interval_minutes INTEGER CHECK (billing_interval_minutes > 0)
 );
 -- rollback DROP TABLE tariffs;
 
 -- changeset albert:9-create-subscription-tariffs-table
 CREATE TABLE IF NOT EXISTS subscription_tariffs(
-    tariff_id INTEGER PRIMARY KEY REFERENCES tariffs(id),
+    tariff_id INTEGER PRIMARY KEY REFERENCES tariffs(id) ON DELETE CASCADE,
     duration_days INTEGER NOT NULL
 );
 -- rollback DROP TABLE subscription_tariffs;
 
 -- changeset albert:10-create-user-subscriptions-table
 CREATE TABLE IF NOT EXISTS user_subscriptions(
-    user_id INTEGER PRIMARY KEY REFERENCES users(id),
-    tariff_id INTEGER NOT NULL REFERENCES tariffs(id),
-    tariff_expiration_date DATE NOT NULL
+    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    tariff_id INTEGER NOT NULL REFERENCES tariffs(id) ON DELETE CASCADE,
+    next_billing_date DATE NOT NULL
 );
 -- rollback DROP TABLE user_subscriptions;
 
@@ -108,7 +108,8 @@ CREATE TABLE IF NOT EXISTS trips(
     started_at TIMESTAMP NOT NULL,
 
     -- Историческая денормализация
-    price_per_hour DECIMAL(10, 2) NOT NULL,
+    price_at_start DECIMAL(10, 2) NOT NULL,
+    interval_at_start INTEGER,
     discount_at_start DECIMAL(3, 2) CHECK (discount_at_start BETWEEN 0 AND 1),
 
     -- Заполняется в конце
@@ -141,3 +142,13 @@ CREATE TABLE IF NOT EXISTS refresh_tokens(
 
 CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 -- rollback DROP TABLE refresh_tokens;
+
+-- Для работы ShedLock в Sheduler
+-- changeset albert:15-create-shedlock-table
+CREATE TABLE IF NOT EXISTS shedlock(
+    name VARCHAR(64) PRIMARY KEY,
+    lock_until TIMESTAMP NOT NULL,
+    locked_at TIMESTAMP NOT NULL,
+    locked_by VARCHAR(255) NOT NULl
+);
+-- rollback DROP TABLE shedlock;

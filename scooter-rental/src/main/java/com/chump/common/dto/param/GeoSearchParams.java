@@ -1,10 +1,10 @@
 package com.chump.common.dto.param;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
+@Builder
 public class GeoSearchParams {
 
     private float latitude;
