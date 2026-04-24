@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS scooters(
     model_id INTEGER NOT NULL REFERENCES models(id),
     battery INTEGER NOT NULL CHECK (battery BETWEEN 0 AND 100),
     location geography(Point, 4326) NOT NULL,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('FREE', 'OCCUPIED', 'MAINTENANCE'))
+    status VARCHAR(20) NOT NULL CHECK (status IN ('FREE', 'OCCUPIED', 'MAINTENANCE', 'ACTIVATING', 'BLOCKING', 'STOPPING'))
 );
 CREATE INDEX idx_scooters_location ON scooters USING GIST(location);
 -- rollback DROP TABLE scooters;

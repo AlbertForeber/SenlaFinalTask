@@ -39,14 +39,6 @@ public class ScooterRepository {
         postgresDao.delete(scooterId);
     }
 
-    public void updateStatus(int scooterId, ScooterStatus status) {
-        // TODO Логика синхронизации Redis
-    }
-
-    public void updateBattery(int scooterId, int battery) {
-        // TODO Логика синхронизации Redis
-    }
-
     public List<Scooter> findAllInZone(Polygon polygon) {
         return postgresDao.findAllInZone(polygon);
     }

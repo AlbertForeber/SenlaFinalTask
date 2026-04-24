@@ -1,6 +1,7 @@
 services:
+  # ------------------------------- BASE -------------------------------
   db:
-    container_name: "postgres"
+    container_name: scooter-postgres
     image: postgis/postgis:16-3.4
     restart: always
     environment:
@@ -16,7 +17,7 @@ services:
       - main_network
 
   app:
-    container_name: "scooter-rental"
+    container_name: scooter-app
     build: scooter-rental
     restart: always
     depends_on:
@@ -28,6 +29,86 @@ services:
       - main_network
     ports:
       - "8080:8080"
+
+  # ------------------------------- KAFKA -------------------------------
+  scooter:
+    container_name: scooter-emulator
+    build: scooter
+    restart: always
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      app:
+        condition: service_started
+    environment:
+      - SCOOTER_ID=1
+    networks:
+      - main_network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
+    container_name: scooter-zookeeper
+    ports:
+      - '2181:2181'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=ruok"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    networks:
+      - main_network
+
+  kafka-1:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka-1
+    container_name: scooter-kafka-1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka-1:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1                              # --- ТРЕБУЕТ НАСТРОЙКИ ПРИ ТЕСТЕ НА 1 БРОКЕРЕ ---
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1                 # + системный топик со сдвигами, по умолчанию 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1         # + системный топик с логами транзакций, по умолчанию 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1                    # + минимум требуется реплик для подтвреждения транзакции (дефолт 1)
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - main_network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka_ui
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - main_network
 
 networks:
   main_network:

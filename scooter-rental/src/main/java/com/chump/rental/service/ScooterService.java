@@ -17,12 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ScooterService {
 
-    private final ScooterRepository repo;
+    private final ScooterRepository scooterRepository;
     private final ScooterModelDao modelDao;
     private final ScooterMapper mapper;
 
-    public ScooterService(ScooterRepository repo, ScooterModelDao modelDao, ScooterMapper mapper) {
-        this.repo = repo;
+    public ScooterService(ScooterRepository scooterRepository, ScooterModelDao modelDao, ScooterMapper mapper) {
+        this.scooterRepository = scooterRepository;
         this.modelDao = modelDao;
         this.mapper = mapper;
     }
@@ -36,12 +36,12 @@ public class ScooterService {
         );
 
         Scooter scooter = mapper.toEntity(command, model);
-        return mapper.toResponse(repo.save(scooter));
+        return mapper.toResponse(scooterRepository.save(scooter));
     }
 
     @Transactional
     public ScooterResponse beginMaintenance(int scooterId) {
-        Scooter scooter = repo.findById(scooterId).orElseThrow(
+        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
 
@@ -51,14 +51,12 @@ public class ScooterService {
         }
 
         scooter.setStatus(ScooterStatus.MAINTENANCE);
-        repo.updateStatus(scooterId, ScooterStatus.MAINTENANCE); // TODO Явный update, для синхронизации Redis и БД
-
         return mapper.toResponse(scooter);
     }
 
     @Transactional
     public ScooterResponse finishMaintenance(int scooterId) {
-        Scooter scooter = repo.findById(scooterId).orElseThrow(
+        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
 
@@ -67,14 +65,12 @@ public class ScooterService {
         }
 
         scooter.setStatus(ScooterStatus.FREE);
-        repo.updateStatus(scooterId, ScooterStatus.FREE); // TODO Явный update, для синхронизации Redis и БД
-
         return mapper.toResponse(scooter);
     }
 
     @Transactional
     public ScooterResponse updateScooterInfo(int scooterId, UpdateScooterInfoCommand command) {
-        Scooter scooter = repo.findById(scooterId).orElseThrow(
+        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
 
@@ -88,14 +84,12 @@ public class ScooterService {
         ) : null;
 
         mapper.updateScooterInfoFromCommand(command, model, scooter);
-
-//        repo.update(scooter); // TODO Явный update, для синхронизации Redis и БД (не нужно т.к. обновляем только Postgres)
         return mapper.toResponse(scooter);
     }
 
     @Transactional
     public ScooterResponse updateScooterBattery(int scooterId, int battery) {
-        Scooter scooter = repo.findById(scooterId).orElseThrow(
+        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
 
@@ -104,7 +98,6 @@ public class ScooterService {
         }
 
         scooter.setBattery(battery);
-        repo.updateBattery(scooterId, battery); // TODO Redis sync
         // TODO отправка уведомления в Kafka
 
         return mapper.toResponse(scooter);
@@ -112,7 +105,7 @@ public class ScooterService {
 
     @Transactional
     public void writeOffScooter(int scooterId) {
-        Scooter scooter = repo.findById(scooterId).orElseThrow(
+        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
 
@@ -120,6 +113,23 @@ public class ScooterService {
             throw new UnavaliableActionException("Start maintenance to write off scooter");
         }
 
-        repo.delete(scooterId);
+        scooterRepository.delete(scooterId);
+    }
+
+    @Transactional
+    public void updateReceivedStatus(int scooterId) {
+        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
+                () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
+        );
+
+        ScooterStatus newStatus = switch (scooter.getStatus()) {
+            case BLOCKING -> ScooterStatus.MAINTENANCE;
+            case ACTIVATING -> ScooterStatus.OCCUPIED;
+            case STOPPING -> ScooterStatus.FREE;
+            default -> scooter.getStatus(); // Если статус не переходный, оставляем
+        };
+
+
+        scooter.setStatus(newStatus);
     }
 }

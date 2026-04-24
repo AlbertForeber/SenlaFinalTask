@@ -8,6 +8,7 @@ import com.chump.rental.dao.TripDao;
 import com.chump.rental.dao.TripPointDao;
 import com.chump.rental.dto.response.TripConciseResponse;
 import com.chump.rental.dto.response.TripDetailedResponse;
+import com.chump.rental.kafka.ScooterProducer;
 import com.chump.rental.mapper.TripMapper;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.model.Trip;
@@ -55,6 +56,7 @@ public class RentalService {
     private final TripPointDao tripPointDao;
     private final RentalSpotDao rentalSpotDao;
     private final Integer minToStart;
+    private final ScooterProducer scooterProducer;
 
     public RentalService(ScooterRepository scooterRepository,
                          TripDao tripDao,
@@ -64,7 +66,7 @@ public class RentalService {
                          TariffDao tariffDao,
                          TripPointDao tripPointDao,
                          RentalSpotDao rentalSpotDao,
-                         @Value("${rental.minimal-balance}") String minToStart) {
+                         @Value("${rental.minimal-balance}") String minToStart, ScooterProducer scooterProducer) {
         this.scooterRepository = scooterRepository;
         this.tripDao = tripDao;
         this.tripMapper = tripMapper;
@@ -74,6 +76,7 @@ public class RentalService {
         this.tripPointDao = tripPointDao;
         this.rentalSpotDao = rentalSpotDao;
         this.minToStart = Integer.parseInt(minToStart);
+        this.scooterProducer = scooterProducer;
     }
 
     @AllArgsConstructor
@@ -94,7 +97,11 @@ public class RentalService {
             throw new UnavaliableActionException("Not enough money to rent a scooter");
         }
 
-        scooter.setStatus(ScooterStatus.OCCUPIED);
+        // TODO  Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
+        // TODO Создание флага ожидания в REDIS
+        scooter.setStatus(ScooterStatus.ACTIVATING);
+        scooterProducer.sendUnlock(scooterId);
+
         Trip createdTrip = tripDao.save(Trip.builder()
                 .status(TripStatus.ONGOING)
                 .scooter(scooter)
@@ -105,7 +112,7 @@ public class RentalService {
                 .discountAtStart(userProfile.getDiscount())
                 .build());
 
-        // TODO Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
+
         return tripMapper.toConciseResponse(createdTrip);
     }
 
@@ -115,6 +122,8 @@ public class RentalService {
         ongoingTrip.setStatus(TripStatus.PAUSED);
 
         // TODO Сообщение самокату в Kafka заблокируйся + приостановка отправки в waypoint
+        // TODO Создание флага ожидания в REDIS
+        scooterProducer.sendLock(scooterId);
         return tripMapper.toConciseResponse(ongoingTrip);
     }
 
@@ -124,6 +133,9 @@ public class RentalService {
         ongoingTrip.setStatus(TripStatus.ONGOING);
 
         // TODO Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
+        // TODO Создание флага ожидания в REDIS
+
+        scooterProducer.sendUnlock(scooterId);
         return tripMapper.toConciseResponse(ongoingTrip);
     }
 
@@ -134,8 +146,6 @@ public class RentalService {
 
         List<TripPoint> waypoints = tripPointDao.findByTripId(ongoingTrip.getId());
         ongoingTrip.setDistance(calculateDistance(waypoints));
-        // TODO Сообщение самокату в Kafka заблокируйся + больше не отправляй waypoint
-        // TODO Проверка зоны парковки
 
         return tripMapper.toDetailedResponse(ongoingTrip, waypoints);
     }
@@ -169,6 +179,7 @@ public class RentalService {
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
 
+        // Проверка зоны парковки
         if (!rentalSpotDao.isInParkingRentalSpot(scooter.getLocation()) && !isForce) {
             throw new UnavaliableActionException("Scooter should be in rental zone");
         }
@@ -179,8 +190,11 @@ public class RentalService {
 
         Duration duration = Duration.between(trip.getStartedAt(), Instant.now());
         trip.setStatus(TripStatus.FINISHED);
-        scooter.setStatus(isForce ? ScooterStatus.MAINTENANCE : ScooterStatus.FREE);
-        scooterRepository.updateStatus(scooter.getId(), ScooterStatus.FREE);
+
+        scooter.setStatus(isForce ? ScooterStatus.BLOCKING : ScooterStatus.STOPPING);
+
+        // TODO таймер Redis
+        scooterProducer.sendLock(scooterId);
 
         trip.setDurationSeconds((int) duration.toSeconds());
         trip.setTotalPrice(calculatePrice(trip));

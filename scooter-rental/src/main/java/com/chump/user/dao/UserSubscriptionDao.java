@@ -8,7 +8,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,7 +26,7 @@ public class UserSubscriptionDao extends AbstractHibernateDao<UserSubscription, 
             CriteriaQuery<UserSubscription> query = criteriaBuilder.createQuery(UserSubscription.class);
 
             Root<UserSubscription> root = query.from(UserSubscription.class);
-            query.where(criteriaBuilder.equal(root.get("user").get("id"), userId));
+            query.where(criteriaBuilder.equal(root.get("userProfile").get("id"), userId));
 
             root.fetch("tariff");
             return getCurrentSession().createQuery(query).uniqueResultOptional();

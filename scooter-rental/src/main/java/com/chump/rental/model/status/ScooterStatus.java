@@ -4,5 +4,8 @@ public enum ScooterStatus {
 
     FREE,
     OCCUPIED,
-    MAINTENANCE
+    MAINTENANCE,
+    BLOCKING,
+    ACTIVATING,
+    STOPPING
 }
