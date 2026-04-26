@@ -6,6 +6,7 @@ import com.chump.rental.dao.ScooterModelDao;
 import com.chump.rental.dto.command.CreateScooterCommand;
 import com.chump.rental.dto.command.UpdateScooterInfoCommand;
 import com.chump.rental.dto.response.ScooterResponse;
+import com.chump.rental.kafka.ScooterProducer;
 import com.chump.rental.mapper.ScooterMapper;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.model.ScooterModel;
@@ -20,11 +21,13 @@ public class ScooterService {
     private final ScooterRepository scooterRepository;
     private final ScooterModelDao modelDao;
     private final ScooterMapper mapper;
+    private final ScooterProducer scooterProducer;
 
-    public ScooterService(ScooterRepository scooterRepository, ScooterModelDao modelDao, ScooterMapper mapper) {
+    public ScooterService(ScooterRepository scooterRepository, ScooterModelDao modelDao, ScooterMapper mapper, ScooterProducer scooterProducer) {
         this.scooterRepository = scooterRepository;
         this.modelDao = modelDao;
         this.mapper = mapper;
+        this.scooterProducer = scooterProducer;
     }
 
     @Transactional
@@ -88,7 +91,7 @@ public class ScooterService {
     }
 
     @Transactional
-    public ScooterResponse updateScooterBattery(int scooterId, int battery) {
+    public ScooterResponse rechargeScooterBattery(int scooterId) {
         Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
@@ -97,8 +100,9 @@ public class ScooterService {
             throw new UnavaliableActionException("Start maintenance to replace scooter's battery");
         }
 
-        scooter.setBattery(battery);
+        scooter.setBattery(100);
         // TODO отправка уведомления в Kafka
+        scooterProducer.sendRecharge(scooterId);
 
         return mapper.toResponse(scooter);
     }
@@ -128,7 +132,6 @@ public class ScooterService {
             case STOPPING -> ScooterStatus.FREE;
             default -> scooter.getStatus(); // Если статус не переходный, оставляем
         };
-
 
         scooter.setStatus(newStatus);
     }

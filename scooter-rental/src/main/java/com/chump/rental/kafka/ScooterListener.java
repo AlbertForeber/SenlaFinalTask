@@ -1,8 +1,10 @@
 package com.chump.rental.kafka;
 
+import com.chump.rental.dao.ScooterTelemetryRedisDao;
 import com.chump.rental.kafka.event.StatusEvent;
 import com.chump.rental.kafka.event.TelemetryEvent;
 import com.chump.rental.kafka.event.WaypointEvent;
+import com.chump.rental.mapper.ScooterMapper;
 import com.chump.rental.service.ScooterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +22,13 @@ public class ScooterListener {
     private final ScooterService scooterService;
 
     private final static Logger logger = LoggerFactory.getLogger(ScooterListener.class);
+    private final ScooterTelemetryRedisDao scooterTelemetryRedisDao;
+    private final ScooterMapper scooterMapper;
 
-    public ScooterListener(ScooterService scooterService) {
+    public ScooterListener(ScooterService scooterService, ScooterTelemetryRedisDao scooterTelemetryRedisDao, ScooterMapper scooterMapper) {
         this.scooterService = scooterService;
+        this.scooterTelemetryRedisDao = scooterTelemetryRedisDao;
+        this.scooterMapper = scooterMapper;
     }
 
     @KafkaListener(
@@ -30,7 +36,8 @@ public class ScooterListener {
             containerFactory = "fastListenerFactory"
     )
     public void telemetryListener(TelemetryEvent event) {
-        // TODO сохранение в REDIS
+        // TODO сохранение в REDIS - ОБРАБОТКА ОШИБОК (вроде не нужна, т.к. телеметрия)
+        scooterTelemetryRedisDao.save(event.getScooterId(), scooterMapper.toTelemetryEntry(event));
         logger.info(event.toString());
     }
 

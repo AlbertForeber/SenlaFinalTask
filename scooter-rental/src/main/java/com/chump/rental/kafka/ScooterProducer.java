@@ -1,9 +1,12 @@
 package com.chump.rental.kafka;
 
 import com.chump.rental.kafka.command.LockCommand;
+import com.chump.rental.kafka.command.RechargeCommand;
 import com.chump.rental.kafka.command.UnlockCommand;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
 
 @Component
 public class ScooterProducer {
@@ -18,13 +21,23 @@ public class ScooterProducer {
         kafkaTemplate.send(
                 "platform.scooter-commands",
                 scooterId.toString(),
-                new LockCommand());
+                new LockCommand(scooterId, Instant.now())
+        );
     }
 
     public void sendUnlock(Integer scooterId) {
         kafkaTemplate.send(
                 "platform.scooter-commands",
                 scooterId.toString(),
-                new UnlockCommand());
+                new UnlockCommand(scooterId, Instant.now())
+        );
+    }
+
+    public void sendRecharge(Integer scooterId) {
+        kafkaTemplate.send(
+                "platform.scooter-commands",
+                scooterId.toString(),
+                new RechargeCommand(scooterId, Instant.now())
+        );
     }
 }

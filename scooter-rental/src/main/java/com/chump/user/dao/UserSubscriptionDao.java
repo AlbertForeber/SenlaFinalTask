@@ -54,6 +54,88 @@ public class UserSubscriptionDao extends AbstractHibernateDao<UserSubscription, 
         }
     }
 
+    public List<Integer> batchFindToBillIds(int batchSize, int offset) {
+        try {
+            CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<Integer> query = criteriaBuilder.createQuery(Integer.class);
+
+            Root<UserSubscription> root = query.from(UserSubscription.class);
+
+            query.where(criteriaBuilder.lessThanOrEqualTo(root.get("nextBillingDate"), LocalDate.now()));
+            query.select(root.get("id"));
+            query.orderBy(criteriaBuilder.asc(root.get("id")));
+
+            return getCurrentSession()
+                    .createQuery(query)
+                    .setFirstResult(offset * batchSize)
+                    .setMaxResults(batchSize)
+                    .getResultList();
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to find subscription ids to bill", e);
+        }
+    }
+
+    public void batchDeleteUnableToPay(List<Integer> userSubscriptionIds) {
+        try {
+            String sql = """
+                    DELETE FROM user_subscriptions us
+                    WHERE us.user_id IN (:ids)
+                        AND (SELECT ud.balance FROM user_details ud WHERE ud.user_id = us.user_id)
+                            < (SELECT t.base_price FROM tariffs t WHERE t.id = us.tariff_id)
+                    """;
+
+            getCurrentSession()
+                    .createNativeMutationQuery(sql)
+                    .setParameter("ids", userSubscriptionIds)
+                    .executeUpdate();
+        } catch (Exception e) {
+            throw new DataManipulationException(
+                    "Failed to delete unable to pay users with ids: " + userSubscriptionIds, e
+            );
+        }
+    }
+
+    public void batchProcessBilling(List<Integer> userSubscriptionIds) {
+        try {
+            String sql = """
+                    UPDATE user_details SET balance = balance -
+                        COALESCE((SELECT t.base_price FROM tariffs t
+                                WHERE t.id = (SELECT us.tariff_id FROM user_subscriptions us
+                                                          WHERE us.user_id = user_details.user_id)), 0)
+                    WHERE user_details.user_id IN (:ids)
+                    """;
+
+            getCurrentSession()
+                    .createNativeMutationQuery(sql)
+                    .setParameter("ids", userSubscriptionIds)
+                    .executeUpdate();
+        } catch (Exception e) {
+            throw new DataManipulationException(
+                    "Failed to process billing for users with ids:" + userSubscriptionIds, e
+            );
+        }
+    }
+
+    public void batchUpdateLastBillingDate(List<Integer> userSubscriptionsIds) {
+        try {
+            String sql = """
+                    UPDATE user_subscriptions SET next_billing_date = next_billing_date +
+                        (SELECT st.duration_days FROM subscription_tariffs st
+                                                 WHERE st.tariff_id = user_subscriptions.tariff_id)
+                    WHERE user_id IN (:ids)
+                    """;
+
+            getCurrentSession()
+                    .createNativeMutationQuery(sql)
+                    .setParameter("ids", userSubscriptionsIds)
+                    .executeUpdate();
+        } catch (Exception e) {
+            throw new DataManipulationException(
+                    "Failed to process update last billing date for users with ids:" + userSubscriptionsIds, e
+            );
+        }
+    }
+
     public List<UserSubscription> findByTariffIdWithUserProfile(int tariffId) {
         try {
             CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();

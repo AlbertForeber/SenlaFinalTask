@@ -114,7 +114,7 @@ INSERT INTO tariffs(name, base_price, billing_interval_minutes) VALUES
     ('per_minute_test', 10, 1),
     ('per_hour_test', 400, 60),
     ('per_month_test', 1800, NULL),
-    ('instant_test', 1000, NULL);;
+    ('instant_test', 5000, NULL);;
 -- rollback DELETE FROM tariffs WHERE id=1;
 
 -- changeset albert:10-add-test-scopes

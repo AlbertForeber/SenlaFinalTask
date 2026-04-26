@@ -2,9 +2,11 @@ package com.chump.rental.mapper;
 
 import com.chump.rental.dto.command.CreateScooterCommand;
 import com.chump.rental.dto.command.UpdateScooterInfoCommand;
+import com.chump.rental.dto.entry.TelemetryEntry;
 import com.chump.rental.dto.request.CreateScooterRequest;
 import com.chump.rental.dto.request.UpdateScooterInfoRequest;
 import com.chump.rental.dto.response.ScooterResponse;
+import com.chump.rental.kafka.event.TelemetryEvent;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.model.ScooterModel;
 import org.mapstruct.*;
@@ -31,4 +33,8 @@ public interface ScooterMapper {
 
     ScooterResponse toResponse(Scooter entity);
     List<ScooterResponse> toResponseList(List<Scooter> entityList);
+
+    @Mapping(target = "latitude", expression = "java(event.getLocation().getY())")
+    @Mapping(target = "longitude", expression = "java(event.getLocation().getX())")
+    TelemetryEntry toTelemetryEntry(TelemetryEvent event);
 }

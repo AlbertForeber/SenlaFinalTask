@@ -1,5 +1,6 @@
 package com.chump.common.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -11,6 +12,9 @@ import java.util.Properties;
 @Configuration
 @DependsOn("liquibase")
 public class HibernateConfig {
+
+    @Value("${hibernate.jdbc.batch-size:50}")
+    private int batchSize;
 
     @Bean
     public LocalSessionFactoryBean sessionFactory(
@@ -34,9 +38,12 @@ public class HibernateConfig {
         Properties properties = new Properties();
 
         properties.put("hibernate.hbm2ddl.auto", "validate");
-        properties.put("hibernate.show_sql", "true");
-        properties.put("hibernate.format_sql", "true");
-        properties.put("hibernate.use_sql_comments", "true");
+        properties.put("hibernate.show_sql", true);
+        properties.put("hibernate.format_sql", true);
+        properties.put("hibernate.use_sql_comments", true);
+        properties.put("hibernate.jdbc.batch_size", batchSize);
+        properties.put("hibernate.order_inserts", true);
+        properties.put("hibernate.order_updates", true);
 
         return properties;
     }

@@ -3,6 +3,7 @@ package com.chump.rental.dao;
 import com.chump.common.dao.AbstractHibernateDao;
 import com.chump.common.dto.param.GeoSearchParams;
 import com.chump.common.exception.DataManipulationException;
+import com.chump.rental.dto.entry.TelemetryEntry;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.model.status.ScooterStatus;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -15,9 +16,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class ScooterDao extends AbstractHibernateDao<Scooter, Integer> {
+public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
 
-    public ScooterDao(SessionFactory sessionFactory) {
+    public ScooterPostgresDao(SessionFactory sessionFactory) {
         super(Scooter.class, sessionFactory);
     }
 
@@ -57,7 +58,7 @@ public class ScooterDao extends AbstractHibernateDao<Scooter, Integer> {
     public List<Scooter> findAllNearby(GeoSearchParams params) {
         try {
             String sql = """
-                    SELECT * FROM scooters
+               SELECT * FROM scooters
                WHERE ST_DWithin(
                location,
                ST_SetSRID(ST_MakePoint(:lon, :lat), 4326),
@@ -87,5 +88,46 @@ public class ScooterDao extends AbstractHibernateDao<Scooter, Integer> {
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find scooters with status: " + status, e);
         }
+    }
+
+    public List<Scooter> findByIds(List<Integer> ids) {
+        try {
+            return getCurrentSession()
+                    .byMultipleIds(Scooter.class)
+                    .enableSessionCheck(true)
+                    .multiLoad(ids);
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to find scooters with ids: " + ids, e);
+        }
+    }
+
+    public void batchUpdateTelemetry(List<TelemetryEntry> entries) {
+        int[] scooterIds = new int[entries.size()];
+        int[] battery = new int[entries.size()];
+        double[] longitude = new double[entries.size()];
+        double[] latitude = new double[entries.size()];
+
+        for (int i = 0; i < entries.size(); i ++) {
+            scooterIds[i] = entries.get(i).getScooterId();
+            battery[i] = entries.get(i).getBattery();
+            longitude[i] = entries.get(i).getLongitude();
+            latitude[i] = entries.get(i).getLatitude();
+        }
+
+        String sql = """
+                UPDATE scooters s SET
+                    s.location = ST_SetSRID(ST_MakePoint(v.longitude, v.latitude), 4326)::geography,
+                    s.battery = v.battery
+                FROM unnest(:scooterIds, :longitude, :latitude, :battery) AS v(scooter_id, longitude, latitude, battery)
+                WHERE s.id = v.scooter_id
+                """;
+
+        getCurrentSession()
+                .createNativeMutationQuery(sql)
+                .setParameter("scooterIds", scooterIds)
+                .setParameter("longitude", longitude)
+                .setParameter("latitude", latitude)
+                .setParameter("battery", battery)
+                .executeUpdate();
     }
 }

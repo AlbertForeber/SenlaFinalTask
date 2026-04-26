@@ -1,7 +1,7 @@
 package com.chump.rental.repo;
 
 import com.chump.common.dto.param.GeoSearchParams;
-import com.chump.rental.dao.ScooterDao;
+import com.chump.rental.dao.ScooterPostgresDao;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.model.status.ScooterStatus;
 import org.locationtech.jts.geom.Polygon;
@@ -13,9 +13,9 @@ import java.util.Optional;
 @Repository
 public class ScooterRepository {
 
-    private final ScooterDao postgresDao;
+    private final ScooterPostgresDao postgresDao;
 
-    public ScooterRepository(ScooterDao postgresDao) {
+    public ScooterRepository(ScooterPostgresDao postgresDao) {
         this.postgresDao = postgresDao;
     }
 
@@ -49,5 +49,9 @@ public class ScooterRepository {
 
     public List<Scooter> findByStatus(ScooterStatus status) {
         return postgresDao.findByStatus(status);
+    }
+
+    public List<Scooter> findByIds(List<Integer> scooterIds) {
+        return postgresDao.findByIds(scooterIds);
     }
  }

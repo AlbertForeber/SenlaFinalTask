@@ -28,6 +28,8 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
             Root<Trip> root = query.from(Trip.class);
 
             query.where(criteriaBuilder.equal(root.get("scooter").get("id"), scooterId));
+            query.where(criteriaBuilder.equal(root.get("status"), TripStatus.ONGOING));
+
             return getCurrentSession().createQuery(query).uniqueResultOptional();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find ongoing trip for scooter with id: " + scooterId, e);

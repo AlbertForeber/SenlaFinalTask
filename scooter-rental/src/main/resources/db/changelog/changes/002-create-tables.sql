@@ -152,3 +152,19 @@ CREATE TABLE IF NOT EXISTS shedlock(
     locked_by VARCHAR(255) NOT NULl
 );
 -- rollback DROP TABLE shedlock;
+
+-- changeset albert:16-create-billing-batch-failures
+CREATE TABLE IF NOT EXISTS billing_batch_failures(
+    id SERIAL PRIMARY KEY,
+    failed_at TIMESTAMP NOT NULL,
+    error_message TEXT NOT NULL,
+    is_resolved BOOLEAN NOT NULL DEFAULT false
+);
+-- rollback DROP TABLE billing_batch_failures;
+
+-- changeset albert:17-create-billing-batch-failure-items
+CREATE TABLE IF NOT EXISTS billing_batch_failure_items(
+    failure_id INT NOT NULL REFERENCES billing_batch_failures(id),
+    user_subscription_id INT NOT NULL -- без FK, т.к. это данные лога
+);
+-- rollback DROP TABLE billing_batch_failure_items;

@@ -15,7 +15,7 @@ public class BillingScheduler {
     }
 
     // TODO поставить ежедневно раз в 3 часа ночи
-    @Scheduled(initialDelay = 5000L, fixedDelay = 5000L)
+    @Scheduled(initialDelay = 5000L, fixedDelay = 30000L)
     @SchedulerLock(name = "billing_daily", lockAtLeastFor = "PT1M", lockAtMostFor = "PT1H")
     public void runDailyBilling() {
         billingService.processBilling();

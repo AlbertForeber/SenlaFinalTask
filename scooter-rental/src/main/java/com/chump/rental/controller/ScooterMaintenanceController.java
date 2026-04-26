@@ -32,7 +32,7 @@ public class ScooterMaintenanceController {
     public ResponseEntity<ScooterResponse> replaceBattery(
             @PathVariable Integer id
     ) {
-        return ResponseEntity.ok(scooterService.updateScooterBattery(id, 100));
+        return ResponseEntity.ok(scooterService.rechargeScooterBattery(id));
     }
 
     @PatchMapping("/finish")

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -78,8 +77,7 @@ public class ScooterEmulator {
             containerFactory = "listenerFactory",
             groupId = "scooter-emulator-${scooter.id}"
     )
-    public void commandListener(ScooterCommand command, Acknowledgment ack) {
-//  TODO       ack.acknowledge();  Не нужен, т.к. autocommit // Сразу осуществляем сдвиг, команда либо отработала, либо нет, других вариантов нет.
+    public void commandListener(ScooterCommand command) {
 
         if (!(command.scooterId() == scooterId)) return;
         if (command.issuedAt().isBefore(Instant.now().minus(MAX_COMMAND_AGE))) {
@@ -92,6 +90,9 @@ public class ScooterEmulator {
                 logger.debug("Already locked, duplicate command ignored");
             }
             // TODO отправка Locked
+            // TODO поменять лог
+            logger.info("Received lock command");
+
             sendStatusEvent(new LockedEvent(scooterId));
             status = ScooterStatus.LOCKED;
         } else if (command instanceof UnlockCommand) {
@@ -99,12 +100,16 @@ public class ScooterEmulator {
                 logger.debug("Already unlocked, duplicate command ignored");
             }
             // TODO отправка Unlocked
+            // TODO поменять лог
+            logger.info("Received unlock command");
             sendStatusEvent(new UnlockedEvent(scooterId));
             status = ScooterStatus.UNLOCKED;
         } else if (command instanceof RechargeCommand) {
             if (battery == 100) {
                 logger.debug("Already charged, command ignored");
             }
+            // TODO поменять лог
+            logger.info("Received recharge command");
             battery = 100;
         } else {
             logger.warn("Unknown command type: {}", command.getClass().getSimpleName());
