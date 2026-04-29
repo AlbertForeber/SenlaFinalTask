@@ -3,19 +3,17 @@ package com.chump.rental.repo;
 import com.chump.rental.dao.TripPointDao;
 import com.chump.rental.model.TripPoint;
 import com.chump.rental.model.TripPointId;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class TripPointRepository {
 
     private final TripPointDao postgresDao;
-
-    public TripPointRepository(TripPointDao postgresDao) {
-        this.postgresDao = postgresDao;
-    }
 
     public Optional<TripPoint> findById(TripPointId tripPointId) {
         return postgresDao.findById(tripPointId);

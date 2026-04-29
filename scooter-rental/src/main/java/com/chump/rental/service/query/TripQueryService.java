@@ -8,6 +8,7 @@ import com.chump.rental.mapper.TripMapper;
 import com.chump.rental.model.Trip;
 import com.chump.rental.model.TripPoint;
 import com.chump.rental.repo.TripPointRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,17 +16,12 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TripQueryService {
 
     private final TripDao dao;
     private final TripPointRepository pointRepository;
     private final TripMapper mapper;
-
-    public TripQueryService(TripDao dao, TripPointRepository pointRepository, TripMapper mapper) {
-        this.dao = dao;
-        this.pointRepository = pointRepository;
-        this.mapper = mapper;
-    }
 
     @Transactional(readOnly = true)
     public List<TripConciseResponse> getUserTrips(int userId) {

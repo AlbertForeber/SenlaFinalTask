@@ -1,6 +1,7 @@
-package com.chump.common.config;
+package com.chump.common.config.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -24,16 +25,13 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
+@RequiredArgsConstructor
 public class KafkaConfig {
-
-    @Value("${kafka.bootstrap-servers}")
-    private String bootstrapServers;
 
     private final ObjectMapper objectMapper;
 
-    public KafkaConfig(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+    @Value("${kafka.bootstrap-servers}")
+    private String bootstrapServers;
 
     public Map<String, Object> baseProperties() {
         Map<String, Object> properties = new HashMap<>();

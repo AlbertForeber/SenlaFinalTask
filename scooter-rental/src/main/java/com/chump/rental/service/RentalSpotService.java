@@ -6,19 +6,16 @@ import com.chump.rental.dto.command.RentalSpotCommand;
 import com.chump.rental.dto.response.RentalSpotDetailedResponse;
 import com.chump.rental.mapper.RentalSpotMapper;
 import com.chump.rental.model.RentalSpot;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class RentalSpotService {
 
     private final RentalSpotMapper mapper;
     private final RentalSpotDao dao;
-
-    public RentalSpotService(RentalSpotMapper mapper, RentalSpotDao dao) {
-        this.mapper = mapper;
-        this.dao = dao;
-    }
 
     @Transactional
     public RentalSpotDetailedResponse openPoint(RentalSpotCommand command) {

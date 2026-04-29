@@ -11,12 +11,14 @@ import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.model.SubscriptionTariff;
 import com.chump.user.dao.UserSubscriptionDao;
 import com.chump.user.model.UserSubscription;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SubscriptionQueryService {
 
     private final SubscriptionTariffDao subscriptionTariffDao;
@@ -24,14 +26,6 @@ public class SubscriptionQueryService {
     private final TariffMapper tariffMapper;
     private final TariffDao tariffDao;
     private final UserSubscriptionDao userSubscriptionDao;
-
-    public SubscriptionQueryService(SubscriptionTariffDao subscriptionTariffDao, SubscriptionMapper subscriptionMapper, TariffMapper tariffMapper, TariffDao tariffDao, UserSubscriptionDao userSubscriptionDao) {
-        this.subscriptionTariffDao = subscriptionTariffDao;
-        this.subscriptionMapper = subscriptionMapper;
-        this.tariffMapper = tariffMapper;
-        this.tariffDao = tariffDao;
-        this.userSubscriptionDao = userSubscriptionDao;
-    }
 
     @Transactional(readOnly = true)
     public List<TariffConciseResponse> getAllSubscriptionTariffs() {

@@ -107,7 +107,7 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
         double[] longitude = new double[entries.size()];
         double[] latitude = new double[entries.size()];
 
-        for (int i = 0; i < entries.size(); i ++) {
+        for (int i = 0; i < entries.size(); i++) {
             scooterIds[i] = entries.get(i).getScooterId();
             battery[i] = entries.get(i).getBattery();
             longitude[i] = entries.get(i).getLongitude();
@@ -115,11 +115,11 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
         }
 
         String sql = """
-                UPDATE scooters s SET
-                    s.location = ST_SetSRID(ST_MakePoint(v.longitude, v.latitude), 4326)::geography,
-                    s.battery = v.battery
+                UPDATE scooters SET
+                    location = CAST(ST_SetSRID(ST_MakePoint(v.longitude, v.latitude), 4326) AS geography),
+                    battery = v.battery
                 FROM unnest(:scooterIds, :longitude, :latitude, :battery) AS v(scooter_id, longitude, latitude, battery)
-                WHERE s.id = v.scooter_id
+                WHERE scooters.id = v.scooter_id
                 """;
 
         getCurrentSession()

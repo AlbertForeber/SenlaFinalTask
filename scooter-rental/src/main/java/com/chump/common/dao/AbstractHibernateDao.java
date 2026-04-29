@@ -4,21 +4,18 @@ import com.chump.common.exception.DataManipulationException;
 import com.chump.common.exception.NoSuchEntityException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class AbstractHibernateDao<T, ID> implements GenericDao<T, ID> {
 
     private final Class<T> type;
     private final SessionFactory sessionFactory;
-
-    public AbstractHibernateDao(Class<T> type, SessionFactory sessionFactory) {
-        this.type = type;
-        this.sessionFactory = sessionFactory;
-    }
 
     protected Session getCurrentSession() {
         return sessionFactory.getCurrentSession();

@@ -3,6 +3,7 @@ package com.chump.rental.service;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
 import com.chump.rental.dao.ScooterModelDao;
+import com.chump.rental.dao.ScooterPendingRedisDao;
 import com.chump.rental.dto.command.CreateScooterCommand;
 import com.chump.rental.dto.command.UpdateScooterInfoCommand;
 import com.chump.rental.dto.response.ScooterResponse;
@@ -12,23 +13,21 @@ import com.chump.rental.model.Scooter;
 import com.chump.rental.model.ScooterModel;
 import com.chump.rental.model.status.ScooterStatus;
 import com.chump.rental.repo.ScooterRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class ScooterService {
 
     private final ScooterRepository scooterRepository;
     private final ScooterModelDao modelDao;
     private final ScooterMapper mapper;
     private final ScooterProducer scooterProducer;
-
-    public ScooterService(ScooterRepository scooterRepository, ScooterModelDao modelDao, ScooterMapper mapper, ScooterProducer scooterProducer) {
-        this.scooterRepository = scooterRepository;
-        this.modelDao = modelDao;
-        this.mapper = mapper;
-        this.scooterProducer = scooterProducer;
-    }
+    private final ScooterPendingRedisDao scooterPendingRedisDao;
 
     @Transactional
     public ScooterResponse addScooter(CreateScooterCommand command) {
@@ -122,6 +121,8 @@ public class ScooterService {
 
     @Transactional
     public void updateReceivedStatus(int scooterId) {
+        scooterPendingRedisDao.delPending(scooterId);
+
         Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
@@ -130,9 +131,46 @@ public class ScooterService {
             case BLOCKING -> ScooterStatus.MAINTENANCE;
             case ACTIVATING -> ScooterStatus.OCCUPIED;
             case STOPPING -> ScooterStatus.FREE;
-            default -> scooter.getStatus(); // Если статус не переходный, оставляем
+            default -> null; // Если статус не переходный, ничего не меняем
         };
 
+        if (newStatus == null) return;
+
         scooter.setStatus(newStatus);
+    }
+
+    @Transactional
+    public void handleStatusTimeout(int scooterId) {
+        try {
+            Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
+                    () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
+            );
+
+            switch (scooter.getStatus()) {
+                case ACTIVATING -> {
+                    scooter.setStatus(ScooterStatus.FREE);
+                    scooterProducer.sendLock(scooterId);
+                    log.warn("Scooter with id: {} failed to get activated. " +
+                            "Compensation 'lock' command sent and 'FREE' status forced.", scooterId);
+                }
+                case BLOCKING -> {
+                    scooter.setStatus(ScooterStatus.MAINTENANCE);
+                    log.warn("Scooter with id: {} failed to force stop. " +
+                            "'MAINTENANCE' status forced, 'lock' command is still pending.", scooterId);
+                }
+                case STOPPING -> {
+                    // Свободный разблокированный самокат нежелательная ситуация
+                    // -> блокируется + статус `MAINTENANCE` наряду с forceStop.
+                    scooter.setStatus(ScooterStatus.MAINTENANCE);
+                    log.warn("Scooter with id: {} failed to stop. " +
+                            "'MAINTENANCE' status forced, 'lock' command is still pending.", scooterId);
+                }
+                default -> {
+                    log.debug("Scooter with id: {} has no pending status. Skipped.", scooterId);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to handle status timeout for scooter with id: {}", scooterId, e);
+        }
     }
 }

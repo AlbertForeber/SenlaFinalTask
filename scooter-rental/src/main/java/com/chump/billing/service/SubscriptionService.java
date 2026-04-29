@@ -16,8 +16,8 @@ import com.chump.user.dao.UserProfileDao;
 import com.chump.user.dao.UserSubscriptionDao;
 import com.chump.user.model.UserProfile;
 import com.chump.user.model.UserSubscription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +28,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class SubscriptionService {
 
     private final UserSubscriptionDao userSubscriptionDao;
@@ -37,23 +39,6 @@ public class SubscriptionService {
     private final TripDao tripDao;
     private final SubscriptionMapper subscriptionMapper;
     private final TariffMapper tariffMapper;
-    private final static Logger logger = LoggerFactory.getLogger(SubscriptionService.class);
-
-    public SubscriptionService(UserSubscriptionDao userSubscriptionDao,
-                               SubscriptionTariffDao subscriptionTariffDao,
-                               UserProfileDao userProfileDao,
-                               SubscriptionMapper subscriptionMapper,
-                               TariffMapper tariffMapper,
-                               TariffDao tariffDao,
-                               TripDao tripDao) {
-        this.userSubscriptionDao = userSubscriptionDao;
-        this.subscriptionTariffDao = subscriptionTariffDao;
-        this.userProfileDao = userProfileDao;
-        this.subscriptionMapper = subscriptionMapper;
-        this.tariffMapper = tariffMapper;
-        this.tariffDao = tariffDao;
-        this.tripDao = tripDao;
-    }
 
     @Transactional
     public SubscribedResponse subscribe(int tariffId, int userId) {
@@ -91,7 +76,6 @@ public class SubscriptionService {
                 .build();
 
         profile.setBalance(profile.getBalance().subtract(subscriptionTariff.getTariff().getBasePrice()));
-
         userSubscriptionDao.save(userSubscription);
         return subscriptionMapper.toSubscribedResponse(userSubscription);
     }
@@ -125,7 +109,7 @@ public class SubscriptionService {
         tariff = tariffDao.save(tariff); // CascadeType.PERSIST не поможет, т.к. сначало нужно сохранить тариф
 
         SubscriptionTariff subscriptionTariff = subscriptionMapper.toEntity(command, tariff);
-        logger.info(subscriptionTariff.toString());
+        log.info(subscriptionTariff.toString());
         return subscriptionMapper.toSubscriptionResponse(subscriptionTariffDao.save(subscriptionTariff));
     }
 

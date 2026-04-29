@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,8 +18,8 @@ public class ScooterTelemetryRedisDao {
 
     private final RedisCommands<String, String> redis;
 
-    private final static long TELEMETRY_TTL = 300L;
-    private final static String KEY_PATTERN = "scooter:%s:telemetry";
+    private static final long TELEMETRY_TTL = 300L;
+    private static final String KEY_PATTERN = "scooter:%s:telemetry";
 
     public ScooterTelemetryRedisDao(RedisCommands<String, String> redis) {
         this.redis = redis;
@@ -51,7 +50,7 @@ public class ScooterTelemetryRedisDao {
         }
     }
 
-    public List<TelemetryEntry> findBatch(int batchSize) {
+    public List<TelemetryEntry> batchFind(int batchSize) {
         try {
             List<TelemetryEntry> result = new ArrayList<>();
 

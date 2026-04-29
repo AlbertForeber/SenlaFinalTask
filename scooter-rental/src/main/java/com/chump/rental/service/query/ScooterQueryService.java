@@ -9,25 +9,20 @@ import com.chump.rental.mapper.ScooterMapper;
 import com.chump.rental.mapper.ScooterModelMapper;
 import com.chump.rental.model.status.ScooterStatus;
 import com.chump.rental.repo.ScooterRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ScooterQueryService {
 
     private final ScooterRepository repo;
     private final ScooterModelDao modelDao;
     private final ScooterMapper mapper;
     private final ScooterModelMapper modelMapper;
-
-    public ScooterQueryService(ScooterRepository repo, ScooterModelDao modelDao, ScooterMapper mapper, ScooterModelMapper modelMapper) {
-        this.repo = repo;
-        this.modelDao = modelDao;
-        this.mapper = mapper;
-        this.modelMapper = modelMapper;
-    }
 
     @Transactional(readOnly = true)
     public ScooterResponse getScooterInfo(int scooterId) {

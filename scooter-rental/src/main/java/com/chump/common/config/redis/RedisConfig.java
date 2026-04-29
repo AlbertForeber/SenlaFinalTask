@@ -1,9 +1,11 @@
-package com.chump.common.config;
+package com.chump.common.config.redis;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,14 +37,23 @@ public class RedisConfig {
     }
 
     @Bean(destroyMethod = "close")
+    @Qualifier("default")
     public StatefulRedisConnection<String, String> redisConnection(RedisClient redisClient) {
         return redisClient.connect();
     }
 
     @Bean
     public RedisCommands<String, String> redisCommand(
-            StatefulRedisConnection<String, String> connection
+            @Qualifier("default") StatefulRedisConnection<String, String> connection
     ) {
         return connection.sync();
+    }
+
+    @Bean(destroyMethod = "close")
+    @Qualifier("pubSub")
+    public StatefulRedisPubSubConnection<String, String> pubSubConnection(
+            RedisClient redisClient
+    ) {
+        return redisClient.connectPubSub();
     }
 }

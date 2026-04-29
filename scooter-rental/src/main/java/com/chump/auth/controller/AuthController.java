@@ -7,6 +7,7 @@ import com.chump.auth.dto.response.TokenResponse;
 import com.chump.auth.mapper.AuthMapper;
 import com.chump.auth.service.AuthService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,16 +17,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
     private final AuthMapper authMapper;
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
-    public AuthController(AuthService authService, AuthMapper authMapper) {
-        this.authService = authService;
-        this.authMapper = authMapper;
-    }
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(

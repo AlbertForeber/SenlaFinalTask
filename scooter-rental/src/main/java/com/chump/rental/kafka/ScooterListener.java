@@ -6,6 +6,8 @@ import com.chump.rental.kafka.event.TelemetryEvent;
 import com.chump.rental.kafka.event.WaypointEvent;
 import com.chump.rental.mapper.ScooterMapper;
 import com.chump.rental.service.ScooterService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,19 +19,13 @@ import org.springframework.stereotype.Component;
 
 // TODO Listener находятся на том же слое, что и контроллеры
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class ScooterListener {
 
     private final ScooterService scooterService;
-
-    private final static Logger logger = LoggerFactory.getLogger(ScooterListener.class);
     private final ScooterTelemetryRedisDao scooterTelemetryRedisDao;
     private final ScooterMapper scooterMapper;
-
-    public ScooterListener(ScooterService scooterService, ScooterTelemetryRedisDao scooterTelemetryRedisDao, ScooterMapper scooterMapper) {
-        this.scooterService = scooterService;
-        this.scooterTelemetryRedisDao = scooterTelemetryRedisDao;
-        this.scooterMapper = scooterMapper;
-    }
 
     @KafkaListener(
             topics = "scooter.telemetry",
@@ -38,7 +34,6 @@ public class ScooterListener {
     public void telemetryListener(TelemetryEvent event) {
         // TODO сохранение в REDIS - ОБРАБОТКА ОШИБОК (вроде не нужна, т.к. телеметрия)
         scooterTelemetryRedisDao.save(event.getScooterId(), scooterMapper.toTelemetryEntry(event));
-        logger.info(event.toString());
     }
 
     @KafkaListener(
@@ -53,11 +48,11 @@ public class ScooterListener {
     ) {
         try {
             // TODO сохранение в REDIS
-            logger.info(event.toString());
+            log.info(event.toString());
             ack.acknowledge();
         } catch (Exception e) {
             // Отрабатывает Error Handler
-            logger.error("Failed to process waypoint from scooter with id: {}. Partition: {}, offset: {}",
+            log.error("Failed to process waypoint from scooter with id: {}. Partition: {}, offset: {}",
                     event.getScooterId(), partition, offset);
         }
     }
@@ -76,7 +71,7 @@ public class ScooterListener {
             scooterService.updateReceivedStatus(event.scooterId());
             ack.acknowledge();
         } catch (Exception e) {
-            logger.error("Failed to process status for scooter with id: {}. Partition: {}, offset: {}",
+            log.error("Failed to process status for scooter with id: {}. Partition: {}, offset: {}",
                     event.scooterId(), partition, offset
             );
         }

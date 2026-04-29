@@ -7,20 +7,16 @@ import com.chump.billing.dto.command.TariffCommand;
 import com.chump.billing.dto.response.TariffDetailedResponse;
 import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.model.Tariff;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class TariffService {
 
     private final TariffDao tariffDao;
     private final TariffMapper tariffMapper;
-
-    public TariffService(TariffDao tariffDao,
-                         TariffMapper tariffMapper) {
-        this.tariffDao = tariffDao;
-        this.tariffMapper = tariffMapper;
-    }
 
     @Transactional
     public TariffDetailedResponse updateTariff(int tariffId, TariffCommand command) {

@@ -14,10 +14,12 @@ import com.chump.user.mapper.UserMapper;
 import com.chump.user.model.Role;
 import com.chump.user.model.User;
 import com.chump.user.model.UserProfile;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserDao userDao;
@@ -25,18 +27,6 @@ public class UserService {
     private final RoleDao roleDao;
     private final UserMapper mapper;
     private final TripDao tripDao;
-
-    public UserService(UserDao userDao,
-                       UserProfileDao userProfileDao,
-                       RoleDao roleDao,
-                       UserMapper mapper,
-                       TripDao tripDao) {
-        this.userDao = userDao;
-        this.userProfileDao = userProfileDao;
-        this.roleDao = roleDao;
-        this.mapper = mapper;
-        this.tripDao = tripDao;
-    }
 
     @Transactional
     public UserProfileResponse updateUserBaseInfo(int userId, UpdateUserBaseInfoCommand command) {

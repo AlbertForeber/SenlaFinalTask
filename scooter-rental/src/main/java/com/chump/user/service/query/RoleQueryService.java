@@ -6,21 +6,18 @@ import com.chump.user.dto.response.RoleResponse;
 import com.chump.user.dto.response.RoleWithScopesResponse;
 import com.chump.user.mapper.RoleMapper;
 import com.chump.user.model.Role;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RoleQueryService {
 
     private final RoleDao roleDao;
     private final RoleMapper roleMapper;
-
-    public RoleQueryService(RoleDao roleDao, RoleMapper roleMapper) {
-        this.roleDao = roleDao;
-        this.roleMapper = roleMapper;
-    }
 
     @Transactional(readOnly = true)
     public List<RoleResponse> getAllRoles() {

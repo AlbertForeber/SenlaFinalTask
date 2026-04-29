@@ -8,6 +8,7 @@ import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.service.TariffService;
 import com.chump.billing.service.query.TariffQueryService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,19 +19,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tariffs")
+@RequiredArgsConstructor
 public class TariffController {
 
     private final TariffQueryService tariffQueryService;
     private final TariffService tariffService;
     private final TariffMapper tariffMapper;
-
-    public TariffController(TariffQueryService tariffQueryService,
-                            TariffService tariffService,
-                            TariffMapper tariffMapper) {
-        this.tariffQueryService = tariffQueryService;
-        this.tariffService = tariffService;
-        this.tariffMapper = tariffMapper;
-    }
 
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_tariff:view')")

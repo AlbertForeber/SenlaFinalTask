@@ -7,6 +7,7 @@ import com.chump.billing.dto.response.BillingResponse;
 import com.chump.billing.model.BillingBatchFailure;
 import com.chump.billing.model.BillingBatchFailureItem;
 import com.chump.user.dao.UserSubscriptionDao;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,25 +21,16 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BillingService {
 
     private final UserSubscriptionDao userSubscriptionDao;
     private final BillingProcessor billingProcessor;
-    private final int batchSize;
     private final BillingBatchFailureDao billingBatchFailureDao;
     private final BillingBatchFailureItemDao billingBatchFailureItemDao;
 
-    public BillingService(UserSubscriptionDao userSubscriptionDao,
-                          BillingProcessor billingProcessor,
-                          @Value("${billing.batch.size:100}") int batchSize,
-                          BillingBatchFailureDao billingBatchFailureDao,
-                          BillingBatchFailureItemDao billingBatchFailureItemDao) {
-        this.userSubscriptionDao = userSubscriptionDao;
-        this.billingProcessor = billingProcessor;
-        this.batchSize = batchSize;
-        this.billingBatchFailureDao = billingBatchFailureDao;
-        this.billingBatchFailureItemDao = billingBatchFailureItemDao;
-    }
+    @Value("${billing.batch.size:100}")
+    private int batchSize;
 
     // Облегчаем транзакцию
     // Вместо добавления @Transactional в DAO (требует CGLIB или использования интерфейсов)

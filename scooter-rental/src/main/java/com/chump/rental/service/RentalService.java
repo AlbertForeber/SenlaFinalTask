@@ -4,6 +4,7 @@ import com.chump.common.exception.InaccessibleActionException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
 import com.chump.rental.dao.RentalSpotDao;
+import com.chump.rental.dao.ScooterPendingRedisDao;
 import com.chump.rental.dao.TripDao;
 import com.chump.rental.dao.TripPointDao;
 import com.chump.rental.dto.response.TripConciseResponse;
@@ -24,6 +25,7 @@ import com.chump.user.model.UserProfile;
 import com.chump.user.model.UserSubscription;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
@@ -45,6 +47,7 @@ import java.util.List;
 // TODO + если пользователь захочет посмотреть поездку до ее завершения - данные подтягиваются из Redis
 // TODO + после завершения поездки данные отправляются в БД (упростить линию)
 @Service
+@RequiredArgsConstructor
 public class RentalService {
 
     private final ScooterRepository scooterRepository;
@@ -55,29 +58,11 @@ public class RentalService {
     private final TariffDao tariffDao;
     private final TripPointDao tripPointDao;
     private final RentalSpotDao rentalSpotDao;
-    private final Integer minToStart;
     private final ScooterProducer scooterProducer;
+    private final ScooterPendingRedisDao scooterPendingRedisDao;
 
-    public RentalService(ScooterRepository scooterRepository,
-                         TripDao tripDao,
-                         TripMapper tripMapper,
-                         UserProfileDao userProfileDao,
-                         UserSubscriptionDao userSubscriptionDao,
-                         TariffDao tariffDao,
-                         TripPointDao tripPointDao,
-                         RentalSpotDao rentalSpotDao,
-                         @Value("${rental.minimal-balance}") String minToStart, ScooterProducer scooterProducer) {
-        this.scooterRepository = scooterRepository;
-        this.tripDao = tripDao;
-        this.tripMapper = tripMapper;
-        this.userProfileDao = userProfileDao;
-        this.userSubscriptionDao = userSubscriptionDao;
-        this.tariffDao = tariffDao;
-        this.tripPointDao = tripPointDao;
-        this.rentalSpotDao = rentalSpotDao;
-        this.minToStart = Integer.parseInt(minToStart);
-        this.scooterProducer = scooterProducer;
-    }
+    @Value("${rental.minimal-balance}")
+    private Integer minToStart;
 
     @AllArgsConstructor
     @Getter
@@ -100,6 +85,7 @@ public class RentalService {
         // TODO  Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
         // TODO Создание флага ожидания в REDIS
         scooter.setStatus(ScooterStatus.ACTIVATING);
+        scooterPendingRedisDao.setPending(scooterId);
         scooterProducer.sendUnlock(scooterId);
 
         Trip createdTrip = tripDao.save(Trip.builder()
@@ -131,7 +117,7 @@ public class RentalService {
     public TripConciseResponse resumeScooter(int scooterId, int userId) {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
         ongoingTrip.setStatus(TripStatus.ONGOING);
-
+        scooterPendingRedisDao.setPending(scooterId);
         // TODO Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
         // TODO Создание флага ожидания в REDIS
 
@@ -194,6 +180,7 @@ public class RentalService {
         scooter.setStatus(isForce ? ScooterStatus.BLOCKING : ScooterStatus.STOPPING);
 
         // TODO таймер Redis
+        scooterPendingRedisDao.setPending(scooterId);
         scooterProducer.sendLock(scooterId);
 
         trip.setDurationSeconds((int) duration.toSeconds());

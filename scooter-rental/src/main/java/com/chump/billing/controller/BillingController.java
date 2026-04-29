@@ -5,6 +5,7 @@ import com.chump.billing.dto.response.BillingResponse;
 import com.chump.billing.service.BillingService;
 import com.chump.billing.service.query.BillingFailureQueryService;
 import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/billing")
 @Validated // TODO добавить маппинг везде
+@RequiredArgsConstructor
 public class BillingController {
 
     private final BillingFailureQueryService billingFailureQueryService;
     private final BillingService billingService;
-
-    public BillingController(BillingFailureQueryService billingFailureQueryService, BillingService billingService) {
-        this.billingFailureQueryService = billingFailureQueryService;
-        this.billingService = billingService;
-    }
 
     @GetMapping("/failures")
     public ResponseEntity<List<BillingBatchFailureResponse>> getFailures(

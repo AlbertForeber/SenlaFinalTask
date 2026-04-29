@@ -11,23 +11,19 @@ import com.chump.rental.mapper.RentalSpotMapper;
 import com.chump.rental.model.RentalSpot;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.repo.ScooterRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RentalSpotQueryService {
 
     private final RentalSpotDao dao;
     private final ScooterRepository scooterRepository;
     private final RentalSpotMapper mapper;
-
-    public RentalSpotQueryService(RentalSpotDao dao, ScooterRepository scooterRepository, RentalSpotMapper mapper) {
-        this.dao = dao;
-        this.scooterRepository = scooterRepository;
-        this.mapper = mapper;
-    }
 
     @Transactional(readOnly = true)
     public List<RentalSpotHierarchyResponse> getAllRentalSpotsHierarchy() {

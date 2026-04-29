@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ManualBillingFailureResponse {
+
     private int subscriptionId;
     private String errorMessage;
 }

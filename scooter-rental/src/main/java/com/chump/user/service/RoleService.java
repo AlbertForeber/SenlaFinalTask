@@ -8,23 +8,19 @@ import com.chump.user.dto.response.RoleWithScopesResponse;
 import com.chump.user.mapper.RoleMapper;
 import com.chump.user.model.Role;
 import com.chump.user.model.Scope;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RoleService {
 
     private final RoleDao roleDao;
     private final ScopeDao scopeDao;
     private final RoleMapper roleMapper;
-
-    public RoleService(RoleDao roleDao, ScopeDao scopeDao, RoleMapper roleMapper) {
-        this.roleDao = roleDao;
-        this.scopeDao = scopeDao;
-        this.roleMapper = roleMapper;
-    }
 
     @Transactional
     public RoleWithScopesResponse addRole(CreateRoleCommand command) {

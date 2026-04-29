@@ -4,6 +4,7 @@ import com.chump.common.dto.param.GeoSearchParams;
 import com.chump.rental.dao.ScooterPostgresDao;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.model.status.ScooterStatus;
+import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Repository;
 
@@ -11,13 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class ScooterRepository {
 
     private final ScooterPostgresDao postgresDao;
-
-    public ScooterRepository(ScooterPostgresDao postgresDao) {
-        this.postgresDao = postgresDao;
-    }
 
     public List<Scooter> findAll() {
         return postgresDao.findAll();

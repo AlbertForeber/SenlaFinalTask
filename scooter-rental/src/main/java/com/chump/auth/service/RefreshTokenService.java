@@ -5,6 +5,7 @@ import com.chump.auth.model.RefreshToken;
 import com.chump.common.exception.AuthException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.user.model.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,15 +14,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class RefreshTokenService {
+
+    private final RefreshTokenDao refreshTokenDao;
 
     @Value("${jwt.refresh-token.expiration-time:604800000}")
     private long expirationTime;
-    private final RefreshTokenDao refreshTokenDao;
-
-    public RefreshTokenService(RefreshTokenDao refreshTokenDao) {
-        this.refreshTokenDao = refreshTokenDao;
-    }
 
     @Transactional
     public RefreshToken generateToken(User user) {

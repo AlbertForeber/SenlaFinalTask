@@ -1,6 +1,7 @@
 package com.chump.billing.service;
 
 import com.chump.user.dao.UserSubscriptionDao;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
@@ -14,13 +15,10 @@ import static java.lang.Thread.sleep;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class BillingProcessor {
 
     private final UserSubscriptionDao userSubscriptionDao;
-
-    public BillingProcessor(UserSubscriptionDao userSubscriptionDao) {
-        this.userSubscriptionDao = userSubscriptionDao;
-    }
 
     @SuppressWarnings("BusyWait")
     @Transactional(propagation = Propagation.REQUIRES_NEW)

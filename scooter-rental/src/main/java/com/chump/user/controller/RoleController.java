@@ -7,6 +7,7 @@ import com.chump.user.mapper.RoleMapper;
 import com.chump.user.service.RoleService;
 import com.chump.user.service.query.RoleQueryService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,17 +18,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/roles")
+@RequiredArgsConstructor
 public class RoleController {
 
     private final RoleQueryService roleQueryService;
     private final RoleService roleService;
     private final RoleMapper roleMapper;
-
-    public RoleController(RoleQueryService roleQueryService, RoleService roleService, RoleMapper roleMapper) {
-        this.roleQueryService = roleQueryService;
-        this.roleService = roleService;
-        this.roleMapper = roleMapper;
-    }
 
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_role:view')")

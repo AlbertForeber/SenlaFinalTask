@@ -10,6 +10,7 @@ import com.chump.user.mapper.UserMapper;
 import com.chump.user.service.UserService;
 import com.chump.user.service.query.UserQueryService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,19 +20,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user/{id}")
+@RequiredArgsConstructor
 public class UserAdminController {
 
     private final UserService userService;
     private final UserQueryService userQueryService;
     private final TripQueryService tripQueryService;
     private final UserMapper userMapper;
-
-    public UserAdminController(UserService userService, UserQueryService userQueryService, TripQueryService tripQueryService, UserMapper userMapper) {
-        this.userService = userService;
-        this.userQueryService = userQueryService;
-        this.tripQueryService = tripQueryService;
-        this.userMapper = userMapper;
-    }
 
     @GetMapping("/history")
     @PreAuthorize("hasAuthority('SCOPE_profile:view_admin')")

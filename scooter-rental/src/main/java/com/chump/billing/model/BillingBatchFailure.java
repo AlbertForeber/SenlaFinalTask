@@ -19,7 +19,7 @@ public class BillingBatchFailure {
     private Integer id;
 
     // Без CASCADE read-only, позволяет использовать batch insert для failureItems
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "failure")
     private List<BillingBatchFailureItem> failureItems;
 
     @Column(name = "failed_at", nullable = false)

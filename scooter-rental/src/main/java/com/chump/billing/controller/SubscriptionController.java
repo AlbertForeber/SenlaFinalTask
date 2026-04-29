@@ -11,6 +11,7 @@ import com.chump.billing.service.BillingService;
 import com.chump.billing.service.SubscriptionService;
 import com.chump.billing.service.query.SubscriptionQueryService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,21 +23,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/subscriptions")
+@RequiredArgsConstructor
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
     private final SubscriptionQueryService subscriptionQueryService;
     private final SubscriptionMapper subscriptionMapper;
     private final BillingService billingService;
-
-    public SubscriptionController(SubscriptionService subscriptionService,
-                                  SubscriptionQueryService subscriptionQueryService,
-                                  SubscriptionMapper subscriptionMapper, BillingService billingService) {
-        this.subscriptionService = subscriptionService;
-        this.subscriptionQueryService = subscriptionQueryService;
-        this.subscriptionMapper = subscriptionMapper;
-        this.billingService = billingService;
-    }
 
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_tariff:view')")

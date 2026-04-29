@@ -8,6 +8,7 @@ import com.chump.user.mapper.UserMapper;
 import com.chump.user.service.UserService;
 import com.chump.user.service.query.UserQueryService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,19 +19,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserController {
 
     private final TripQueryService tripQueryService;
     private final UserQueryService userQueryService;
     private final UserService userService;
     private final UserMapper userMapper;
-
-    public UserController(TripQueryService tripQueryService, UserQueryService userQueryService, UserService userService, UserMapper userMapper) {
-        this.tripQueryService = tripQueryService;
-        this.userQueryService = userQueryService;
-        this.userService = userService;
-        this.userMapper = userMapper;
-    }
 
     @GetMapping("/history")
     @PreAuthorize("hasAuthority('SCOPE_profile:view')")

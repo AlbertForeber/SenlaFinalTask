@@ -1,4 +1,4 @@
-package com.chump.common.config;
+package com.chump.common.config.db;
 
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.context.annotation.Bean;

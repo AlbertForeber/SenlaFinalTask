@@ -28,9 +28,9 @@ public class ScooterEmulator {
     private final KafkaTemplate<String, Object> fastKafkaTemplate;
     private final KafkaTemplate<String, Object> reliableKafkaTemplate;
 
-    private final static Duration MAX_COMMAND_AGE = Duration.ofMinutes(2);
-    private final static Logger logger = LoggerFactory.getLogger(ScooterEmulator.class);
-    private final static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    private static final Duration MAX_COMMAND_AGE = Duration.ofMinutes(2);
+    private static final Logger logger = LoggerFactory.getLogger(ScooterEmulator.class);
+    private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     private volatile int battery = 100;
     private volatile Point curLocation = geometryFactory.createPoint(new Coordinate(37.609913, 55.7614868));
@@ -56,7 +56,8 @@ public class ScooterEmulator {
         );
     }
 
-    @Scheduled(fixedDelay = 5000L)
+    // ~раз в 9 метров
+    @Scheduled(fixedDelay = 10000L)
     public void sendWaypoint() {
         if (status != ScooterStatus.UNLOCKED) return;
 
@@ -89,17 +90,14 @@ public class ScooterEmulator {
             if (status == ScooterStatus.LOCKED) {
                 logger.debug("Already locked, duplicate command ignored");
             }
-            // TODO отправка Locked
             // TODO поменять лог
             logger.info("Received lock command");
-
             sendStatusEvent(new LockedEvent(scooterId));
             status = ScooterStatus.LOCKED;
         } else if (command instanceof UnlockCommand) {
             if (status == ScooterStatus.UNLOCKED) {
                 logger.debug("Already unlocked, duplicate command ignored");
             }
-            // TODO отправка Unlocked
             // TODO поменять лог
             logger.info("Received unlock command");
             sendStatusEvent(new UnlockedEvent(scooterId));

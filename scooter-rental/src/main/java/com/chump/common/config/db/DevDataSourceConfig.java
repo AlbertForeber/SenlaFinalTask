@@ -1,4 +1,4 @@
-package com.chump.common.config;
+package com.chump.common.config.db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

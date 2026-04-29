@@ -3,19 +3,17 @@ package com.chump.rental.kafka;
 import com.chump.rental.kafka.command.LockCommand;
 import com.chump.rental.kafka.command.RechargeCommand;
 import com.chump.rental.kafka.command.UnlockCommand;
+import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
 @Component
+@RequiredArgsConstructor
 public class ScooterProducer {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-
-    public ScooterProducer(KafkaTemplate<String, Object> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
-    }
 
     public void sendLock(Integer scooterId) {
         kafkaTemplate.send(

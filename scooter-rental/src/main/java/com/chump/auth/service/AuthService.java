@@ -13,6 +13,7 @@ import com.chump.user.dao.UserProfileDao;
 import com.chump.user.model.Role;
 import com.chump.user.model.User;
 import com.chump.user.model.UserProfile;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -33,26 +35,6 @@ public class AuthService {
     private final UserDao userDao;
     private final UserProfileDao userProfileDao;
     private final AuthMapper authMapper;
-
-    private static Logger logger = LoggerFactory.getLogger(AuthService.class);
-
-    public AuthService(AuthenticationManager authenticationManager,
-                       JwtService jwtService,
-                       RefreshTokenService refreshTokenService,
-                       PasswordEncoder passwordEncoder,
-                       RoleDao roleDao,
-                       UserDao userDao,
-                       UserProfileDao userProfileDao,
-                       AuthMapper authMapper) {
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-        this.refreshTokenService = refreshTokenService;
-        this.passwordEncoder = passwordEncoder;
-        this.roleDao = roleDao;
-        this.userDao = userDao;
-        this.userProfileDao = userProfileDao;
-        this.authMapper = authMapper;
-    }
 
     @Transactional
     public TokenResponse login(LoginCommand command) {

@@ -4,6 +4,7 @@ import com.chump.auth.model.RefreshToken;
 import com.chump.common.dao.AbstractHibernateDao;
 import com.chump.common.exception.DataManipulationException;
 import jakarta.persistence.criteria.*;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,8 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class RefreshTokenDao extends AbstractHibernateDao<RefreshToken, Integer> {
-
-    private static final Logger logger = LoggerFactory.getLogger(RefreshTokenDao.class);
 
     public RefreshTokenDao(SessionFactory sessionFactory) {
         super(RefreshToken.class, sessionFactory);
@@ -48,7 +48,7 @@ public class RefreshTokenDao extends AbstractHibernateDao<RefreshToken, Integer>
     }
 
     public void revokeByUserId(Integer userId) {
-        logger.info("Arrived to method revokeByUserId");
+        log.info("Arrived to method revokeByUserId");
 
         CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
         CriteriaUpdate<RefreshToken> update = criteriaBuilder.createCriteriaUpdate(RefreshToken.class);
