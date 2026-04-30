@@ -20,6 +20,7 @@ public interface RoleMapper {
 
     @Mapping(source = "command.name", target = "name")
     @Mapping(source = "scopes", target = "scopes")
+    @Mapping(target = "id", ignore = true) // id не назначается вручную
     Role toEntity(CreateRoleCommand command, List<Scope> scopes);
 
     CreateRoleCommand toCommand(CreateRoleRequest request);

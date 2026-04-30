@@ -3,17 +3,14 @@ package com.chump.rental.service;
 import com.chump.common.exception.InaccessibleActionException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
-import com.chump.rental.dao.RentalSpotDao;
-import com.chump.rental.dao.ScooterPendingRedisDao;
-import com.chump.rental.dao.TripDao;
-import com.chump.rental.dao.TripPointDao;
+import com.chump.rental.dao.*;
+import com.chump.rental.dto.entry.WaypointEntry;
 import com.chump.rental.dto.response.TripConciseResponse;
 import com.chump.rental.dto.response.TripDetailedResponse;
 import com.chump.rental.kafka.ScooterProducer;
 import com.chump.rental.mapper.TripMapper;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.model.Trip;
-import com.chump.rental.model.TripPoint;
 import com.chump.rental.model.status.ScooterStatus;
 import com.chump.rental.model.status.TripStatus;
 import com.chump.rental.repo.ScooterRepository;
@@ -26,10 +23,7 @@ import com.chump.user.model.UserSubscription;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +54,7 @@ public class RentalService {
     private final RentalSpotDao rentalSpotDao;
     private final ScooterProducer scooterProducer;
     private final ScooterPendingRedisDao scooterPendingRedisDao;
+    private final ScooterWaypointRedisDao scooterWaypointRedisDao;
 
     @Value("${rental.minimal-balance}")
     private Integer minToStart;
@@ -130,10 +125,12 @@ public class RentalService {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
         finishTrip(ongoingTrip, scooterId, userId, isForce);
 
-        List<TripPoint> waypoints = tripPointDao.findByTripId(ongoingTrip.getId());
-        ongoingTrip.setDistance(calculateDistance(waypoints));
+        List<WaypointEntry> waypoints = scooterWaypointRedisDao.batchPopWaypoints(ongoingTrip.getId());
+        tripPointDao.batchSave(ongoingTrip.getId(), waypoints);
+        LineString route = tripDao.updateRoute(ongoingTrip.getId());
+        ongoingTrip.setRoute(route);
 
-        return tripMapper.toDetailedResponse(ongoingTrip, waypoints);
+        return tripMapper.toDetailedResponse(ongoingTrip);
     }
 
     private Scooter findAndValidateScooter(int scooterId) {
@@ -187,22 +184,6 @@ public class RentalService {
         trip.setTotalPrice(calculatePrice(trip));
 
         userProfile.setBalance(userProfile.getBalance().subtract(trip.getTotalPrice()));
-    }
-
-    private float calculateDistance(List<TripPoint> waypoints) {
-        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-
-        LineString line = geometryFactory.createLineString(
-                waypoints.stream()
-                        .map(p -> new Coordinate(p.getLocation().getX(), p.getLocation().getY()))
-                        .toArray(Coordinate[]::new)
-        );
-
-        // TODO временная логика, получаем результат в градусах
-        // TODO умножение на примерное значение, чтобы не писать лишний запрос в БД
-        // TODO далее будет замененно на Redis
-        // TODO + в БД отправляется упрощенный маршрут
-        return (float) line.getLength() * 111000;
     }
 
     private BigDecimal calculatePrice(Trip trip) {

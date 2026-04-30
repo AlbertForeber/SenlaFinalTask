@@ -4,10 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 @Entity
@@ -15,6 +12,7 @@ import org.locationtech.jts.geom.Point;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
 public class TripPoint {
 
     @EmbeddedId

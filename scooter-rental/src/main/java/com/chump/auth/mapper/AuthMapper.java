@@ -15,8 +15,9 @@ public interface AuthMapper {
 
     @Mapping(source = "command.fullName", target = "fullName")
     @Mapping(source = "command.dateOfBirth", target = "dateOfBirth")
-    @Mapping(source = "command.balance", target = "balance")
+    @Mapping(source = "command.balance", target = "balance") // TODO может заменить на DEFAULT в БД
     @Mapping(source = "user", target = "user")
+    @Mapping(target = "discount", ignore = true) // Изначально скидки нет
     UserProfile toUserProfileEntity(RegisterCommand command, User user);
 
     @Mapping(source = "command.username", target = "username")

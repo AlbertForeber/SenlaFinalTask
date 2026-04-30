@@ -6,8 +6,6 @@ import com.chump.rental.dto.response.TripConciseResponse;
 import com.chump.rental.dto.response.TripDetailedResponse;
 import com.chump.rental.mapper.TripMapper;
 import com.chump.rental.model.Trip;
-import com.chump.rental.model.TripPoint;
-import com.chump.rental.repo.TripPointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +18,6 @@ import java.util.List;
 public class TripQueryService {
 
     private final TripDao dao;
-    private final TripPointRepository pointRepository;
     private final TripMapper mapper;
 
     @Transactional(readOnly = true)
@@ -49,7 +46,6 @@ public class TripQueryService {
                 () -> new NoSuchEntityException("No trip found with id: " + tripId)
         );
 
-        List<TripPoint> tripPoints = pointRepository.findByTripId(trip.getId());
-        return mapper.toDetailedResponse(trip, tripPoints);
+        return mapper.toDetailedResponse(trip);
     }
 }

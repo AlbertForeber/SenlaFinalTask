@@ -2,12 +2,15 @@ package com.chump.rental.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.Data;
+import lombok.*;
 
 import java.time.Instant;
 
 @Embeddable
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class TripPointId {
 
     @Column(name = "trip_id")

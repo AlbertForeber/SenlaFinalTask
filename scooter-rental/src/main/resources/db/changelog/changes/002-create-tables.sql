@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS trips(
     discount_at_start DECIMAL(3, 2) CHECK (discount_at_start BETWEEN 0 AND 1),
 
     -- Заполняется в конце
-    distance FLOAT,
+    route geography(LineString, 4326),
     duration_seconds INTEGER,
     total_price NUMERIC(10, 2)
 );

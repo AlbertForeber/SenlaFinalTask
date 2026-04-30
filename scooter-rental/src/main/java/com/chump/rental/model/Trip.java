@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.chump.rental.model.status.TripStatus;
 import com.chump.user.model.User;
+import org.locationtech.jts.geom.LineString;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -44,8 +45,8 @@ public class Trip {
     @Column(name = "discount_at_start", nullable = false)
     private BigDecimal discountAtStart;
 
-    @Column(name = "distance")
-    private Float distance;
+    @Column(name = "route", columnDefinition = "geography(LineString, 4326)")
+    private LineString route;
 
     @Column(name = "duration_seconds")
     private Integer durationSeconds;

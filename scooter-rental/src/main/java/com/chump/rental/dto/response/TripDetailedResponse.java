@@ -4,10 +4,10 @@ import com.chump.rental.model.status.TripStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.locationtech.jts.geom.LineString;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 
 @Getter
 @Setter
@@ -19,9 +19,8 @@ public class TripDetailedResponse {
     private Integer scooterId;
     private Integer userId;
     private Instant startedAt;
-    private Float distance;
+    private Double distance;
     private Integer durationSeconds;
     private BigDecimal totalPrice;
-
-    private List<TripPointResponse> tripPoints;
+    private LineString route;
 }

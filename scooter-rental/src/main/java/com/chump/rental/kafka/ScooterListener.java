@@ -1,6 +1,7 @@
 package com.chump.rental.kafka;
 
 import com.chump.rental.dao.ScooterTelemetryRedisDao;
+import com.chump.rental.dao.ScooterWaypointRedisDao;
 import com.chump.rental.kafka.event.StatusEvent;
 import com.chump.rental.kafka.event.TelemetryEvent;
 import com.chump.rental.kafka.event.WaypointEvent;
@@ -8,8 +9,6 @@ import com.chump.rental.mapper.ScooterMapper;
 import com.chump.rental.service.ScooterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -26,13 +25,14 @@ public class ScooterListener {
     private final ScooterService scooterService;
     private final ScooterTelemetryRedisDao scooterTelemetryRedisDao;
     private final ScooterMapper scooterMapper;
+    private final ScooterWaypointRedisDao scooterWaypointRedisDao;
 
     @KafkaListener(
             topics = "scooter.telemetry",
             containerFactory = "fastListenerFactory"
     )
     public void telemetryListener(TelemetryEvent event) {
-        // TODO сохранение в REDIS - ОБРАБОТКА ОШИБОК (вроде не нужна, т.к. телеметрия)
+        // TODO сохранение в REDIS - ОБРАБОТКА ОШИБОК (не нужна, т.к. телеметрия)
         scooterTelemetryRedisDao.save(event.getScooterId(), scooterMapper.toTelemetryEntry(event));
     }
 
@@ -47,8 +47,8 @@ public class ScooterListener {
             Acknowledgment ack
     ) {
         try {
-            // TODO сохранение в REDIS
             log.info(event.toString());
+            scooterWaypointRedisDao.save(scooterMapper.toWaypointEntry(event)); // TODO сохранение в REDIS
             ack.acknowledge();
         } catch (Exception e) {
             // Отрабатывает Error Handler

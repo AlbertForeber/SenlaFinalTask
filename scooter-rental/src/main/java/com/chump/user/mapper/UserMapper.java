@@ -23,9 +23,17 @@ public interface UserMapper {
 
     UserRoleResponse toUserRoleResponse(User entity);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "balance", ignore = true)
+    @Mapping(target = "discount", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserBaseInfoFromCommand(UpdateUserBaseInfoCommand command, @MappingTarget UserProfile info);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "dateOfBirth", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserProtectedInfoFromCommand(UpdateUserProtectedInfoCommand command, @MappingTarget UserProfile info);
 }

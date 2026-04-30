@@ -61,9 +61,11 @@ public class ScooterEmulator {
     public void sendWaypoint() {
         if (status != ScooterStatus.UNLOCKED) return;
 
-        reliableKafkaTemplate.send("scooter.waypoints", scooterId.toString(), WaypointEvent
-                .builder()
-                .location(curLocation)
+        reliableKafkaTemplate.send("scooter.waypoints", scooterId.toString(), WaypointEvent.builder()
+                        .location(curLocation)
+                        .scooterId(scooterId)
+                        .sendAt(Instant.now())
+                        .build()
         ).whenComplete(
             (result, ex) -> {
                 if (ex != null) {

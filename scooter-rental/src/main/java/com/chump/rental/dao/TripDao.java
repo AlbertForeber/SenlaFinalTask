@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.SessionFactory;
+import org.locationtech.jts.geom.LineString;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -88,6 +89,26 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
             return getCurrentSession().createQuery(query).getResultList();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find trips in period", e);
+        }
+    }
+
+    public LineString updateRoute(int tripId) {
+        try {
+            String sql = """
+                    UPDATE trips SET route = (
+                        SELECT CAST(ST_SetSRID(ST_Simplify(ST_MakeLine(CAST(location AS geometry)), 0.0001), 4326) AS geography)
+                        FROM trip_points WHERE trip_id = :id
+                    )
+                    WHERE id = :id
+                    RETURNING route
+                    """;
+
+            return getCurrentSession()
+                    .createNativeQuery(sql, LineString.class)
+                    .setParameter("id", tripId)
+                    .getSingleResult();
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to update distance for trip with id: " + tripId, e);
         }
     }
 }

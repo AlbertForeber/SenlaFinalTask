@@ -25,11 +25,15 @@ public interface TariffMapper {
     TariffCommand toCreateCommand(CreateTariffRequest request);
 
     @Mapping(source = "command.interval", target = "billingIntervalMinutes")
+    @Mapping(target = "id", ignore = true)
     Tariff toEntity(TariffCommand command);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "billingIntervalMinutes", ignore = true) // Для подписки не нужно
     Tariff toEntityForSubscription(CreateSubscriptionTariffCommand command);
 
     @InheritConfiguration
+    @Mapping(target = "id", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateTariffFromCommand(TariffCommand command, @MappingTarget Tariff entity);
 }
