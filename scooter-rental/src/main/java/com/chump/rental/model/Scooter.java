@@ -54,7 +54,7 @@ public class Scooter {
     @Column(name = "battery", nullable = false)
     private Integer battery;
 
-    @Column(name = "location", nullable = false, columnDefinition = "geography(Point, 4326")
+    @Column(name = "location", nullable = false, columnDefinition = "geography(Point, 4326)")
     private Point location;
 
     @Enumerated(EnumType.STRING)

@@ -92,7 +92,7 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
         }
     }
 
-    public LineString updateRoute(int tripId) {
+    public Optional<LineString> updateRoute(int tripId) {
         try {
             String sql = """
                     UPDATE trips SET route = (
@@ -106,7 +106,7 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
             return getCurrentSession()
                     .createNativeQuery(sql, LineString.class)
                     .setParameter("id", tripId)
-                    .getSingleResult();
+                    .uniqueResultOptional(); // Полная сущность не требуется
         } catch (Exception e) {
             throw new DataManipulationException("Failed to update distance for trip with id: " + tripId, e);
         }

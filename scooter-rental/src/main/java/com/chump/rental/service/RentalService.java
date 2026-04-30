@@ -23,7 +23,8 @@ import com.chump.user.model.UserSubscription;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.locationtech.jts.geom.*;
+import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.LineString;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,7 @@ import java.util.List;
 // TODO        откуда, система должна их считывать и записывать в Redis
 // TODO + если пользователь захочет посмотреть поездку до ее завершения - данные подтягиваются из Redis
 // TODO + после завершения поездки данные отправляются в БД (упростить линию)
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RentalService {
@@ -125,12 +127,16 @@ public class RentalService {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
         finishTrip(ongoingTrip, scooterId, userId, isForce);
 
-        List<WaypointEntry> waypoints = scooterWaypointRedisDao.batchPopWaypoints(ongoingTrip.getId());
-        tripPointDao.batchSave(ongoingTrip.getId(), waypoints);
-        LineString route = tripDao.updateRoute(ongoingTrip.getId());
-        ongoingTrip.setRoute(route);
+        List<WaypointEntry> waypoints = scooterWaypointRedisDao.getWaypoints(scooterId);
+        log.info("Got waypoints: {}", waypoints); // TODO убрать
 
-        return tripMapper.toDetailedResponse(ongoingTrip);
+        tripPointDao.batchSave(ongoingTrip.getId(), waypoints);
+        LineString route = tripDao.updateRoute(ongoingTrip.getId()).orElse(
+
+        );
+
+//        return tripMapper.toDetailedResponse(ongoingTrip); TODO вернуть
+        return null;
     }
 
     private Scooter findAndValidateScooter(int scooterId) {

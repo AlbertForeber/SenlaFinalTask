@@ -58,9 +58,11 @@ public class TripPointDao extends AbstractHibernateDao<TripPoint, TripPointId> {
                 getCurrentSession().flush();
                 getCurrentSession().clear();
             }
-
-            getCurrentSession().flush();
-            getCurrentSession().clear();
         }
+
+        // TODO т.к. результат используется раньше конца транзакции
+        // требуется дополнительный .flush
+        getCurrentSession().flush();
+        getCurrentSession().clear();
     }
 }

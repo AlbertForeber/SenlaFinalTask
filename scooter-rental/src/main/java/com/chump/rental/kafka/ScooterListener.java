@@ -47,7 +47,7 @@ public class ScooterListener {
             Acknowledgment ack
     ) {
         try {
-            log.info(event.toString());
+            log.info(event.toString()); // TODO убрать
             scooterWaypointRedisDao.save(scooterMapper.toWaypointEntry(event)); // TODO сохранение в REDIS
             ack.acknowledge();
         } catch (Exception e) {
