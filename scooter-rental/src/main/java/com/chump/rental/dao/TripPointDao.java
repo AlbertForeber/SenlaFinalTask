@@ -8,12 +8,14 @@ import com.chump.rental.model.TripPointId;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class TripPointDao extends AbstractHibernateDao<TripPoint, TripPointId> {
 
@@ -44,6 +46,8 @@ public class TripPointDao extends AbstractHibernateDao<TripPoint, TripPointId> {
         for (int i = 0; i < entries.size(); i++) {
             WaypointEntry entry = entries.get(i);
 
+            log.info("Processing entry {}", i); // TODO убрать
+
             TripPoint tripPoint = TripPoint.builder()
                     .id(TripPointId.builder()
                             .tripId(tripId)
@@ -54,7 +58,8 @@ public class TripPointDao extends AbstractHibernateDao<TripPoint, TripPointId> {
 
             getCurrentSession().persist(tripPoint);
 
-            if (i % batchSize == 0) {
+            if (i > 0 && i % batchSize == 0) {
+                log.info("Flushed!"); // TODO убрать
                 getCurrentSession().flush();
                 getCurrentSession().clear();
             }
@@ -62,6 +67,7 @@ public class TripPointDao extends AbstractHibernateDao<TripPoint, TripPointId> {
 
         // TODO т.к. результат используется раньше конца транзакции
         // требуется дополнительный .flush
+        log.info("Flushed final!"); // TODO убрать
         getCurrentSession().flush();
         getCurrentSession().clear();
     }

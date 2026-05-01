@@ -95,6 +95,7 @@ public class ScooterEmulator {
             // TODO поменять лог
             logger.info("Received lock command");
             sendStatusEvent(new LockedEvent(scooterId));
+            // sendWaypoint(); // TODO Отправляем последнюю точку - точку остановки.
             status = ScooterStatus.LOCKED;
         } else if (command instanceof UnlockCommand) {
             if (status == ScooterStatus.UNLOCKED) {

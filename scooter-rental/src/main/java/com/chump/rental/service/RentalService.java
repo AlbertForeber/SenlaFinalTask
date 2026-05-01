@@ -3,6 +3,7 @@ package com.chump.rental.service;
 import com.chump.common.exception.InaccessibleActionException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.*;
 import com.chump.rental.dto.entry.WaypointEntry;
 import com.chump.rental.dto.response.TripConciseResponse;
@@ -24,7 +25,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.locationtech.jts.geom.LineString;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,11 +79,7 @@ public class RentalService {
             throw new UnavaliableActionException("Not enough money to rent a scooter");
         }
 
-        // TODO  Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
-        // TODO Создание флага ожидания в REDIS
         scooter.setStatus(ScooterStatus.ACTIVATING);
-        scooterPendingRedisDao.setPending(scooterId);
-        scooterProducer.sendUnlock(scooterId);
 
         Trip createdTrip = tripDao.save(Trip.builder()
                 .status(TripStatus.ONGOING)
@@ -95,6 +91,10 @@ public class RentalService {
                 .discountAtStart(userProfile.getDiscount())
                 .build());
 
+        TransactionUtils.afterCommit(() -> {
+            scooterPendingRedisDao.setPending(scooterId);
+            scooterProducer.sendUnlock(scooterId);
+        });
 
         return tripMapper.toConciseResponse(createdTrip);
     }
@@ -106,7 +106,12 @@ public class RentalService {
 
         // TODO Сообщение самокату в Kafka заблокируйся + приостановка отправки в waypoint
         // TODO Создание флага ожидания в REDIS
-        scooterProducer.sendLock(scooterId);
+
+        TransactionUtils.afterCommit(() -> {
+            scooterPendingRedisDao.setPending(scooterId);
+            scooterProducer.sendLock(scooterId);
+        });
+
         return tripMapper.toConciseResponse(ongoingTrip);
     }
 
@@ -114,29 +119,33 @@ public class RentalService {
     public TripConciseResponse resumeScooter(int scooterId, int userId) {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
         ongoingTrip.setStatus(TripStatus.ONGOING);
-        scooterPendingRedisDao.setPending(scooterId);
-        // TODO Сообщение самокату в Kafka разблокируйся + начни отправлять данные в waypoint-topic
-        // TODO Создание флага ожидания в REDIS
 
-        scooterProducer.sendUnlock(scooterId);
+        TransactionUtils.afterCommit(() -> {
+            scooterPendingRedisDao.setPending(scooterId);
+            scooterProducer.sendUnlock(scooterId);
+        });
+
         return tripMapper.toConciseResponse(ongoingTrip);
     }
 
     @Transactional
     public TripDetailedResponse returnScooter(int scooterId, int userId, boolean isForce) {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
-        finishTrip(ongoingTrip, scooterId, userId, isForce);
+        finishTrip(ongoingTrip, userId, isForce);
 
         List<WaypointEntry> waypoints = scooterWaypointRedisDao.getWaypoints(scooterId);
         log.info("Got waypoints: {}", waypoints); // TODO убрать
 
-        tripPointDao.batchSave(ongoingTrip.getId(), waypoints);
-        LineString route = tripDao.updateRoute(ongoingTrip.getId()).orElse(
+        tripPointDao.batchSave(ongoingTrip.getId(), waypoints); // TODO батчинг не работает, исправить
+        ongoingTrip.setRoute(tripDao.updateRoute(ongoingTrip.getId()));
 
-        );
+        TransactionUtils.afterCommit(() -> {
+            scooterWaypointRedisDao.clearWaypoints(scooterId);
+            scooterPendingRedisDao.setPending(scooterId);
+            scooterProducer.sendLock(scooterId);
+        });
 
-//        return tripMapper.toDetailedResponse(ongoingTrip); TODO вернуть
-        return null;
+        return tripMapper.toDetailedResponse(ongoingTrip);
     }
 
     private Scooter findAndValidateScooter(int scooterId) {
@@ -163,10 +172,8 @@ public class RentalService {
         return trip;
     }
 
-    private void finishTrip(Trip trip, int scooterId, int userId, boolean isForce) {
-        Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
-                () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
-        );
+    private void finishTrip(Trip trip, int userId, boolean isForce) {
+        Scooter scooter = trip.getScooter(); // Без JOIN FETCH, т.к. сущность Scooter нужна лишь в этом методе
 
         // Проверка зоны парковки
         if (!rentalSpotDao.isInParkingRentalSpot(scooter.getLocation()) && !isForce) {
@@ -181,10 +188,6 @@ public class RentalService {
         trip.setStatus(TripStatus.FINISHED);
 
         scooter.setStatus(isForce ? ScooterStatus.BLOCKING : ScooterStatus.STOPPING);
-
-        // TODO таймер Redis
-        scooterPendingRedisDao.setPending(scooterId);
-        scooterProducer.sendLock(scooterId);
 
         trip.setDurationSeconds((int) duration.toSeconds());
         trip.setTotalPrice(calculatePrice(trip));
@@ -203,7 +206,7 @@ public class RentalService {
             fullPrice = price
                     .multiply(
                             BigDecimal.valueOf(trip.getDurationSeconds())
-                                    .divide(BigDecimal.valueOf(60L * interval), 2, RoundingMode.UP));
+                                    .divide(BigDecimal.valueOf(60L * interval), 0, RoundingMode.UP));
             fullPrice = fullPrice.subtract(fullPrice.multiply(discount));
         }
         return fullPrice;

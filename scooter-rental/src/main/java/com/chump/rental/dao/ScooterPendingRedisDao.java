@@ -29,7 +29,7 @@ public class ScooterPendingRedisDao {
         }
     }
 
-    public void delPending(int scooterId) {
+    public void deletePending(int scooterId) {
         try {
             redis.del(key(scooterId));
             log.info("pending removed!"); // TODO УБРАТЬ

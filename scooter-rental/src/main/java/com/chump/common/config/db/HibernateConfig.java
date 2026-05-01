@@ -44,6 +44,7 @@ public class HibernateConfig {
         properties.put("hibernate.jdbc.batch_size", batchSize);
         properties.put("hibernate.order_inserts", true);
         properties.put("hibernate.order_updates", true);
+        properties.put("hibernate.generate_statistics", true);
 
         return properties;
     }

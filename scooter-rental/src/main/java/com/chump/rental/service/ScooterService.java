@@ -2,6 +2,7 @@ package com.chump.rental.service;
 
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.ScooterModelDao;
 import com.chump.rental.dao.ScooterPendingRedisDao;
 import com.chump.rental.dto.command.CreateScooterCommand;
@@ -121,11 +122,15 @@ public class ScooterService {
 
     @Transactional
     public void updateReceivedStatus(int scooterId) {
-        scooterPendingRedisDao.delPending(scooterId);
+
+        log.info("Received update status"); // TODO убрать
+
 
         Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
+
+        log.info("Changing status successfully from {}", scooter.getStatus()); // TODO убрать
 
         ScooterStatus newStatus = switch (scooter.getStatus()) {
             case BLOCKING -> ScooterStatus.MAINTENANCE;
@@ -134,17 +139,24 @@ public class ScooterService {
             default -> null; // Если статус не переходный, ничего не меняем
         };
 
+        log.info("New status {}", newStatus); // TODO убрать
+
         if (newStatus == null) return;
 
         scooter.setStatus(newStatus);
+
+        TransactionUtils.afterCommit(() -> scooterPendingRedisDao.deletePending(scooterId));
     }
 
     @Transactional
     public void handleStatusTimeout(int scooterId) {
+
         try {
             Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                     () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
             );
+
+            log.info("Changing status from {}", scooter.getStatus()); // TODO убрать
 
             switch (scooter.getStatus()) {
                 case ACTIVATING -> {

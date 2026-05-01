@@ -13,7 +13,7 @@ public interface TripMapper {
 
     @Mapping(source = "scooter.id", target = "scooterId")
     @Mapping(source = "user.id", target = "userId")
-    @Mapping(target = "distance", expression = "java(entity.getRoute().getLength())")
+    @Mapping(target = "distance", expression = "java(entity.getRoute() != null ? entity.getRoute().getLength() : null)")
     TripDetailedResponse toDetailedResponse(Trip entity);
 
     @Mapping(source = "scooter.id", target = "scooterId")

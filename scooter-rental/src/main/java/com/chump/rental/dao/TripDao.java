@@ -7,6 +7,8 @@ import com.chump.rental.model.status.TripStatus;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
+import org.geolatte.geom.jts.JTS;
 import org.hibernate.SessionFactory;
 import org.locationtech.jts.geom.LineString;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class TripDao extends AbstractHibernateDao<Trip, Integer> {
 
@@ -92,23 +95,31 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
         }
     }
 
-    public Optional<LineString> updateRoute(int tripId) {
+    public LineString updateRoute(int tripId) {
         try {
             String sql = """
                     UPDATE trips SET route = (
-                        SELECT CAST(ST_SetSRID(ST_Simplify(ST_MakeLine(CAST(location AS geometry)), 0.0001), 4326) AS geography)
+                        SELECT CAST(ST_SetSRID(ST_SimplifyPreserveTopology(ST_MakeLine(CAST(location AS geometry)), 0.001), 4326) AS geography)
                         FROM trip_points WHERE trip_id = :id
                     )
                     WHERE id = :id
                     RETURNING route
                     """;
 
-            return getCurrentSession()
-                    .createNativeQuery(sql, LineString.class)
+            Object result = getCurrentSession()
+                    .createNativeQuery(sql, Object.class)
                     .setParameter("id", tripId)
-                    .uniqueResultOptional(); // Полная сущность не требуется
+                    .getSingleResult();
+            try {
+                return JTS.to((org.geolatte.geom.LineString<?>) result); // Аналогично RentalSpotDao
+                // TODO поменять на COUNT + if-else?
+            } catch (Exception e) {
+                // Ловит два случая - путь менее чем из двух точек / точек нет совсем
+                log.warn("Unable to convert update route result to LineString", e);
+                return null;
+            }
         } catch (Exception e) {
-            throw new DataManipulationException("Failed to update distance for trip with id: " + tripId, e);
+            throw new DataManipulationException("Failed to update route for trip with id: " + tripId, e);
         }
     }
 }

@@ -49,16 +49,15 @@ public class ScooterWaypointRedisDao {
                     }
             ).filter(Objects::nonNull).toList();
         } catch (Exception e) {
-            throw new DataManipulationException("Failed to pop waypoints for scooter with id: " + scooterId, e);
+            throw new DataManipulationException("Failed to get waypoints for scooter with id: " + scooterId, e);
         }
     }
 
     public void clearWaypoints(int scooterId) {
         try {
-            String key = key(scooterId);
-            redis.del(key);
+            redis.del(key(scooterId));
         } catch (Exception e) {
-            throw new DataManipulationException();
+            throw new DataManipulationException("Failed to clear waypoints for scooters with id: " + scooterId, e);
         }
     }
 
