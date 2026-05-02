@@ -44,6 +44,23 @@ public class AbstractHibernateDao<T, ID> implements GenericDao<T, ID> {
     }
 
     @Override
+    public List<T> batchFindAll(int batchSize, int offset) {
+        try {
+            CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<T> query = criteriaBuilder.createQuery(type);
+            query.select(query.from(type));
+
+            return getCurrentSession()
+                    .createQuery(query)
+                    .setFirstResult(offset * batchSize)
+                    .setMaxResults(batchSize)
+                    .getResultList();
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to find batch of entities", e);
+        }
+    }
+
+    @Override
     public T save(T entity) {
         try {
             getCurrentSession().persist(entity);

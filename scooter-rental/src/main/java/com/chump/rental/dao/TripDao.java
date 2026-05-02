@@ -40,27 +40,35 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
         }
     }
 
-    public List<Trip> findByUserId(int userId) {
+    public List<Trip> batchFindByUserId(int userId, int batchSize, int offset) {
         try {
             CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
             CriteriaQuery<Trip> query = criteriaBuilder.createQuery(Trip.class);
             Root<Trip> root = query.from(Trip.class);
 
             query.where(criteriaBuilder.equal(root.get("user").get("id"), userId));
-            return getCurrentSession().createQuery(query).getResultList();
+            return getCurrentSession()
+                    .createQuery(query)
+                    .setFirstResult(offset * batchSize)
+                    .setMaxResults(batchSize)
+                    .getResultList();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find trips for user with id: " + userId, e);
         }
     }
 
-    public List<Trip> findByScooterId(int scooterId) {
+    public List<Trip> batchFindByScooterId(int scooterId, int batchSize, int offset) {
         try {
             CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
             CriteriaQuery<Trip> query = criteriaBuilder.createQuery(Trip.class);
             Root<Trip> root = query.from(Trip.class);
 
             query.where(criteriaBuilder.equal(root.get("scooter").get("id"), scooterId));
-            return getCurrentSession().createQuery(query).getResultList();
+            return getCurrentSession()
+                    .createQuery(query)
+                    .setFirstResult(offset * batchSize)
+                    .setMaxResults(batchSize)
+                    .getResultList();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find trips for scooter with id: " + scooterId, e);
         }

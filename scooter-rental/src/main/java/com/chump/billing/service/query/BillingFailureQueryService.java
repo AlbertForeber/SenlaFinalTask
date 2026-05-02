@@ -17,7 +17,7 @@ public class BillingFailureQueryService {
 
     public List<BillingBatchFailureResponse> getAllBillingFailures(int pageSize, int page) {
         return billingMapper.toResponseList(
-                billingBatchFailureDao.batchFindAllWithItemsSortedByFailedAt(pageSize, page + 1)
+                billingBatchFailureDao.batchFindAllWithItemsSortedByFailedAt(pageSize, page - 1)
         );
     }
 }

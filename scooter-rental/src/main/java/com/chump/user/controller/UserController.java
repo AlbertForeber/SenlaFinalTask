@@ -8,17 +8,20 @@ import com.chump.user.mapper.UserMapper;
 import com.chump.user.service.UserService;
 import com.chump.user.service.query.UserQueryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
+@Validated
 @RequiredArgsConstructor
 public class UserController {
 
@@ -30,9 +33,16 @@ public class UserController {
     @GetMapping("/history")
     @PreAuthorize("hasAuthority('SCOPE_profile:view')")
     public ResponseEntity<List<TripConciseResponse>> getUserTripHistory(
-            @AuthenticationPrincipal Integer userId
+            @AuthenticationPrincipal Integer userId,
+            @RequestParam(defaultValue = "10", required = false)
+            @Positive(message = "Param 'pageSize' must be positive number")
+            int pageSize,
+
+            @RequestParam(defaultValue = "1", required = false)
+            @Positive(message = "Param 'page' must be positive number")
+            int page
     ) {
-        return ResponseEntity.ok(tripQueryService.getUserTrips(userId));
+        return ResponseEntity.ok(tripQueryService.getUserTrips(userId, pageSize, page));
     }
 
     @GetMapping("/profile")

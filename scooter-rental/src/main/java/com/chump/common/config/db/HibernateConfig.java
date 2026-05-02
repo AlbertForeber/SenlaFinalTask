@@ -38,13 +38,14 @@ public class HibernateConfig {
         Properties properties = new Properties();
 
         properties.put("hibernate.hbm2ddl.auto", "validate");
-        properties.put("hibernate.show_sql", true);
-        properties.put("hibernate.format_sql", true);
         properties.put("hibernate.use_sql_comments", true);
         properties.put("hibernate.jdbc.batch_size", batchSize);
         properties.put("hibernate.order_inserts", true);
         properties.put("hibernate.order_updates", true);
+        // TODO в проде убрать:
         properties.put("hibernate.generate_statistics", true);
+        properties.put("hibernate.show_sql", true);
+        properties.put("hibernate.format_sql", true);
 
         return properties;
     }

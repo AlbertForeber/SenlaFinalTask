@@ -13,7 +13,7 @@ public class TelemetryFlushScheduler {
     private final TelemetryService telemetryService;
 
     // Слив телеметрии в БД раз в минуту
-    @Scheduled(initialDelay = 5000L, fixedDelay = 10000L)
+    @Scheduled(initialDelay = 5000L, fixedDelay = 60000L)
     @SchedulerLock(name = "telemetry-per-minute", lockAtLeastFor = "PT10S", lockAtMostFor = "PT2M")
     public void flushTelemetry() {
         telemetryService.processTelemetryUpdate();

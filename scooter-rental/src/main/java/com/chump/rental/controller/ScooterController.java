@@ -12,10 +12,13 @@ import com.chump.rental.service.ScooterService;
 import com.chump.rental.service.query.ScooterQueryService;
 import com.chump.rental.service.query.TripQueryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -23,6 +26,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/scooters")
+@Validated
+@RequiredArgsConstructor
 public class ScooterController {
 
     private final ScooterQueryService scooterQueryService;
@@ -30,17 +35,18 @@ public class ScooterController {
     private final ScooterService scooterService;
     private final ScooterMapper scooterMapper;
 
-    public ScooterController(ScooterQueryService scooterQueryService, TripQueryService tripQueryService, ScooterService scooterService, ScooterMapper scooterMapper) {
-        this.scooterQueryService = scooterQueryService;
-        this.tripQueryService = tripQueryService;
-        this.scooterService = scooterService;
-        this.scooterMapper = scooterMapper;
-    }
-
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_scooter:view')")
-    public ResponseEntity<List<ScooterResponse>> getAllFreeScooters() {
-        return ResponseEntity.ok(scooterQueryService.getAllFreeScooters());
+    public ResponseEntity<List<ScooterResponse>> getAllFreeScooters(
+            @RequestParam(defaultValue = "10", required = false)
+            @Positive(message = "Param 'pageSize' must be positive number")
+            int pageSize,
+
+            @RequestParam(defaultValue = "1", required = false)
+            @Positive(message = "Param 'page' must be positive number")
+            int page
+    ) {
+        return ResponseEntity.ok(scooterQueryService.getAllFreeScooters(pageSize, page));
     }
 
     @GetMapping(params = {"longitude", "latitude", "radius"})
@@ -62,9 +68,16 @@ public class ScooterController {
     @GetMapping(params = "status")
     @PreAuthorize("hasAuthority('SCOPE_scooter:view_by_status')")
     public ResponseEntity<List<ScooterResponse>> getScooterWithStatus(
-            @RequestParam ScooterStatus status
+            @RequestParam ScooterStatus status,
+            @RequestParam(defaultValue = "10", required = false)
+            @Positive(message = "Param 'pageSize' must be positive number")
+            int pageSize,
+
+            @RequestParam(defaultValue = "1", required = false)
+            @Positive(message = "Param 'page' must be positive number")
+            int page
     ) {
-        return ResponseEntity.ok(scooterQueryService.getScooterByStatus(status));
+        return ResponseEntity.ok(scooterQueryService.getScooterByStatus(status, pageSize, page));
     }
 
     @GetMapping("/models")
@@ -76,9 +89,16 @@ public class ScooterController {
     @GetMapping("/{id}/trips")
     @PreAuthorize("hasAuthority('SCOPE_scooter:view_admin')")
     public ResponseEntity<List<TripConciseResponse>> getScooterHistory(
-            @PathVariable Integer id
+            @PathVariable Integer id,
+            @RequestParam(defaultValue = "10", required = false)
+            @Positive(message = "Param 'pageSize' must be positive number")
+            int pageSize,
+
+            @RequestParam(defaultValue = "1", required = false)
+            @Positive(message = "Param 'page' must be positive number")
+            int page
     ) {
-        return ResponseEntity.ok(tripQueryService.getScooterTrips(id));
+        return ResponseEntity.ok(tripQueryService.getScooterTrips(id, pageSize, page));
     }
 
     @GetMapping("/{id}")

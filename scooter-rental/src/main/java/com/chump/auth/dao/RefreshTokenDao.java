@@ -37,24 +37,30 @@ public class RefreshTokenDao extends AbstractHibernateDao<RefreshToken, Integer>
     }
 
     public void deleteByUserId(Integer userId) {
-        CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
-        CriteriaDelete<RefreshToken> delete = criteriaBuilder.createCriteriaDelete(RefreshToken.class);
-        Root<RefreshToken> root = delete.from(RefreshToken.class);
+        try {
+            CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
+            CriteriaDelete<RefreshToken> delete = criteriaBuilder.createCriteriaDelete(RefreshToken.class);
+            Root<RefreshToken> root = delete.from(RefreshToken.class);
 
-        delete.where(criteriaBuilder.equal(root.get("user").get("id"), userId));
-        getCurrentSession().createMutationQuery(delete).executeUpdate();
+            delete.where(criteriaBuilder.equal(root.get("user").get("id"), userId));
+            getCurrentSession().createMutationQuery(delete).executeUpdate();
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to delete refresh tokens by user id: " + userId, e);
+        }
     }
 
     public void revokeByUserId(Integer userId) {
-        log.info("Arrived to method revokeByUserId");
+        try {
+            CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
+            CriteriaUpdate<RefreshToken> update = criteriaBuilder.createCriteriaUpdate(RefreshToken.class);
+            Root<RefreshToken> root = update.from(RefreshToken.class);
 
-        CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
-        CriteriaUpdate<RefreshToken> update = criteriaBuilder.createCriteriaUpdate(RefreshToken.class);
-        Root<RefreshToken> root = update.from(RefreshToken.class);
+            update.set(root.get("revoked"), true);
+            update.where(criteriaBuilder.equal(root.get("user").get("id"), userId));
 
-        update.set(root.get("revoked"), true);
-        update.where(criteriaBuilder.equal(root.get("user").get("id"), userId));
-
-        getCurrentSession().createMutationQuery(update).executeUpdate();
+            getCurrentSession().createMutationQuery(update).executeUpdate();
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to revoke refresh tokens by user id: " + userId, e);
+        }
     }
 }

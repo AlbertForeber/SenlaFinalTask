@@ -32,8 +32,8 @@ public class ScooterQueryService {
     }
 
     @Transactional(readOnly = true)
-    public List<ScooterResponse> getAllFreeScooters() {
-        return mapper.toResponseList(repo.findByStatus(ScooterStatus.FREE));
+    public List<ScooterResponse> getAllFreeScooters(int pageSize, int page) {
+        return mapper.toResponseList(repo.batchFindByStatus(ScooterStatus.FREE, pageSize, page - 1));
     }
 
     @Transactional(readOnly = true)
@@ -42,8 +42,8 @@ public class ScooterQueryService {
     }
 
     @Transactional(readOnly = true)
-    public List<ScooterResponse> getScooterByStatus(ScooterStatus status) {
-        return mapper.toResponseList(repo.findByStatus(status));
+    public List<ScooterResponse> getScooterByStatus(ScooterStatus status, int pageSize, int page) {
+        return mapper.toResponseList(repo.batchFindByStatus(status, pageSize, page - 1));
     }
 
     @Transactional(readOnly = true)

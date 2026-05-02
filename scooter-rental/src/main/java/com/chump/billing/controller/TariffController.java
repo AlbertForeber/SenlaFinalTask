@@ -8,10 +8,12 @@ import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.service.TariffService;
 import com.chump.billing.service.query.TariffQueryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -19,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tariffs")
+@Validated
 @RequiredArgsConstructor
 public class TariffController {
 
@@ -28,8 +31,16 @@ public class TariffController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_tariff:view')")
-    public ResponseEntity<List<TariffConciseResponse>> getTariffs() {
-        return ResponseEntity.ok(tariffQueryService.getAllTariffs());
+    public ResponseEntity<List<TariffConciseResponse>> getTariffs(
+            @RequestParam(defaultValue = "10", required = false)
+            @Positive(message = "Param 'pageSize' must be positive number")
+            int pageSize,
+
+            @RequestParam(defaultValue = "1", required = false)
+            @Positive(message = "Param 'page' must be positive number")
+            int page
+    ) {
+        return ResponseEntity.ok(tariffQueryService.getAllTariffs(pageSize, page));
     }
 
     @GetMapping("/{id}")

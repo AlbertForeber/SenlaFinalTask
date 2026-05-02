@@ -224,7 +224,7 @@ public class RentalService {
                 tariffDao
                         .getDefaultTariff()
                         .orElseThrow(
-                                () -> new NoSuchEntityException("No default tariff found. Contact support service.")
+                                () -> new NoSuchEntityException("No default tariff found. Contact support servicez")
                         );
 
         return new UserContext(userProfile, tariff);

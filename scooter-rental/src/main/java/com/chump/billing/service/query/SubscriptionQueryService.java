@@ -28,8 +28,8 @@ public class SubscriptionQueryService {
     private final UserSubscriptionDao userSubscriptionDao;
 
     @Transactional(readOnly = true)
-    public List<TariffConciseResponse> getAllSubscriptionTariffs() {
-        return tariffMapper.toConciseResponseList(tariffDao.getAllSubscriptionTariffs());
+    public List<TariffConciseResponse> getAllSubscriptionTariffs(int pageSize, int page) {
+        return tariffMapper.toConciseResponseList(tariffDao.batchFindAllSubscriptionTariffs(pageSize, page - 1));
     }
 
     @Transactional(readOnly = true)

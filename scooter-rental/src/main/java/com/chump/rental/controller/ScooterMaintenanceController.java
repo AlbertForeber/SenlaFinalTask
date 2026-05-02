@@ -2,6 +2,7 @@ package com.chump.rental.controller;
 
 import com.chump.rental.dto.response.ScooterResponse;
 import com.chump.rental.service.ScooterService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,13 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/scooters/{id}/maintenance")
+@RequiredArgsConstructor
 public class ScooterMaintenanceController {
 
     private final ScooterService scooterService;
-
-    public ScooterMaintenanceController(ScooterService scooterService) {
-        this.scooterService = scooterService;
-    }
 
     @PatchMapping("/start")
     @PreAuthorize("hasAuthority('SCOPE_scooter:maintenance')")

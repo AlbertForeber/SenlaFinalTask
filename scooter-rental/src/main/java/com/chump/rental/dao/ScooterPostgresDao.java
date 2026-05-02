@@ -24,7 +24,7 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
 
     public List<Scooter> findAllInZone(Polygon polygon) {
         try {
-            // Модель подтяигвается сразу в соответствии с требованием
+            // Модель подтягивается сразу в соответствии с требованием
             String sql = """
                SELECT
                    s.id AS s_id,
@@ -77,14 +77,18 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
         }
     }
 
-    public List<Scooter> findByStatus(ScooterStatus status) {
+    public List<Scooter> batchFindByStatus(ScooterStatus status, int batchSize, int offset) {
         try {
             CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
             CriteriaQuery<Scooter> query = criteriaBuilder.createQuery(Scooter.class);
             Root<Scooter> root = query.from(Scooter.class);
 
             query.where(criteriaBuilder.equal(root.get("status"), status));
-            return getCurrentSession().createQuery(query).getResultList();
+            return getCurrentSession()
+                    .createQuery(query)
+                    .setFirstResult(offset * batchSize)
+                    .setMaxResults(batchSize)
+                    .getResultList();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find scooters with status: " + status, e);
         }
@@ -128,6 +132,22 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
                 .setParameter("longitude", longitude)
                 .setParameter("latitude", latitude)
                 .setParameter("battery", battery)
+                .executeUpdate();
+    }
+
+    public void updateTelemetry(TelemetryEntry entry) {
+        String sql = """
+                UPDATE scooters SET
+                    location = CAST(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326) AS geography),
+                    battery = :battery
+                WHERE scooter.id = :id
+                """;
+
+        getCurrentSession()
+                .createNativeMutationQuery(sql)
+                .setParameter("id", entry.getScooterId())
+                .setParameter("longitude", entry.getLongitude())
+                .setParameter("latitude", entry.getLatitude())
                 .executeUpdate();
     }
 }

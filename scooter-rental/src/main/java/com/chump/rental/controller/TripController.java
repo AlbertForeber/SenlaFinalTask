@@ -3,6 +3,7 @@ package com.chump.rental.controller;
 import com.chump.rental.dto.response.TripConciseResponse;
 import com.chump.rental.dto.response.TripDetailedResponse;
 import com.chump.rental.service.query.TripQueryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -15,13 +16,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/trips")
+@RequiredArgsConstructor
 public class TripController {
 
     private final TripQueryService tripQueryService;
-
-    public TripController(TripQueryService tripQueryService) {
-        this.tripQueryService = tripQueryService;
-    }
 
     @GetMapping("/current")
     @PreAuthorize("hasAuthority('SCOPE_trip:view')")

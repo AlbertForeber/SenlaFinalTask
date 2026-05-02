@@ -93,7 +93,7 @@ public class AuthService {
 
     private User createUser(RegisterCommand command) {
         Role defaultRole = roleDao.getDefaultRole().orElseThrow(
-                () -> new NoSuchEntityException("No default role found. Contact support service.")
+                () -> new NoSuchEntityException("No default role found. Contact support service")
         );
 
         User user = authMapper.toUserEntity(command, defaultRole);

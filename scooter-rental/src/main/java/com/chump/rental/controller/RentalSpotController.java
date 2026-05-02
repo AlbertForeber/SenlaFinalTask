@@ -11,6 +11,7 @@ import com.chump.rental.mapper.RentalSpotMapper;
 import com.chump.rental.service.RentalSpotService;
 import com.chump.rental.service.query.RentalSpotQueryService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,17 +22,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/rental-spots")
+@RequiredArgsConstructor
 public class RentalSpotController {
 
     private final RentalSpotQueryService rentalSpotQueryService;
     private final RentalSpotService rentalSpotService;
     private final RentalSpotMapper rentalSpotMapper;
-
-    public RentalSpotController(RentalSpotQueryService rentalSpotQueryService, RentalSpotService rentalSpotService, RentalSpotMapper rentalSpotMapper) {
-        this.rentalSpotQueryService = rentalSpotQueryService;
-        this.rentalSpotService = rentalSpotService;
-        this.rentalSpotMapper = rentalSpotMapper;
-    }
 
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_spot:view')")

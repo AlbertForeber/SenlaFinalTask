@@ -41,6 +41,8 @@ public class RentalSpotQueryService {
 
     @Transactional(readOnly = true)
     public RentalSpotWithScootersResponse getRentalSpotScooters(int rentSpotId) {
+        // Выбрано 2 запроса, вместо одного, чтобы различать случаи, когда указанной зоны нет
+        // и когда в указанной зоне нет свободных самокатов
         RentalSpot spot = dao.findById(rentSpotId).orElseThrow(
                 () -> new NoSuchEntityException("No rental spot found with id: " + rentSpotId)
         );

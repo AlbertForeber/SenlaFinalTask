@@ -3,6 +3,7 @@ package com.chump.rental.controller;
 import com.chump.rental.dto.response.TripConciseResponse;
 import com.chump.rental.dto.response.TripDetailedResponse;
 import com.chump.rental.service.RentalService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,13 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/scooters/{id}")
+@RequiredArgsConstructor
 public class ScooterRentController {
 
     private final RentalService rentalService;
-
-    public ScooterRentController(RentalService rentalService) {
-        this.rentalService = rentalService;
-    }
 
     @PatchMapping("/rent")
     @PreAuthorize("hasAuthority('SCOPE_scooter:rent')")

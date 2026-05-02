@@ -36,11 +36,11 @@ public class BillingService {
     // Вместо добавления @Transactional в DAO (требует CGLIB или использования интерфейсов)
     @Transactional
     public BillingResponse processBilling() {
-        int page = 0;
+        int offset = 0;
         int failed = 0;
         int successful = 0;
         Instant start = Instant.now();
-        List<Integer> batch = userSubscriptionDao.batchFindToBillIds(batchSize, page);
+        List<Integer> batch = userSubscriptionDao.batchFindToBillIds(batchSize, offset);
 
         while (!batch.isEmpty()) {
             try {
@@ -51,8 +51,8 @@ public class BillingService {
                 failed += batch.size();
                 saveFailure(e, batch);
             } finally {
-                page++;
-                batch = userSubscriptionDao.batchFindToBillIds(batchSize, page);
+                offset++;
+                batch = userSubscriptionDao.batchFindToBillIds(batchSize, offset);
             }
         }
 
@@ -78,12 +78,12 @@ public class BillingService {
             return processBilling();
         }
 
-        int page = 0;
+        int offset = 0;
         int failed = 0;
         int successful = 0;
         List<ManualBillingFailureResponse> details = new ArrayList<>();
 
-        List<BillingBatchFailureItem> batch = billingBatchFailureItemDao.batchFindAll(batchSize, page);
+        List<BillingBatchFailureItem> batch = billingBatchFailureItemDao.batchFindAll(batchSize, offset);
         while (!batch.isEmpty()) {
             for (BillingBatchFailureItem item : batch) {
                 try {
@@ -96,10 +96,10 @@ public class BillingService {
                     details.add(ManualBillingFailureResponse.builder()
                             .subscriptionId(item.getId().getUserSubscriptionId())
                             .errorMessage(e.getCause().getMessage()) // getCause() т.к. все ошибки Dao оборачиваются
-                            .build());                                       // в кастомное исключение, а здесь нужна сама проблема
+                            .build());                               // в кастомное исключение, а здесь нужна сама проблема
                 } finally {
-                    page++;
-                    batch = billingBatchFailureItemDao.batchFindAll(batchSize, page);
+                    offset++;
+                    batch = billingBatchFailureItemDao.batchFindAll(batchSize, offset);
                 }
             }
         }

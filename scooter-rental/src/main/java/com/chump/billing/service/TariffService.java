@@ -45,7 +45,7 @@ public class TariffService {
         );
 
         if (tariff.getBillingIntervalMinutes() == null) {
-            throw new UnavaliableActionException("Cannot delete subscription. Use /api/tariff/subscription instead");
+            throw new UnavaliableActionException("Cannot delete subscription. Use /api/subscriptions instead");
         }
 
         tariffDao.delete(tariffId);

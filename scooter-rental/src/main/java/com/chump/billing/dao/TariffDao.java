@@ -30,6 +30,7 @@ public class TariffDao extends AbstractHibernateDao<Tariff, Integer> {
         return findById(defaultTariffId);
     }
 
+    // TODO удалить если не нужен
     public Optional<BillingData> getBillingData(int tariffId) {
         try {
             CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
@@ -53,14 +54,18 @@ public class TariffDao extends AbstractHibernateDao<Tariff, Integer> {
         }
     }
 
-    public List<Tariff> getAllSubscriptionTariffs() {
+    public List<Tariff> batchFindAllSubscriptionTariffs(int batchSize, int offset) {
         try {
             CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
             CriteriaQuery<Tariff> query = criteriaBuilder.createQuery(Tariff.class);
             Root<Tariff> root = query.from(Tariff.class);
 
             query.where(criteriaBuilder.isNull(root.get("billingIntervalMinutes")));
-            return getCurrentSession().createQuery(query).getResultList();
+            return getCurrentSession()
+                    .createQuery(query)
+                    .setFirstResult(offset * batchSize)
+                    .setMaxResults(batchSize)
+                    .getResultList();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find subscription tariffs", e);
         }

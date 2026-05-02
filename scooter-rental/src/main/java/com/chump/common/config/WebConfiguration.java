@@ -9,6 +9,7 @@ import org.springframework.context.annotation.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -42,5 +43,11 @@ public class WebConfiguration implements WebMvcConfigurer {
                 .addModule(new JtsModule()) // Для поддержки Point, LineString, Polygon
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // Instant как даты, а не как числа
                 .build();
+    }
+
+    // Для @Validated
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+        return new MethodValidationPostProcessor();
     }
 }

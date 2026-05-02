@@ -7,6 +7,7 @@ public interface GenericDao<T, ID> {
 
     Optional<T> findById(ID id);
     List<T> findAll();
+    List<T> batchFindAll(int batchSize, int offset);
     T save(T entity);
     void update(T entity);
     void delete(ID id);

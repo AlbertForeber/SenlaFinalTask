@@ -21,13 +21,13 @@ public class TripQueryService {
     private final TripMapper mapper;
 
     @Transactional(readOnly = true)
-    public List<TripConciseResponse> getUserTrips(int userId) {
-        return mapper.toConsiseResponseList(dao.findByUserId(userId));
+    public List<TripConciseResponse> getUserTrips(int userId, int pageSize, int page) {
+        return mapper.toConsiseResponseList(dao.batchFindByUserId(userId, pageSize, page - 1));
     }
 
     @Transactional(readOnly = true)
-    public List<TripConciseResponse> getScooterTrips(int scooterId) {
-        return mapper.toConsiseResponseList(dao.findByScooterId(scooterId));
+    public List<TripConciseResponse> getScooterTrips(int scooterId, int pageSize, int page) {
+        return mapper.toConsiseResponseList(dao.batchFindByScooterId(scooterId, pageSize, page - 1));
     }
 
     @Transactional(readOnly = true)

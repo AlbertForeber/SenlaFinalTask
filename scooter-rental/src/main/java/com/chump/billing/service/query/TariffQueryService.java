@@ -19,8 +19,8 @@ public class TariffQueryService {
     private final TariffMapper tariffMapper;
 
     @Transactional(readOnly = true)
-    public List<TariffConciseResponse> getAllTariffs() {
-        return tariffMapper.toConciseResponseList(tariffDao.findAll());
+    public List<TariffConciseResponse> getAllTariffs(int pageSize, int page) {
+        return tariffMapper.toConciseResponseList(tariffDao.batchFindAll(pageSize, page - 1));
     }
 
     @Transactional(readOnly = true)

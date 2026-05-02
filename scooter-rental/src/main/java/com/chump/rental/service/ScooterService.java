@@ -122,15 +122,9 @@ public class ScooterService {
 
     @Transactional
     public void updateReceivedStatus(int scooterId) {
-
-        log.info("Received update status"); // TODO убрать
-
-
         Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         );
-
-        log.info("Changing status successfully from {}", scooter.getStatus()); // TODO убрать
 
         ScooterStatus newStatus = switch (scooter.getStatus()) {
             case BLOCKING -> ScooterStatus.MAINTENANCE;
@@ -139,7 +133,6 @@ public class ScooterService {
             default -> null; // Если статус не переходный, ничего не меняем
         };
 
-        log.info("New status {}", newStatus); // TODO убрать
 
         if (newStatus == null) return;
 
@@ -163,23 +156,21 @@ public class ScooterService {
                     scooter.setStatus(ScooterStatus.FREE);
                     scooterProducer.sendLock(scooterId);
                     log.warn("Scooter with id: {} failed to get activated. " +
-                            "Compensation 'lock' command sent and 'FREE' status forced.", scooterId);
+                            "Compensation 'lock' command sent and 'FREE' status forced", scooterId);
                 }
                 case BLOCKING -> {
                     scooter.setStatus(ScooterStatus.MAINTENANCE);
                     log.warn("Scooter with id: {} failed to force stop. " +
-                            "'MAINTENANCE' status forced, 'lock' command is still pending.", scooterId);
+                            "'MAINTENANCE' status forced, 'lock' command is still pending", scooterId);
                 }
                 case STOPPING -> {
                     // Свободный разблокированный самокат нежелательная ситуация
                     // -> блокируется + статус `MAINTENANCE` наряду с forceStop.
                     scooter.setStatus(ScooterStatus.MAINTENANCE);
                     log.warn("Scooter with id: {} failed to stop. " +
-                            "'MAINTENANCE' status forced, 'lock' command is still pending.", scooterId);
+                            "'MAINTENANCE' status forced, 'lock' command is still pending", scooterId);
                 }
-                default -> {
-                    log.debug("Scooter with id: {} has no pending status. Skipped.", scooterId);
-                }
+                default -> log.debug("Scooter with id: {} has no pending status. Skipped", scooterId);
             }
         } catch (Exception e) {
             log.error("Failed to handle status timeout for scooter with id: {}", scooterId, e);
