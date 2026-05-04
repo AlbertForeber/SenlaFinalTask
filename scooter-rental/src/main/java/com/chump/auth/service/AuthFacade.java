@@ -4,7 +4,7 @@ import com.chump.auth.dto.command.LoginCommand;
 import com.chump.auth.dto.command.RegisterCommand;
 import com.chump.auth.dto.response.TokenResponse;
 import com.chump.auth.mapper.AuthMapper;
-import com.chump.auth.model.RefreshToken;
+import com.chump.auth.model.Session;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
 import com.chump.user.dao.RoleDao;
@@ -23,10 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthFacade {
 
     private final AuthenticationManager authenticationManager;
-    private final RefreshTokenService refreshTokenService;
+    private final SessionService sessionService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final RoleDao roleDao;
@@ -42,13 +42,12 @@ public class AuthService {
                         command.getPassword()
                 )).getPrincipal();
 
-        // Подчищаем старые refresh-токены при многократном входе
-        // для устранения риска компроментации неиспользованных токенов
-        // TODO добавить привязку к устройству для входа с нескольких устройств
-        refreshTokenService.revokeUserTokens(user.getId());
-
         String accessToken = jwtService.generateToken(user);
-        String refreshToken = refreshTokenService.generateToken(user).getToken();
+        String refreshToken = sessionService.generateSession(
+                user,
+                command.getDeviceName(),
+                command.getIpAddress()
+        ).getRefreshToken();
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
@@ -67,7 +66,11 @@ public class AuthService {
         userProfileDao.save(userProfile);
 
         String accessToken = jwtService.generateToken(user);
-        String refreshToken = refreshTokenService.generateToken(user).getToken();
+        String refreshToken = sessionService.generateSession(
+                user,
+                command.getDeviceName(),
+                command.getIpAddress()
+        ).getRefreshToken();
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
@@ -76,18 +79,18 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(int userId) {
-        refreshTokenService.deleteUserTokens(userId);
+    public void logout(int userId, String refreshToken) {
+        sessionService.terminateSessionByToken(userId, refreshToken);
     }
 
     @Transactional
     public TokenResponse refresh(String refreshToken) {
-        RefreshToken newRefreshToken = refreshTokenService.rotateToken(refreshToken);
-        String newAccessToken = jwtService.generateToken(newRefreshToken.getUser());
+        Session newSession = sessionService.rotateSessionRefreshToken(refreshToken);
+        String newAccessToken = jwtService.generateToken(newSession.getUser());
 
         return TokenResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken.getToken())
+                .refreshToken(newSession.getRefreshToken())
                 .build();
     }
 

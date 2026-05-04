@@ -35,8 +35,11 @@
         <spring.kafka.version>3.1.2</spring.kafka.version>
         <minio.version>8.5.9</minio.version>
         <redis.version>6.3.2.RELEASE</redis.version>
-        <jjwt.version>0.12.5</jjwt.version>
         <shedlock.version>5.10.0</shedlock.version>
+
+        <!-- AUTH -->
+        <jjwt.version>0.12.5</jjwt.version>
+        <ua.parser.version>1.6.1</ua.parser.version>
 
         <!-- ASPECTS -->
         <aspectj.version>1.9.25.1</aspectj.version>

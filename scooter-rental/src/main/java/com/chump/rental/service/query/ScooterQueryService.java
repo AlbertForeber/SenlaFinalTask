@@ -26,7 +26,7 @@ public class ScooterQueryService {
 
     @Transactional(readOnly = true)
     public ScooterResponse getScooterInfo(int scooterId) {
-        return mapper.toResponse(repo.findById(scooterId).orElseThrow(
+        return mapper.toResponse(repo.findByIdWithActualInfoAndModel(scooterId).orElseThrow(
                 () -> new NoSuchEntityException("No scooter found with id: " + scooterId)
         ));
     }

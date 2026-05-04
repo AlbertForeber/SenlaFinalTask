@@ -134,10 +134,12 @@ public class RentalService {
         finishTrip(ongoingTrip, userId, isForce);
 
         List<WaypointEntry> waypoints = scooterWaypointRedisDao.getWaypoints(scooterId);
-        log.info("Got waypoints: {}", waypoints); // TODO убрать
+        tripPointDao.batchSave(ongoingTrip.getId(), waypoints);
 
-        tripPointDao.batchSave(ongoingTrip.getId(), waypoints); // TODO батчинг не работает, исправить
-        ongoingTrip.setRoute(tripDao.updateRoute(ongoingTrip.getId()));
+        tripMapper.updateTripFromRouteData(
+            tripDao.updateRouteAndDistance(ongoingTrip.getId()),
+            ongoingTrip
+        );
 
         TransactionUtils.afterCommit(() -> {
             scooterWaypointRedisDao.clearWaypoints(scooterId);

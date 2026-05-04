@@ -1,6 +1,6 @@
 package com.chump;
 
-import com.chump.auth.service.AuthService;
+import com.chump.auth.service.AuthFacade;
 import com.chump.rental.service.RentalService;
 import com.chump.rental.service.RentalSpotService;
 import com.chump.rental.service.ScooterService;
@@ -47,7 +47,7 @@ public class Tests {
     @Autowired
     private RentalService rentalService;
     @Autowired
-    private AuthService authService;
+    private AuthFacade authFacade;
 
 
     @PostConstruct

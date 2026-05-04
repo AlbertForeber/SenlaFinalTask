@@ -45,6 +45,9 @@ public class Trip {
     @Column(name = "discount_at_start", nullable = false)
     private BigDecimal discountAtStart;
 
+    @Column(name = "distance")
+    private Double distance;
+
     @Column(name = "route", columnDefinition = "geography(LineString, 4326)")
     private LineString route;
 

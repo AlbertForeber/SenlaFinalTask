@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+// Bean инициализируется лениво, InitializingBean берет на себя ответственность
+// одноразовой отработки для подписки
 @Slf4j
 @Component
 @RequiredArgsConstructor
-// Bean инициализируется лениво, InitializingBean берет на себя ответственность
-// одноразовой отработки для подписки
 public class RedisKeyspaceSubscriber implements InitializingBean {
 
     private final StatefulRedisPubSubConnection<String, String> conn;

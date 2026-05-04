@@ -14,6 +14,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
@@ -94,6 +95,21 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
         }
     }
 
+    public Optional<Scooter> findByIdWithModel(int scooterId) {
+        try {
+            CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<Scooter> query = criteriaBuilder.createQuery(Scooter.class);
+
+            Root<Scooter> root = query.from(Scooter.class);
+            root.fetch("model");
+
+            query.where(criteriaBuilder.equal(root.get("id"), scooterId));
+            return getCurrentSession().createQuery(query).uniqueResultOptional();
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to find scooters with id: " + scooterId, e);
+        }
+    }
+
     public List<Scooter> findByIds(List<Integer> ids) {
         try {
             return getCurrentSession()
@@ -132,22 +148,6 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
                 .setParameter("longitude", longitude)
                 .setParameter("latitude", latitude)
                 .setParameter("battery", battery)
-                .executeUpdate();
-    }
-
-    public void updateTelemetry(TelemetryEntry entry) {
-        String sql = """
-                UPDATE scooters SET
-                    location = CAST(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326) AS geography),
-                    battery = :battery
-                WHERE scooter.id = :id
-                """;
-
-        getCurrentSession()
-                .createNativeMutationQuery(sql)
-                .setParameter("id", entry.getScooterId())
-                .setParameter("longitude", entry.getLongitude())
-                .setParameter("latitude", entry.getLatitude())
                 .executeUpdate();
     }
 }

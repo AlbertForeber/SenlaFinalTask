@@ -7,6 +7,7 @@ import com.chump.billing.service.query.BillingFailureQueryService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class BillingController {
     private final BillingService billingService;
 
     @GetMapping("/failures")
+    @PreAuthorize("hasAuthority('billing:view_admin')")
     public ResponseEntity<List<BillingBatchFailureResponse>> getFailures(
             @RequestParam(defaultValue = "10", required = false)
             @Positive(message = "Param 'pageSize' must be positive number")
@@ -35,6 +37,7 @@ public class BillingController {
     }
 
     @PostMapping("/manual")
+    @PreAuthorize("hasAuthority('billing:manage_admin')")
     public ResponseEntity<BillingResponse> postManualBatching(
             @RequestParam(defaultValue = "false", required = false) boolean failedOnly
     ) {

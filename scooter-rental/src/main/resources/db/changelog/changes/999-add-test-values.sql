@@ -144,7 +144,11 @@ INSERT INTO scopes(name) VALUES
     ('tariff:manage'),
     ('role:view'),
     ('role:manage'),
-    ('role:manage');
+    ('role:manage'),
+    ('billing:view_admin'),
+    ('billing:manage_admin'),
+    ('session:view'),
+    ('session:manage');
 -- rollback DELETE FROM scopes WHERE id BETWEEN 1 AND 2;
 
 -- changeset albert:10-add-test-role-scope

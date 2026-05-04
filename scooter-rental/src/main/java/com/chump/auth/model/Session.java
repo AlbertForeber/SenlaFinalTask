@@ -7,23 +7,33 @@ import lombok.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "refresh_tokens")
+@Table(name = "sessions")
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class RefreshToken {
+public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "token", nullable = false)
-    private String token;
+    @Column(name = "refresh_token", nullable = false)
+    private String refreshToken;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "replaced_by_token", referencedColumnName = "refresh_token")
+    private Session replacedByToken;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @Column(name = "device_name", nullable = false)
+    private String deviceName;
+
+    @Column(name = "ip_address", nullable = false, length = 15)
+    private String ipAddress;
 
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
@@ -32,22 +42,14 @@ public class RefreshToken {
     private Instant createdAt;
 
     @Builder.Default
-    @Column(name = "used", nullable = false)
-    private Boolean used = false;
-
-    @Builder.Default
-    @Column(name = "revoked", nullable = false)
-    private Boolean revoked = false;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "replaced_by_token", referencedColumnName = "token")
-    private RefreshToken replacedByToken;
+    @Column(name = "terminated", nullable = false)
+    private Boolean terminated = false;
 
     public boolean isExpired() {
         return Instant.now().isAfter(expiresAt);
     }
 
-    public boolean isValid() {
-        return !isExpired() && !revoked && !used;
+    public boolean isNotValid() {
+        return isExpired() || terminated || replacedByToken != null;
     }
 }

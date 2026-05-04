@@ -17,6 +17,7 @@ import java.util.Objects;
 public class ScooterWaypointRedisDao {
 
     private final RedisCommands<String, String> redis;
+    private final GeoConverter geoConverter;
 
     // Храним не более 8 часов (т.к. современные самокаты в среднем держат заряд не больше 3 часов)
     private static final long WAYPOINT_TTL = 28800L;
@@ -26,7 +27,7 @@ public class ScooterWaypointRedisDao {
         log.info("Saved waypoint {}", entry); // TODO убрать
         try {
             String key = key(entry.getScooterId());
-            redis.rpush(key, GeoConverter.waypointToString(entry));
+            redis.rpush(key, geoConverter.waypointToString(entry));
             redis.expire(key, WAYPOINT_TTL);
         } catch (Exception e) {
             throw new DataManipulationException("Failed to save trip waypoints with id: " + entry.getScooterId(), e);
@@ -41,7 +42,7 @@ public class ScooterWaypointRedisDao {
             return result.stream().map(
                     o -> {
                         try {
-                            return GeoConverter.stringToWaypoint(scooterId, o);
+                            return geoConverter.stringToWaypoint(scooterId, o);
                         } catch (Exception e) {
                             log.warn("One of waypoints failed to parse: {}", o);
                             return null; // TODO (или стоит поменять?) Неудачные точки просто пропускаем

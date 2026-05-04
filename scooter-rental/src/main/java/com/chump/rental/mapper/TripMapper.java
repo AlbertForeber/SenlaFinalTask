@@ -1,10 +1,10 @@
 package com.chump.rental.mapper;
 
+import com.chump.rental.dto.RouteData;
 import com.chump.rental.dto.response.TripDetailedResponse;
 import com.chump.rental.dto.response.TripConciseResponse;
 import com.chump.rental.model.Trip;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -13,7 +13,6 @@ public interface TripMapper {
 
     @Mapping(source = "scooter.id", target = "scooterId")
     @Mapping(source = "user.id", target = "userId")
-    @Mapping(target = "distance", expression = "java(entity.getRoute() != null ? entity.getRoute().getLength() : null)")
     TripDetailedResponse toDetailedResponse(Trip entity);
 
     @Mapping(source = "scooter.id", target = "scooterId")
@@ -21,4 +20,7 @@ public interface TripMapper {
     TripConciseResponse toConciseResponse(Trip entity);
 
     List<TripConciseResponse> toConsiseResponseList(List<Trip> entityList);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateTripFromRouteData(RouteData routeData, @MappingTarget Trip trip);
 }

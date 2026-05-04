@@ -113,8 +113,11 @@ CREATE TABLE IF NOT EXISTS trips(
     discount_at_start DECIMAL(3, 2) CHECK (discount_at_start BETWEEN 0 AND 1),
 
     -- Заполняется в конце
-    route geography(LineString, 4326),
     duration_seconds INTEGER,
+
+    -- Денормализация итогов
+    distance FLOAT,
+    route geography(LineString, 4326),
     total_price NUMERIC(10, 2)
 );
 -- rollback DROP TABLE trips;
@@ -128,20 +131,24 @@ CREATE TABLE IF NOT EXISTS trip_points(
 );
 -- rollback DROP TABLE trip_points;
 
--- changeset albert:14-create-refresh-token-table
-CREATE TABLE IF NOT EXISTS refresh_tokens(
+-- changeset albert:14-create-sessions-table
+CREATE TABLE IF NOT EXISTS sessions(
     id SERIAL PRIMARY KEY,
-    token VARCHAR(255) NOT NULL UNIQUE, -- автоматически создается index (unique)
+    -- тех. поля
+    refresh_token VARCHAR(255) NOT NULL UNIQUE, -- автоматически создается index (unique)
+    replaced_by_token VARCHAR(255) REFERENCES sessions(refresh_token),
+
+    -- поля бизнес логики
     user_id INTEGER NOT NULL REFERENCES users(id),
+    device_name VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(15) NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    used BOOLEAN NOT NULL,
-    revoked BOOLEAN NOT NULL,
-    replaced_by_token VARCHAR(255) REFERENCES refresh_tokens(token)
+    terminated BOOLEAN NOT NULL
 );
 
-CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
--- rollback DROP TABLE refresh_tokens;
+CREATE INDEX idx_sessions_user_id ON sessions(user_id);
+-- rollback DROP TABLE sessions;
 
 -- Для работы ShedLock в Sheduler
 -- changeset albert:15-create-shedlock-table

@@ -1,10 +1,6 @@
 package com.chump.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.n52.jackson.datatype.jts.JtsModule;
 import org.springframework.context.annotation.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -27,22 +23,19 @@ import java.util.List;
 //@EnableAspectJAutoProxy // TODO (На будущее) YAGNI
 public class WebConfiguration implements WebMvcConfigurer {
 
+    private final ObjectMapper objectMapper;
+
+    public WebConfiguration(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(objectMapper());
+        converter.setObjectMapper(objectMapper);
 
         // Добавляем первым, как приоритетный
         converters.add(0, converter);
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return JsonMapper.builder()
-                .addModule(new JavaTimeModule()) // Для поддержки Instant, LocalDate
-                .addModule(new JtsModule()) // Для поддержки Point, LineString, Polygon
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // Instant как даты, а не как числа
-                .build();
     }
 
     // Для @Validated

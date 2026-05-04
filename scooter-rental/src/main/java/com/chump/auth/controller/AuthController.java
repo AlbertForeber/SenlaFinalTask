@@ -1,11 +1,14 @@
 package com.chump.auth.controller;
 
 import com.chump.auth.dto.request.LoginRequest;
+import com.chump.auth.dto.request.LogoutRequest;
 import com.chump.auth.dto.request.RefreshRequest;
 import com.chump.auth.dto.request.RegisterRequest;
 import com.chump.auth.dto.response.TokenResponse;
 import com.chump.auth.mapper.AuthMapper;
-import com.chump.auth.service.AuthService;
+import com.chump.auth.service.AuthFacade;
+import com.chump.common.utils.DeviceInfoResolver;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,32 +21,43 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthFacade authFacade;
     private final AuthMapper authMapper;
+    private final DeviceInfoResolver deviceInfoResolver;
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(
-            @RequestBody LoginRequest request
+            @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
     ) {
-        return ResponseEntity.ok(authService.login(
-                authMapper.toLoginCommand(request)
+        return ResponseEntity.ok(authFacade.login(
+                authMapper.toLoginCommand(
+                        request,
+                        deviceInfoResolver.resolveDeviceName(httpRequest.getHeader("User-Agent")),
+                        deviceInfoResolver.resolveIpAddress(httpRequest)
+                )
         ));
     }
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(
-            @Valid @RequestBody RegisterRequest request
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest
     ) {
-        return ResponseEntity.ok(authService.register(
-                authMapper.toRegisterCommand(request)
+        return ResponseEntity.ok(authFacade.register(
+                authMapper.toRegisterCommand(
+                        request,
+                        deviceInfoResolver.resolveDeviceName(httpRequest.getHeader("User-Agent")),
+                        deviceInfoResolver.resolveIpAddress(httpRequest)
+                )
         ));
     }
 
-    @PostMapping("refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(
             @Valid @RequestBody RefreshRequest request
     ) {
-        return ResponseEntity.ok(authService.refresh(
+        return ResponseEntity.ok(authFacade.refresh(
                 request.getOldRefreshToken()
         ));
     }
@@ -51,8 +65,9 @@ public class AuthController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(
-            @AuthenticationPrincipal Integer userId
+            @AuthenticationPrincipal Integer userId,
+            @Valid @RequestBody LogoutRequest request
     ) {
-        authService.logout(userId);
+        authFacade.logout(userId, request.getRefreshToken());
     }
 }

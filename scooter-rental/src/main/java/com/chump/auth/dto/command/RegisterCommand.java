@@ -15,4 +15,6 @@ public class RegisterCommand {
     private LocalDate dateOfBirth;
     private String fullName;
     private BigDecimal balance;
+    private String deviceName;
+    private String ipAddress;
 }

@@ -159,6 +159,7 @@
         </dependency>
 
         <!-- SHEDLOCK -->
+        <!-- Важно для шедулинга при масштабировании на несколько узлов -->
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-spring</artifactId>
@@ -169,6 +170,14 @@
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-provider-jdbc-template</artifactId>
             <version>${shedlock.version}</version>
+        </dependency>
+
+        <!-- UA Parser -->
+        <!-- Для парсинга User-Agent из запросов -->
+        <dependency>
+            <groupId>com.github.ua-parser</groupId>
+            <artifactId>uap-java</artifactId>
+            <version>${ua.parser.version}</version>
         </dependency>
 
         <!-- JWT -->
@@ -192,6 +201,8 @@
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
+
+
 
         <!-- JACKSON -->
         <!-- Версия из jackson-bom -->
