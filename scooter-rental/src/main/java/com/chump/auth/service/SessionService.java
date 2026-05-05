@@ -61,6 +61,8 @@ public class SessionService {
                 oldToken.getIpAddress()
         );
         oldToken.setReplacedByToken(updatedSession);
+        oldToken.setTerminated(true);
+
         return updatedSession;
     }
 

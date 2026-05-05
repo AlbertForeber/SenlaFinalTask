@@ -33,7 +33,7 @@ public class SessionDao extends AbstractHibernateDao<Session, Integer> {
             CriteriaQuery<Session> query = criteriaBuilder.createQuery(Session.class);
             Root<Session> root = query.from(Session.class);
 
-            query.where(criteriaBuilder.equal(root.get("token"), token));
+            query.where(criteriaBuilder.equal(root.get("refreshToken"), token));
             root.fetch("user"); // Для помощи в генерации accessToken при ротации
 
             return getCurrentSession().createQuery(query).uniqueResultOptional();
@@ -48,7 +48,7 @@ public class SessionDao extends AbstractHibernateDao<Session, Integer> {
     public void terminateChain(String token) {
         try {
             String sql = """
-                    WITH RECURSIVE chain AS (
+                    WITH RECURSIVE token_chain AS (
                         SELECT refresh_token, replaced_by_token
                         FROM sessions
                         WHERE refresh_token = :token
@@ -57,11 +57,12 @@ public class SessionDao extends AbstractHibernateDao<Session, Integer> {
 
                         SELECT s.refresh_token, s.replaced_by_token
                         FROM sessions s
-                        JOIN chain ON s.replaced_by_token = chain.refresh_token
+                        JOIN token_chain ON s.refresh_token = token_chain.replaced_by_token
                     )
-                    UPDATE sessions SET terminated=true
-                    WHERE refresh_token = chain.refresh_token
-                    FROM chain;
+                    UPDATE sessions SET
+                        terminated = true
+                    FROM token_chain
+                    WHERE sessions.refresh_token = token_chain.refresh_token
                     """;
             getCurrentSession()
                     .createNativeMutationQuery(sql)
@@ -107,13 +108,16 @@ public class SessionDao extends AbstractHibernateDao<Session, Integer> {
         }
     }
 
-    public List<Session> findAllByUserId(int userId) {
+    public List<Session> findAllActiveByUserId(int userId) {
         try {
             CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
             CriteriaQuery<Session> query = criteriaBuilder.createQuery(Session.class);
 
             Root<Session> root = query.from(Session.class);
-            query.where(criteriaBuilder.equal(root.get("user").get("id"), userId));
+            query.where(criteriaBuilder.and(
+                    criteriaBuilder.equal(root.get("user").get("id"), userId),
+                    criteriaBuilder.isFalse(root.get("terminated"))
+            ));
 
             return getCurrentSession().createQuery(query).getResultList();
         } catch (Exception e) {

@@ -4,7 +4,8 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 
 COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
 
-ENV CATALINA_OPTS_="-Xms512m -Xmx1024m \
+ENV CATALINA_OPTS="-Xms512m -Xmx1024m \
     -XX:+UseG1GC \
     -XX:MaxGCPauseMillis=200 \
-    -Djava.security.egd=file:/dev/./urandom"
+    -Djava.security.egd=file:/dev/./urandom \
+    -Daddress=0.0.0.0"

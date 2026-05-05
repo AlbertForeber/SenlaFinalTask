@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS trip_points(
 -- changeset albert:14-create-sessions-table
 CREATE TABLE IF NOT EXISTS sessions(
     id SERIAL PRIMARY KEY,
+
     -- тех. поля
     refresh_token VARCHAR(255) NOT NULL UNIQUE, -- автоматически создается index (unique)
     replaced_by_token VARCHAR(255) REFERENCES sessions(refresh_token),
@@ -144,13 +145,13 @@ CREATE TABLE IF NOT EXISTS sessions(
     ip_address VARCHAR(15) NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    terminated BOOLEAN NOT NULL
+    terminated BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_sessions_user_id ON sessions(user_id);
 -- rollback DROP TABLE sessions;
 
--- Для работы ShedLock в Sheduler
+-- Для работы ShedLock в Scheduler
 -- changeset albert:15-create-shedlock-table
 CREATE TABLE IF NOT EXISTS shedlock(
     name VARCHAR(64) PRIMARY KEY,

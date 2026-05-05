@@ -17,8 +17,8 @@ public class SessionQueryService {
     private final AuthMapper authMapper;
 
     @Transactional(readOnly = true)
-    public List<SessionResponse> getAllUserSessions(int userId) {
-        return authMapper.toSessionResponseList(sessionDao.findAllByUserId(userId));
+    public List<SessionResponse> getAllUserActiveSessions(int userId) {
+        return authMapper.toSessionResponseList(sessionDao.findAllActiveByUserId(userId));
     }
 
     @Transactional(readOnly = true)

@@ -21,15 +21,15 @@ public class SessionController {
     private final SessionService sessionService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('session:view')")
+    @PreAuthorize("hasAuthority('SCOPE_session:view')")
     public ResponseEntity<List<SessionResponse>> getUserSessions(
             @AuthenticationPrincipal Integer userId
     ) {
-        return ResponseEntity.ok(sessionQueryService.getAllUserSessions(userId));
+        return ResponseEntity.ok(sessionQueryService.getAllUserActiveSessions(userId));
     }
 
     @DeleteMapping
-    @PreAuthorize("hasAuthority('session:manage')")
+    @PreAuthorize("hasAuthority('SCOPE_session:manage')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAllSessions(
             @AuthenticationPrincipal Integer userId
@@ -38,7 +38,7 @@ public class SessionController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('session:manage')")
+    @PreAuthorize("hasAuthority('SCOPE_session:manage')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSession(
             @AuthenticationPrincipal Integer userId,

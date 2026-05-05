@@ -5,6 +5,7 @@ import com.chump.auth.dto.command.RegisterCommand;
 import com.chump.auth.dto.response.TokenResponse;
 import com.chump.auth.mapper.AuthMapper;
 import com.chump.auth.model.Session;
+import com.chump.common.exception.AuthException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
 import com.chump.user.dao.RoleDao;
@@ -83,7 +84,7 @@ public class AuthFacade {
         sessionService.terminateSessionByToken(userId, refreshToken);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = AuthException.class)
     public TokenResponse refresh(String refreshToken) {
         Session newSession = sessionService.rotateSessionRefreshToken(refreshToken);
         String newAccessToken = jwtService.generateToken(newSession.getUser());
