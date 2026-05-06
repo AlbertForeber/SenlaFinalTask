@@ -32,13 +32,11 @@ public class TariffController {
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_tariff:view')")
     public ResponseEntity<List<TariffConciseResponse>> getTariffs(
-            @RequestParam(defaultValue = "10", required = false)
-            @Positive(message = "Param 'pageSize' must be positive number")
-            int pageSize,
+            @Positive(message = "Param 'pageSize' must not be negative")
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
 
-            @RequestParam(defaultValue = "1", required = false)
-            @Positive(message = "Param 'page' must be positive number")
-            int page
+            @Positive(message = "Param 'page' must not be negative")
+            @RequestParam(defaultValue = "1", required = false) int page
     ) {
         return ResponseEntity.ok(tariffQueryService.getAllTariffs(pageSize, page));
     }

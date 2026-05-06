@@ -37,8 +37,8 @@ public class ScooterEmulator {
     private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     private final AtomicInteger battery = new AtomicInteger(100);
-    private volatile double latitude = 0;
-    private volatile double longitude = 0;
+    private volatile double latitude = 55.7614868;
+    private volatile double longitude = 37.6099130;
     private final Stack<Map.Entry<Double, Double>> waypoints = new Stack<>();
 
     private volatile ScooterStatus status = ScooterStatus.LOCKED;

@@ -37,13 +37,11 @@ public class SubscriptionController {
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_tariff:view')")
     public ResponseEntity<List<TariffConciseResponse>> getSubscriptions(
-            @RequestParam(defaultValue = "10", required = false)
-            @Positive(message = "Param 'pageSize' must be positive number")
-            int pageSize,
+            @Positive(message = "Param 'pageSize' must not be negative")
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
 
-            @RequestParam(defaultValue = "1", required = false)
-            @Positive(message = "Param 'page' must be positive number")
-            int page
+            @Positive(message = "Param 'page' must not be negative")
+            @RequestParam(defaultValue = "1", required = false) int page
     ) {
         return ResponseEntity.ok(subscriptionQueryService.getAllSubscriptionTariffs(pageSize, page));
     }
@@ -67,6 +65,7 @@ public class SubscriptionController {
     @GetMapping(params = "user_id")
     @PreAuthorize("hasAuthority('SCOPE_tariff:view_admin')")
     public ResponseEntity<CurrentSubscriptionResponse> getUserSubscription(
+            @Positive(message = "Param 'user_id' must not be negative")
             @RequestParam(name = "user_id") Integer userId
     ) {
         return ResponseEntity.ok(subscriptionQueryService.getCurrentSubscriptionOfUser(userId));
@@ -124,11 +123,12 @@ public class SubscriptionController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSubscription(
             @PathVariable Integer id,
-            @RequestParam(defaultValue = "false") Boolean force
+            @RequestParam(defaultValue = "false") boolean force
     ) {
         subscriptionService.deleteSubscription(id, force);
     }
 
+    // TODO убрать
     @GetMapping("/test")
     public void test() {
         billingService.processBilling();

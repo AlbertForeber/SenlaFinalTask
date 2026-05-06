@@ -32,7 +32,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
-    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "dateOfBirth", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserProtectedInfoFromCommand(UpdateUserProtectedInfoCommand command, @MappingTarget UserProfile info);

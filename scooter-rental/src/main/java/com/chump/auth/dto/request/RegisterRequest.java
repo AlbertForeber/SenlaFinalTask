@@ -1,8 +1,6 @@
 package com.chump.auth.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,8 +21,11 @@ public class RegisterRequest {
     private String password;
 
     @NotNull(message = "Field 'dateOfBirth' must not be empty")
+    @Past(message = "Date of birth must be in past")
     private LocalDate dateOfBirth;
 
-    @NotBlank(message = "Field 'fullName' must not be empty")
-    private String fullName;
+    @NotBlank(message = "Field 'email' must not be empty")
+    @Size(min = 4, max = 100, message = "Email must be between 6 and 100 characters long")
+    @Email(message = "Field 'email' must contain well-formed email address")
+    private String email;
 }

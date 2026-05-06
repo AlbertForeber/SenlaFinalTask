@@ -26,11 +26,11 @@ public class BillingController {
     @PreAuthorize("hasAuthority('SCOPE_billing:view_admin')")
     public ResponseEntity<List<BillingBatchFailureResponse>> getFailures(
             @RequestParam(defaultValue = "10", required = false)
-            @Positive(message = "Param 'pageSize' must be positive number")
+            @Positive(message = "Param 'pageSize' must not be negative")
             int pageSize,
 
             @RequestParam(defaultValue = "1", required = false)
-            @Positive(message = "Param 'page' must be positive number")
+            @Positive(message = "Param 'page' must not be negative")
             int page
     ) {
         return ResponseEntity.ok(billingFailureQueryService.getAllBillingFailures(pageSize, page));

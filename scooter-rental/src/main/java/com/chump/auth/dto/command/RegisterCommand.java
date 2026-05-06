@@ -13,7 +13,7 @@ public class RegisterCommand {
     private String username;
     private String password;
     private LocalDate dateOfBirth;
-    private String fullName;
+    private String email;
     private BigDecimal balance;
     private String deviceName;
     private String ipAddress;

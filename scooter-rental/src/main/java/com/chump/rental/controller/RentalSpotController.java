@@ -11,6 +11,9 @@ import com.chump.rental.mapper.RentalSpotMapper;
 import com.chump.rental.service.RentalSpotService;
 import com.chump.rental.service.query.RentalSpotQueryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,8 +65,15 @@ public class RentalSpotController {
     @GetMapping(params = {"latitude", "longitude", "radius"})
     @PreAuthorize("hasAuthority('SCOPE_spot:view')")
     public ResponseEntity<List<RentalSpotConciseResponse>> getNearbyRentalSpots(
+            @DecimalMin(value = "-90.0", message = "Param 'latitude' must not be less than -90")
+            @DecimalMax(value = "90.0", message = "Param 'latitude' must not be greater than 90")
             @RequestParam float latitude,
+
+            @DecimalMin(value = "-180.0", message = "Param 'longitude' must not be less than -180")
+            @DecimalMax(value = "180.0", message = "Param 'longitude' must not be greater than 180")
             @RequestParam float longitude,
+
+            @Positive(message = "Param 'radius' must be positive")
             @RequestParam float radius
     ) {
         return ResponseEntity.ok(rentalSpotQueryService.getNearbySpots(

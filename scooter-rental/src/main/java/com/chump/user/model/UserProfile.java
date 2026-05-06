@@ -20,8 +20,8 @@ public class UserProfile {
     @MapsId
     private User user;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(name = "email", nullable = false)
+    private String email;
 
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;

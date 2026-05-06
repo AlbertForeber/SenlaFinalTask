@@ -9,6 +9,6 @@ import java.time.LocalDate;
 @Getter
 public class UpdateUserBaseInfoCommand {
 
-    private String fullName;
+    private String email;
     private LocalDate dateOfBirth;
 }

@@ -1,5 +1,7 @@
 package com.chump.user.dto.request;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,8 +12,10 @@ import java.time.LocalDate;
 @Setter
 public class UpdateUserBaseInfoRequest {
 
-    @Size(min = 4, max = 100, message = "Full name must be between 4 and 100 characters long")
-    private String fullName;
+    @Size(min = 4, max = 100, message = "Email must be between 6 and 100 characters long")
+    @Email(message = "Field 'email' must contain well-formed email address")
+    private String email;
 
+    @Past(message = "Date of birth must be in past")
     private LocalDate dateOfBirth;
 }

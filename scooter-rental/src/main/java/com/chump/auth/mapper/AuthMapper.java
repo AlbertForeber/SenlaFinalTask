@@ -18,7 +18,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface AuthMapper {
 
-    @Mapping(source = "command.fullName", target = "fullName")
+    @Mapping(source = "command.email", target = "email")
     @Mapping(source = "command.dateOfBirth", target = "dateOfBirth")
     @Mapping(source = "command.balance", target = "balance") // TODO может заменить на DEFAULT в БД
     @Mapping(source = "user", target = "user")
@@ -28,6 +28,7 @@ public interface AuthMapper {
     @Mapping(source = "command.username", target = "username")
     @Mapping(target = "password", ignore = true) // Маппер не должен знать о логике хэширования
     @Mapping(source = "role", target = "role")
+    @Mapping(target = "id", ignore = true)
     User toUserEntity(RegisterCommand command, Role role);
 
     @Mapping(source = "request.username", target = "username")
@@ -38,7 +39,7 @@ public interface AuthMapper {
 
     @InheritConfiguration(name = "toLoginCommand")
     @Mapping(source = "request.dateOfBirth", target = "dateOfBirth")
-    @Mapping(source = "request.fullName", target = "fullName")
+    @Mapping(source = "request.email", target = "email")
     @Mapping(target = "balance", expression = "java(BigDecimal.ZERO)")
     RegisterCommand toRegisterCommand(RegisterRequest request, String deviceName, String ipAddress);
 

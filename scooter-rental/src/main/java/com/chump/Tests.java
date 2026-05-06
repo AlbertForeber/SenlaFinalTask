@@ -46,6 +46,7 @@ public class Tests {
 
     @Autowired
     private RentalService rentalService;
+
     @Autowired
     private AuthFacade authFacade;
 

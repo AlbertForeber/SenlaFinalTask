@@ -34,6 +34,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('SCOPE_profile:view')")
     public ResponseEntity<List<TripConciseResponse>> getUserTripHistory(
             @AuthenticationPrincipal Integer userId,
+
             @RequestParam(defaultValue = "10", required = false)
             @Positive(message = "Param 'pageSize' must be positive number")
             int pageSize,

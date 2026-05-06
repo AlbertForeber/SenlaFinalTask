@@ -14,7 +14,7 @@ public class UserProfileResponse {
 
     private Integer id;
     private String username;
-    private String fullName;
+    private String email;
     private LocalDate dateOfBirth;
     private BigDecimal balance;
     private BigDecimal discount;

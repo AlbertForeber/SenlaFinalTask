@@ -15,6 +15,7 @@ import com.chump.user.model.Role;
 import com.chump.user.model.User;
 import com.chump.user.model.UserProfile;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthFacade {
@@ -102,6 +104,8 @@ public class AuthFacade {
 
         User user = authMapper.toUserEntity(command, defaultRole);
         user.setPassword(passwordEncoder.encode(command.getPassword()));
+
+        log.info("Got user to register: {}", user);
 
         return userDao.save(user);
     }
