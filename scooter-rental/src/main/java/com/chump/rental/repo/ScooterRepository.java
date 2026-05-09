@@ -23,7 +23,7 @@ public class ScooterRepository {
 
     private final ScooterPostgresDao postgresDao;
     private final ScooterTelemetryRedisDao redisDao;
-    private GeoConverter geoConverter;
+    private final GeoConverter geoConverter;
 
     public List<Scooter> findAll() {
         return postgresDao.findAll();
@@ -82,9 +82,4 @@ public class ScooterRepository {
     public List<Scooter> batchFindByStatus(ScooterStatus status, int batchSize, int offset) {
         return postgresDao.batchFindByStatus(status, batchSize, offset);
     }
-
-    // TODO убрать
-    public List<Scooter> findByIds(List<Integer> scooterIds) {
-        return postgresDao.findByIds(scooterIds);
-    }
- }
+}

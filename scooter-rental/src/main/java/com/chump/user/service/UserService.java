@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -62,10 +64,17 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(int userId) {
+    public void deleteUser(int userId, boolean isForce) {
         if (!tripDao.findOngoingByUserId(userId).isEmpty()) {
             throw new UnavaliableActionException("Forbidden to delete user with ongoing trips");
         }
+
+        Optional<UserProfile> userProfile = userProfileDao.findById(userId);
+        if (!isForce && userProfile.isPresent() && userProfile.get().getBalance().longValue() > 0) {
+            throw new UnavaliableActionException("Forbidden to delete user with not zero balance. " +
+                    "Use 'force=true' to force delete");
+        }
+
         userDao.delete(userId);
     }
 }

@@ -70,9 +70,10 @@ public class UserAdminController {
     @PreAuthorize("hasAuthority('SCOPE_profile:manage_admin')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUserProfile(
-            @PathVariable Integer id
+            @PathVariable Integer id,
+            @RequestParam(defaultValue = "false") boolean force
     ) {
-        userService.deleteUser(id);
+        userService.deleteUser(id, force);
     }
 
     @PatchMapping("/role")

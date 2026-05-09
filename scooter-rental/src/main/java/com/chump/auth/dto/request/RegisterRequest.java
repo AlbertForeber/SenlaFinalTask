@@ -1,5 +1,6 @@
 package com.chump.auth.dto.request;
 
+import com.chump.common.validation.Trimmed;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +13,8 @@ import java.time.LocalDate;
 @ToString
 public class RegisterRequest {
 
-    @NotBlank(message = "Field 'username' must not be empty")
+    @Trimmed(message = "Field 'username' must not contain trailing spaces")
+    @NotNull(message = "Field 'username' must not be empty")
     @Size(min = 3, max = 20, message = "Username must be between 3 to 20 characters long")
     private String username;
 

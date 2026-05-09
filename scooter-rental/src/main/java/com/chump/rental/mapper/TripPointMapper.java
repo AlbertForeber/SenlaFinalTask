@@ -5,10 +5,14 @@ import com.chump.rental.model.TripPoint;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface TripPointMapper {
 
     @Mapping(source = "id.tripId", target = "tripId")
     @Mapping(source = "id.createdAt", target = "createdAt")
     TripPointResponse toResponse(TripPoint entity);
+
+    List<TripPointResponse> toResponseList(List<TripPoint> entityList);
 }

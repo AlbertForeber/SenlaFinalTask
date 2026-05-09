@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -23,7 +21,6 @@ public class ScooterPendingRedisDao {
             String key = key(scooterId);
             redis.set(key, "");
             redis.expire(key, PENDING_TTL);
-            log.info("pending set at {}!", Instant.now()); // TODO УБРАТЬ
         } catch (Exception e) {
             throw new DataManipulationException("Failed to set pending for scooter with id: " + scooterId, e);
         }
@@ -32,9 +29,8 @@ public class ScooterPendingRedisDao {
     public void deletePending(int scooterId) {
         try {
             redis.del(key(scooterId));
-            log.info("pending removed!"); // TODO УБРАТЬ
         } catch (Exception e) {
-            throw new DataManipulationException("Failed to set pending for scooter with id: " + scooterId, e);
+            throw new DataManipulationException("Failed to delete pending for scooter with id: " + scooterId, e);
         }
     }
 

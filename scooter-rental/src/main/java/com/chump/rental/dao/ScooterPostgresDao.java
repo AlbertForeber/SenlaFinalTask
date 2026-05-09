@@ -110,17 +110,6 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
         }
     }
 
-    public List<Scooter> findByIds(List<Integer> ids) {
-        try {
-            return getCurrentSession()
-                    .byMultipleIds(Scooter.class)
-                    .enableSessionCheck(true)
-                    .multiLoad(ids);
-        } catch (Exception e) {
-            throw new DataManipulationException("Failed to find scooters with ids: " + ids, e);
-        }
-    }
-
     public void batchUpdateTelemetry(List<TelemetryEntry> entries) {
         int[] scooterIds = new int[entries.size()];
         int[] battery = new int[entries.size()];

@@ -1,16 +1,15 @@
 package com.chump.rental.controller;
 
+import com.chump.rental.dto.request.RentScooterRequest;
 import com.chump.rental.dto.response.TripConciseResponse;
 import com.chump.rental.dto.response.TripDetailedResponse;
 import com.chump.rental.service.RentalService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/scooters/{id}")
@@ -23,9 +22,10 @@ public class ScooterRentController {
     @PreAuthorize("hasAuthority('SCOPE_scooter:rent')")
     public ResponseEntity<TripConciseResponse> rentScooter(
             @PathVariable Integer id,
-            @AuthenticationPrincipal Integer userId
+            @AuthenticationPrincipal Integer userId,
+            @Valid @RequestBody RentScooterRequest request
     ) {
-        return ResponseEntity.ok(rentalService.rentScooter(id, userId));
+        return ResponseEntity.ok(rentalService.rentScooter(id, userId, request.getTariffId()));
     }
 
     @PostMapping("/return")

@@ -1,9 +1,10 @@
 package com.chump.rental.service;
 
-import com.chump.common.exception.InaccessibleActionException;
+import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
 import com.chump.common.utils.TransactionUtils;
+import com.chump.common.utils.TripPriceCalculator;
 import com.chump.rental.dao.*;
 import com.chump.rental.dto.entry.WaypointEntry;
 import com.chump.rental.dto.response.TripConciseResponse;
@@ -57,6 +58,7 @@ public class RentalService {
     private final ScooterProducer scooterProducer;
     private final ScooterPendingRedisDao scooterPendingRedisDao;
     private final ScooterWaypointRedisDao scooterWaypointRedisDao;
+    private final TripTimeLimitRedisDao tripTimeLimitRedisDao;
 
     @Value("${rental.minimal-balance}")
     private Integer minToStart;
@@ -69,13 +71,16 @@ public class RentalService {
     }
 
     @Transactional
-    public TripConciseResponse rentScooter(int scooterId, int userId) {
+    public TripConciseResponse rentScooter(int scooterId, int userId, int tariffId) {
         Scooter scooter = findAndValidateScooter(scooterId);
-        UserContext userContext = collectUserContext(userId);
+
+        UserContext userContext = collectUserContext(userId, tariffId);
         UserProfile userProfile = userContext.getUserProfile();
         Tariff tariff = userContext.getTariff();
 
-        if (userProfile.getBalance().longValue() < minToStart && tariff.getBillingIntervalMinutes() != null) {
+        boolean isInterval = tariff.getBillingIntervalMinutes() != null;
+
+        if (userProfile.getBalance().longValue() < minToStart && isInterval) {
             throw new UnavaliableActionException("Not enough money to rent a scooter");
         }
 
@@ -94,6 +99,10 @@ public class RentalService {
         TransactionUtils.afterCommit(() -> {
             scooterPendingRedisDao.setPending(scooterId);
             scooterProducer.sendUnlock(scooterId);
+
+            if (isInterval) {
+                tripTimeLimitRedisDao.setTimeLimit(createdTrip.getId(), calculateTimeLimit(createdTrip, userProfile));
+            }
         });
 
         return tripMapper.toConciseResponse(createdTrip);
@@ -103,9 +112,6 @@ public class RentalService {
     public TripConciseResponse pauseScooter(int scooterId, int userId) {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
         ongoingTrip.setStatus(TripStatus.PAUSED);
-
-        // TODO Сообщение самокату в Kafka заблокируйся + приостановка отправки в waypoint
-        // TODO Создание флага ожидания в REDIS
 
         TransactionUtils.afterCommit(() -> {
             scooterPendingRedisDao.setPending(scooterId);
@@ -131,23 +137,18 @@ public class RentalService {
     @Transactional
     public TripDetailedResponse returnScooter(int scooterId, int userId, boolean isForce) {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
-        finishTrip(ongoingTrip, userId, isForce);
-
-        List<WaypointEntry> waypoints = scooterWaypointRedisDao.getWaypoints(scooterId);
-        tripPointDao.batchSave(ongoingTrip.getId(), waypoints);
-
-        tripMapper.updateTripFromRouteData(
-            tripDao.updateRouteAndDistance(ongoingTrip.getId()),
-            ongoingTrip
-        );
-
-        TransactionUtils.afterCommit(() -> {
-            scooterWaypointRedisDao.clearWaypoints(scooterId);
-            scooterPendingRedisDao.setPending(scooterId);
-            scooterProducer.sendLock(scooterId);
-        });
+        buildPathAndFinishTrip(ongoingTrip, isForce);
 
         return tripMapper.toDetailedResponse(ongoingTrip);
+    }
+
+    @Transactional
+    public void handleTimeLimit(int tripId) {
+        Trip trip = tripDao.findById(tripId).orElseThrow(
+                () -> new NoRequiredEntityException("No trip found with id: " + tripId)
+        );
+
+        buildPathAndFinishTrip(trip, true);
     }
 
     private Scooter findAndValidateScooter(int scooterId) {
@@ -156,7 +157,7 @@ public class RentalService {
         );
 
         if (scooter.getStatus() != ScooterStatus.FREE) {
-            throw new InaccessibleActionException("Forbidden to rent occupied scooter");
+            throw new UnavaliableActionException("Forbidden to rent occupied scooter");
         }
 
         return scooter;
@@ -168,14 +169,35 @@ public class RentalService {
         );
 
         if (!trip.getUser().getId().equals(userId)) {
-            throw new InaccessibleActionException("Forbidden to manage someone else's scooter");
+            throw new UnavaliableActionException("Forbidden to manage someone else's scooter");
         }
 
         return trip;
     }
 
-    private void finishTrip(Trip trip, int userId, boolean isForce) {
+    private void buildPathAndFinishTrip(Trip trip, boolean isForce) {
+        finishTrip(trip, isForce);
+        int scooterId = trip.getScooter().getId();
+
+        List<WaypointEntry> waypoints = scooterWaypointRedisDao.getWaypoints(scooterId);
+        tripPointDao.batchSave(trip.getId(), waypoints);
+
+        tripMapper.updateTripFromRouteData(
+                tripDao.updateRouteAndDistance(trip.getId()),
+                trip
+        );
+
+        TransactionUtils.afterCommit(() -> {
+            scooterWaypointRedisDao.clearWaypoints(scooterId);
+            scooterPendingRedisDao.setPending(scooterId);
+            tripTimeLimitRedisDao.deleteTimeLimit(trip.getId());
+            scooterProducer.sendLock(scooterId);
+        });
+    }
+
+    private void finishTrip(Trip trip, boolean isForce) {
         Scooter scooter = trip.getScooter(); // Без JOIN FETCH, т.к. сущность Scooter нужна лишь в этом методе
+        int userId = trip.getUser().getId();
 
         // Проверка зоны парковки
         if (!rentalSpotDao.isInParkingRentalSpot(scooter.getLocation()) && !isForce) {
@@ -183,7 +205,7 @@ public class RentalService {
         }
 
         UserProfile userProfile = userProfileDao.findById(userId).orElseThrow(
-                () -> new NoSuchEntityException("No user profile found with id:" + userId)
+                () -> new NoSuchEntityException("No user profile found with id:"  + userId)
         );
 
         Duration duration = Duration.between(trip.getStartedAt(), Instant.now());
@@ -192,43 +214,46 @@ public class RentalService {
         scooter.setStatus(isForce ? ScooterStatus.BLOCKING : ScooterStatus.STOPPING);
 
         trip.setDurationSeconds((int) duration.toSeconds());
-        trip.setTotalPrice(calculatePrice(trip));
+        trip.setTotalPrice(TripPriceCalculator.calculatePrice(trip));
 
         userProfile.setBalance(userProfile.getBalance().subtract(trip.getTotalPrice()));
     }
 
-    private BigDecimal calculatePrice(Trip trip) {
-        BigDecimal price = trip.getPriceAtStart();
-        Integer interval = trip.getIntervalAtStart();
-        BigDecimal discount = trip.getDiscountAtStart();
-
-        BigDecimal fullPrice = null;
-
-        if (interval != null) {
-            fullPrice = price
-                    .multiply(
-                            BigDecimal.valueOf(trip.getDurationSeconds())
-                                    .divide(BigDecimal.valueOf(60L * interval), 0, RoundingMode.UP));
-            fullPrice = fullPrice.subtract(fullPrice.multiply(discount));
-        }
-        return fullPrice;
-    }
-
-    private UserContext collectUserContext(int userId) {
+    private UserContext collectUserContext(int userId, int tariffId) {
         UserProfile userProfile = userProfileDao.findById(userId).orElseThrow(
-                () -> new NoSuchEntityException("No user profile found for trip with id: " + userId
+                () -> new NoRequiredEntityException("No user profile found for user with id: " + userId
                         + ". Contact support service.")
         );
 
         UserSubscription userSubscription = userSubscriptionDao.findByIdWithTariff(userId).orElse(null);
 
+        if (tariffId != 0 && userSubscription != null) {
+            throw new UnavaliableActionException("Forbidden to choose tariff with active subscription");
+        }
+
         Tariff tariff = userSubscription != null ? userSubscription.getTariff() :
-                tariffDao
-                        .getDefaultTariff()
+                tariffId != 0 ? tariffDao.findById(tariffId)
                         .orElseThrow(
-                                () -> new NoSuchEntityException("No default tariff found. Contact support servicez")
+                                () -> new NoSuchEntityException("No tariff found with id: " + tariffId)
+                        )
+                : tariffDao.getDefaultTariff()
+                        .orElseThrow(
+                                () -> new NoRequiredEntityException("No default tariff found. Contact support service")
                         );
 
+        if (tariff.getBillingIntervalMinutes() == null && userSubscription == null) {
+            throw new UnavaliableActionException("Forbidden to choose subscription tariff for trip. Use /api/subscriptions instead");
+        }
+
         return new UserContext(userProfile, tariff);
+    }
+
+    private int calculateTimeLimit(Trip trip, UserProfile userProfile) {
+        BigDecimal intervalSeconds = BigDecimal.valueOf(trip.getIntervalAtStart() * 60);
+        return userProfile.getBalance()
+                .divide(trip.getPriceAtStart(), RoundingMode.DOWN)
+                .multiply(intervalSeconds)
+                .add(intervalSeconds) // Добавляем еще один, чтобы пользователь мог уйти в мниус, но минимально возможно
+                .intValue();
     }
 }

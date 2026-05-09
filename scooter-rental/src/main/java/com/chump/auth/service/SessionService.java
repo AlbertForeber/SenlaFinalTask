@@ -5,7 +5,10 @@ import com.chump.auth.model.Session;
 import com.chump.common.exception.AuthException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
+import com.chump.notification.service.EmailService;
+import com.chump.user.dao.UserProfileDao;
 import com.chump.user.model.User;
+import com.chump.user.model.UserProfile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +24,8 @@ import java.util.UUID;
 public class SessionService {
 
     private final SessionDao sessionDao;
+    private final UserProfileDao userProfileDao;
+    private final EmailService emailService;
 
     @Value("${auth.refresh-token.expiration-time:604800000}")
     private long expirationTime;
@@ -108,7 +113,20 @@ public class SessionService {
     }
 
     private void handleSessionRefreshTokenReuse(Session session) {
-        // TODO Логирование + email
         sessionDao.terminateChain(session.getRefreshToken());
+
+        int userId = session.getUser().getId();
+        UserProfile userProfile = userProfileDao.findById(userId).orElse(null);
+        if (userProfile == null) {
+            log.error("No user profile found to notify compromise for user with id: {}", userId);
+            return; // Пропуск - ошибка не для пользователя
+        }
+
+        emailService.asyncSideSendMail(
+                userProfile.getEmail(),
+                "Your account might be in danger",
+                "It looks like someone else tried to access your account. " +
+                        "Please assure that your network is secured"
+        );
     }
 }

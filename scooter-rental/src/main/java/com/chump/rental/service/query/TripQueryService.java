@@ -1,15 +1,18 @@
 package com.chump.rental.service.query;
 
 import com.chump.common.exception.NoSuchEntityException;
+import com.chump.common.utils.TripPriceCalculator;
 import com.chump.rental.dao.TripDao;
 import com.chump.rental.dto.response.TripConciseResponse;
 import com.chump.rental.dto.response.TripDetailedResponse;
 import com.chump.rental.mapper.TripMapper;
 import com.chump.rental.model.Trip;
+import com.chump.rental.model.status.TripStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -45,6 +48,12 @@ public class TripQueryService {
         Trip trip = dao.findById(tripId).orElseThrow(
                 () -> new NoSuchEntityException("No trip found with id: " + tripId)
         );
+
+        // Если пользователь хочет получить текущую инфу по поездке
+        if (trip.getStatus() == TripStatus.ONGOING) {
+            trip.setDurationSeconds((int) Duration.between(trip.getStartedAt(), Instant.now()).toSeconds());
+            trip.setTotalPrice(TripPriceCalculator.calculatePrice(trip));
+        }
 
         return mapper.toDetailedResponse(trip);
     }

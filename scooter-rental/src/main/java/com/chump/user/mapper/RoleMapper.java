@@ -1,13 +1,13 @@
 package com.chump.user.mapper;
 
-import com.chump.user.dto.command.CreateRoleCommand;
+import com.chump.user.dto.command.RoleCommand;
 import com.chump.user.dto.request.CreateRoleRequest;
+import com.chump.user.dto.request.UpdateRoleRequest;
 import com.chump.user.dto.response.RoleResponse;
 import com.chump.user.dto.response.RoleWithScopesResponse;
 import com.chump.user.model.Role;
 import com.chump.user.model.Scope;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -21,7 +21,8 @@ public interface RoleMapper {
     @Mapping(source = "command.name", target = "name")
     @Mapping(source = "scopes", target = "scopes")
     @Mapping(target = "id", ignore = true) // id не назначается вручную
-    Role toEntity(CreateRoleCommand command, List<Scope> scopes);
+    Role toEntity(RoleCommand command, List<Scope> scopes);
 
-    CreateRoleCommand toCommand(CreateRoleRequest request);
+    RoleCommand toCreateCommand(CreateRoleRequest request);
+    RoleCommand toUpdateCommand(UpdateRoleRequest request);
 }

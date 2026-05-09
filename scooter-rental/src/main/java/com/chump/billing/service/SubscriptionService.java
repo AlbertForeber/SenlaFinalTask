@@ -1,5 +1,6 @@
 package com.chump.billing.service;
 
+import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
 import com.chump.billing.dao.SubscriptionTariffDao;
@@ -61,7 +62,7 @@ public class SubscriptionService {
                 )
         );
         UserProfile profile = userProfileDao.findById(userId).orElseThrow(
-                () -> new NoSuchEntityException("No user found with id: " + userId)
+                () -> new NoRequiredEntityException("No user found with id: " + userId)
         );
 
         if (profile.getBalance().compareTo(subscriptionTariff.getTariff().getBasePrice()) < 0) {
@@ -106,7 +107,7 @@ public class SubscriptionService {
     @Transactional
     public SubscriptionTariffResponse addSubscriptionTariff(CreateSubscriptionTariffCommand command) {
         Tariff tariff = tariffMapper.toEntityForSubscription(command);
-        tariff = tariffDao.save(tariff); // CascadeType.PERSIST не поможет, т.к. сначало нужно сохранить тариф
+        tariff = tariffDao.save(tariff); // CascadeType.PERSIST не поможет, т.к. сначала нужно сохранить тариф
 
         SubscriptionTariff subscriptionTariff = subscriptionMapper.toEntity(command, tariff);
         log.info(subscriptionTariff.toString());

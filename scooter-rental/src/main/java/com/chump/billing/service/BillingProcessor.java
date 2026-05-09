@@ -1,5 +1,7 @@
 package com.chump.billing.service;
 
+import com.chump.common.utils.TransactionUtils;
+import com.chump.notification.service.EmailService;
 import com.chump.user.dao.UserSubscriptionDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,37 +21,27 @@ import static java.lang.Thread.sleep;
 public class BillingProcessor {
 
     private final UserSubscriptionDao userSubscriptionDao;
+    private final EmailService emailService;
 
     @SuppressWarnings("BusyWait")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processSingleBatch(List<Integer> batchIds) throws InterruptedException {
-//        UserProfile userProfile = userSubscription.getUserProfile();
-//        BillingData billingData = tariffDao.getBillingData(userSubscription.getTariff().getId()).orElseThrow(
-//                () -> new NoSuchEntityException("No subscription tariff found with id: "
-//                        + userSubscription.getTariff().getId())
-//        );
-//
-//        if (userProfile.getBalance().compareTo(billingData.getBasePrice()) < 0) {
-//            userSubscriptionDao.delete(userSubscription.getId()); // TODO просто переводим пользователя на обычный тариф
-//        }
-//
-//        userProfile.setBalance(userProfile.getBalance().subtract(billingData.getBasePrice()));
-//        userSubscription.setNextBillingDate(
-//                userSubscription.getNextBillingDate().plusDays(billingData.getDurationDays())
-//        );
-//
-//        // Dirty Check не происходит, т.к. мы создаем новую транзакцию
-//        // А сюда попадает Detached объект => ручной update (merge).
-//        userProfileDao.update(userProfile);
-//        userSubscriptionDao.update(userSubscription);
         int attempts = 0;
         int delay = 500;
 
         while (true) {
             try {
-                userSubscriptionDao.batchDeleteUnableToPay(batchIds);
+                List<String> emailsToNotify = userSubscriptionDao.batchDeleteUnableToPayReturnMails(batchIds);
                 userSubscriptionDao.batchProcessBilling(batchIds);
                 userSubscriptionDao.batchUpdateLastBillingDate(batchIds);
+                TransactionUtils.afterCommit(() -> emailsToNotify.forEach(
+                        o -> emailService.asyncSideSendMail(
+                                o,
+                                "Billing",
+                                "Your subscription has been canceled due to insufficient funds in your balance"
+                        )
+                ));
+
                 return;
             } catch (Exception e) {
                 if (attempts == 3 || !isRetryable(e)) throw e;

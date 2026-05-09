@@ -75,19 +75,20 @@ public class UserSubscriptionDao extends AbstractHibernateDao<UserSubscription, 
         }
     }
 
-    public void batchDeleteUnableToPay(List<Integer> userSubscriptionIds) {
+    public List<String> batchDeleteUnableToPayReturnMails(List<Integer> userSubscriptionIds) {
         try {
             String sql = """
                     DELETE FROM user_subscriptions us
                     WHERE us.user_id IN (:ids)
                         AND (SELECT ud.balance FROM user_details ud WHERE ud.user_id = us.user_id)
                             < (SELECT t.base_price FROM tariffs t WHERE t.id = us.tariff_id)
+                    RETURNING (SELECT ud.email FROM user_details ud WHERE ud.user_id IN (:ids))
                     """;
 
-            getCurrentSession()
-                    .createNativeMutationQuery(sql)
+            return getCurrentSession()
+                    .createNativeQuery(sql, String.class)
                     .setParameter("ids", userSubscriptionIds)
-                    .executeUpdate();
+                    .getResultList();
         } catch (Exception e) {
             throw new DataManipulationException(
                     "Failed to delete unable to pay users with ids: " + userSubscriptionIds, e

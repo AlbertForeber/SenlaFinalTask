@@ -36,8 +36,19 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId> <!-- Для @Transactional и PlatformTransactionManager -->
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId> <!-- Для работы с почтой -->
+        </dependency>
 
-        <!-- ASPECTS -->
+        <!-- EMAIL -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>${jakarta.mail.version}</version>
+        </dependency>
+
+        <!-- ASPECTS TODO возможно уже не пригодится-->
         <dependency> <!--Аспекты для красивого логирования начала/окончания операций-->
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
@@ -114,7 +125,7 @@
             <version>${postgresql.version}</version>
         </dependency>
 
-        <!-- Connection Pool -->
+        <!-- CONNECTION POOL -->
         <!-- c3po или HikariCP, второй быстрее, но нужен slf4j -->
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -232,6 +243,12 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>

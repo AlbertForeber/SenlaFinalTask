@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CreateRoleCommand {
+public class RoleCommand {
 
     private String name;
     private List<Integer> scopeIds;

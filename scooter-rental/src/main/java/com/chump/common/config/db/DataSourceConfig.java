@@ -5,15 +5,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 
 import javax.sql.DataSource;
 
 @Configuration
-@PropertySource("classpath:db-prod.properties")
-@Profile("prod")
-public class ProdDataSourceConfig {
+@PropertySource("classpath:db-${spring.profiles.active}.properties")
+public class DataSourceConfig {
 
     @Value("${db.url}") String url;
     @Value("${db.username}") String username;
@@ -34,3 +32,4 @@ public class ProdDataSourceConfig {
         return new HikariDataSource(config);
     }
 }
+

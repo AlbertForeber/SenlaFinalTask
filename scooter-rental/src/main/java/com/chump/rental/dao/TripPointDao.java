@@ -29,14 +29,20 @@ public class TripPointDao extends AbstractHibernateDao<TripPoint, TripPointId> {
         this.batchSize = batchSize;
     }
 
-    public List<TripPoint> findByTripId(int tripId) {
+    public List<TripPoint> batchFindByTripId(int tripId, int batchSize, int offset) {
         try {
             CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
             CriteriaQuery<TripPoint> query = criteriaBuilder.createQuery(TripPoint.class);
             Root<TripPoint> root = query.from(TripPoint.class);
 
             query.where(criteriaBuilder.equal(root.get("id").get("tripId"), tripId));
-            return getCurrentSession().createQuery(query).getResultList();
+            query.orderBy(criteriaBuilder.desc(root.get("id").get("createdAt")));
+
+            return getCurrentSession()
+                    .createQuery(query)
+                    .setFirstResult(offset * batchSize)
+                    .setMaxResults(batchSize)
+                    .getResultList();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find trip points for trip with id: " + tripId, e);
         }

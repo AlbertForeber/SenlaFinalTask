@@ -6,7 +6,7 @@ import com.chump.auth.dto.response.TokenResponse;
 import com.chump.auth.mapper.AuthMapper;
 import com.chump.auth.model.Session;
 import com.chump.common.exception.AuthException;
-import com.chump.common.exception.NoSuchEntityException;
+import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.UnavaliableActionException;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dao.UserDao;
@@ -99,7 +99,7 @@ public class AuthFacade {
 
     private User createUser(RegisterCommand command) {
         Role defaultRole = roleDao.getDefaultRole().orElseThrow(
-                () -> new NoSuchEntityException("No default role found. Contact support service")
+                () -> new NoRequiredEntityException("No default role found. Contact support service")
         );
 
         User user = authMapper.toUserEntity(command, defaultRole);

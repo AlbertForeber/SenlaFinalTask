@@ -5,6 +5,7 @@ import com.chump.common.exception.NoSuchEntityException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import jakarta.validation.ConstraintViolationException;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,8 +89,27 @@ public class RestExceptionHandler {
                 .build(), HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleSimpleTypeValidation(
+            ConstraintViolationException exception
+    ) {
+        List<String> details = exception
+                .getConstraintViolations()
+                .stream()
+                .map(error -> error.getPropertyPath() + ": " + error.getMessage())
+                .toList();
+
+
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .status(400)
+                .error("Validation exception")
+                .message("Some of path variables or params failed to validate")
+                .details(details)
+                .build(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(
+    public ResponseEntity<ErrorResponse> handleBodyValidation(
             MethodArgumentNotValidException exception
     ) {
         List<String> details = exception

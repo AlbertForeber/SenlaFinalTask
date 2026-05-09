@@ -88,6 +88,8 @@ public class AbstractHibernateDao<T, ID> implements GenericDao<T, ID> {
             }
 
             getCurrentSession().remove(entity);
+        } catch (NoSuchEntityException e) {
+            throw e;
         } catch (Exception e) {
             throw new DataManipulationException("Failed to remove entity with id: " + id, e);
         }
@@ -99,6 +101,15 @@ public class AbstractHibernateDao<T, ID> implements GenericDao<T, ID> {
             return getCurrentSession().getReference(type, id);
         } catch (Exception e) {
             throw new DataManipulationException("Failed to get reference for entity with id: " + id, e);
+        }
+    }
+
+    @Override
+    public void refresh(T entity) {
+        try {
+            getCurrentSession().refresh(entity);
+        } catch (Exception e) {
+            throw new DataManipulationException("Failed to refresh entity", e);
         }
     }
 }

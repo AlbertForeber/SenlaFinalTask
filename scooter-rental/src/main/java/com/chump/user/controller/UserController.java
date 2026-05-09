@@ -70,8 +70,9 @@ public class UserController {
     @PreAuthorize("hasAuthority('SCOPE_profile:manage')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUserProfile(
-            @AuthenticationPrincipal Integer userId
+            @AuthenticationPrincipal Integer userId,
+            @RequestParam(defaultValue = "false") boolean force
     ) {
-        userService.deleteUser(userId);
+        userService.deleteUser(userId, force);
     }
 }

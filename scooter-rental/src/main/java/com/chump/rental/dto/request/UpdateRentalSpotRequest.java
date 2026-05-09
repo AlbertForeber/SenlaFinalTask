@@ -11,7 +11,7 @@ public class UpdateRentalSpotRequest {
 
     private Integer parentId;
 
-    @Size(max = 100, message = "Name msut be less than 100 characters long")
+    @Size(max = 100, message = "Name must be less than 100 characters long")
     private String name;
     private Polygon area;
     private Boolean isParking;

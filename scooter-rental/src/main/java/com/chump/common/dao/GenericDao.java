@@ -12,4 +12,5 @@ public interface GenericDao<T, ID> {
     void update(T entity);
     void delete(ID id);
     T getReference(ID id);
+    void refresh(T entity);
 }

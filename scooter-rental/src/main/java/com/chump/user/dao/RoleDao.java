@@ -11,6 +11,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -41,5 +42,31 @@ public class RoleDao extends AbstractHibernateDao<Role, Integer> {
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find role with scopes", e);
         }
+    }
+
+    public void clearRoleScopes(int roleId) {
+        String sql = """
+                DELETE FROM role_scope
+                WHERE role_id = :id
+                """;
+
+        getCurrentSession()
+                .createNativeMutationQuery(sql)
+                .setParameter("id", roleId)
+                .executeUpdate();
+    }
+
+    public void batchInsertRoleScopes(int roleId, List<Integer> scopesIds) {
+        String sql = """
+                INSERT INTO role_scope
+                SELECT :roleId, unnest(:scopeIds)
+                """;
+
+        Integer[] scopesIdsArray = scopesIds.toArray(new Integer[0]);
+        getCurrentSession()
+                .createNativeMutationQuery(sql)
+                .setParameter("roleId", roleId)
+                .setParameter("scopeIds", scopesIdsArray)
+                .executeUpdate();
     }
 }

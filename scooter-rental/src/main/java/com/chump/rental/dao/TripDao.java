@@ -114,7 +114,7 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
                         FROM trip_points WHERE trip_id = :id
                     )
                     UPDATE trips SET
-                        route = CAST(ST_SimplifyPreserveTopology(line.geom, 0.001) AS geography),
+                        route = CAST(ST_SimplifyPreserveTopology(line.geom, 0.0001) AS geography),
                         distance = COALESCE(ST_Length(CAST(line.geom AS geography)), 0)
                     FROM line
                     WHERE trips.id = :id

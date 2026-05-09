@@ -5,6 +5,7 @@ import com.chump.rental.dto.entry.TelemetryEntry;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanIterator;
 import io.lettuce.core.api.sync.RedisCommands;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,16 +15,13 @@ import java.util.Map;
 
 // HGETALL, допустимо, т.к. количество полей мало
 @Component
+@RequiredArgsConstructor
 public class ScooterTelemetryRedisDao {
 
     private final RedisCommands<String, String> redis;
 
     private static final long TELEMETRY_TTL = 300L;
     private static final String KEY_PATTERN = "scooter:%s:telemetry";
-
-    public ScooterTelemetryRedisDao(RedisCommands<String, String> redis) {
-        this.redis = redis;
-    }
 
     public void save(int scooterId, TelemetryEntry entry) {
         try {

@@ -1,5 +1,6 @@
 package com.chump.rental.dto.request;
 
+import com.chump.common.validation.Trimmed;
 import com.chump.rental.model.status.ScooterStatus;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -10,7 +11,8 @@ import org.locationtech.jts.geom.Point;
 @Setter
 public class CreateScooterRequest {
 
-    @NotBlank(message = "Field 'serialNumber' must not be empty")
+    @Trimmed(message = "Field 'serialNumber' must not contain trailing spaces")
+    @NotNull(message = "Field 'serialNumber' must not be empty")
     private String serialNumber;
 
     @NotNull(message = "Field 'modelId' must not be empty")

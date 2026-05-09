@@ -1,6 +1,7 @@
 package com.chump.user.controller;
 
 import com.chump.user.dto.request.CreateRoleRequest;
+import com.chump.user.dto.request.UpdateRoleRequest;
 import com.chump.user.dto.response.RoleResponse;
 import com.chump.user.dto.response.RoleWithScopesResponse;
 import com.chump.user.mapper.RoleMapper;
@@ -45,13 +46,25 @@ public class RoleController {
             @Valid @RequestBody CreateRoleRequest request
     ) {
         RoleWithScopesResponse result = roleService.addRole(
-                roleMapper.toCommand(request)
+                roleMapper.toCreateCommand(request)
         );
         URI uri = URI.create("/api/roles/" + result.getId());
 
         return ResponseEntity
                 .created(uri)
                 .body(result);
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_role:manage')")
+    public ResponseEntity<RoleWithScopesResponse> patchRole(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateRoleRequest request
+    ) {
+        return ResponseEntity.ok(roleService.updateRole(
+                id,
+                roleMapper.toUpdateCommand(request)
+        ));
     }
 
     @DeleteMapping("/{id}")

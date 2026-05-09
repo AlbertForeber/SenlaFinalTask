@@ -1,7 +1,8 @@
 package com.chump.user.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import com.chump.common.validation.Trimmed;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +12,8 @@ import java.util.List;
 @Setter
 public class CreateRoleRequest {
 
-    @NotBlank(message = "Field 'name' should not be empty")
+    @Trimmed(message = "Field 'name' must not contain trailing spaces")
+    @NotNull(message = "Field 'name' must not be empty")
     private String name;
 
     @NotEmpty(message = "List 'scopeIds' should not be empty")

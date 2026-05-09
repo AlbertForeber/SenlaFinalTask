@@ -21,6 +21,7 @@ public class TripDetailedResponse {
     private Instant startedAt;
     private Double distance;
     private Integer durationSeconds;
+    private Double avgSpeedKmh;
     private BigDecimal totalPrice;
     private LineString route;
 }

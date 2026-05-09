@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ScopeDao extends AbstractHibernateDao<Scope, Integer> {
@@ -20,7 +21,9 @@ public class ScopeDao extends AbstractHibernateDao<Scope, Integer> {
             return getCurrentSession()
                     .byMultipleIds(Scope.class)
                     .enableSessionCheck(true) // Проверяем кэш для производительности
-                    .multiLoad(scopeIds);
+                    .multiLoad(scopeIds)
+                    .stream().filter(Objects::nonNull)
+                    .toList();
         } catch (Exception e) {
             throw new DataManipulationException("Failed to scopes by ids", e);
         }

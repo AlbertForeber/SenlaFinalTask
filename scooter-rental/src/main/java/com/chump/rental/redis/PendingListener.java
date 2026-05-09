@@ -25,7 +25,9 @@ public class PendingListener implements KeyspaceEventListener {
         try {
             scooterService.handleStatusTimeout(Integer.parseInt(matcher.group(1)));
         } catch (NumberFormatException e) {
-            log.error("Expired key: {} is malformed.", expiredKey);
+            log.error("Expired pending key: {} is malformed", expiredKey);
+        } catch (Exception e) {
+            log.error("Failed to handle status timeout for scooter with id: {}", matcher.group(1), e);
         }
     }
 }

@@ -16,7 +16,7 @@ INSERT INTO users(username, password, role_id) VALUES
 
 -- changeset albert:3-add-test-user-details
 INSERT INTO user_details VALUES
-    (1, 'test@example.com', '1999.9.9', 10000, 0.05);
+    (1, 'albertforeber2@gmail.com', '1999.9.9', 11, 0.05);
 -- rollback: DELETE FROM user_details WHERE id=1;
 
 -- changeset albert:4-add-test-rental-spots
@@ -138,6 +138,7 @@ INSERT INTO scopes(name) VALUES
     ('trip:view'),
     ('trip:view_period'),
     ('trip:view_admin'),
+    ('trip:manage_admin'),
     ('tariff:view'),
     ('tariff:view_admin'),
     ('tariff:subscribe'),

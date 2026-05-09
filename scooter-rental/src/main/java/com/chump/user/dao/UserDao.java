@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.*;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -31,6 +32,17 @@ public class UserDao extends AbstractHibernateDao<User, Integer> {
         } catch (Exception e) {
             throw new DataManipulationException("Failed to find user with username: " + username, e);
         }
+    }
+
+    public List<Integer> findIdsByRoleId(int roleId) {
+        CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<Integer> query = criteriaBuilder.createQuery(Integer.class);
+
+        Root<User> root = query.from(User.class);
+        query.where(criteriaBuilder.equal(root.get("role").get("id"), roleId));
+        query.select(root.get("id"));
+
+        return getCurrentSession().createQuery(query).getResultList();
     }
 
     public boolean existsByUsername(String username) {
