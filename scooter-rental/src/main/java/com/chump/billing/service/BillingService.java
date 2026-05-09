@@ -78,30 +78,29 @@ public class BillingService {
             return processBilling();
         }
 
-        int offset = 0;
         int failed = 0;
         int successful = 0;
         List<ManualBillingFailureResponse> details = new ArrayList<>();
+        List<BillingBatchFailureItem> batch = billingBatchFailureItemDao.batchFindNotResolvedWithFailure(batchSize);
 
-        List<BillingBatchFailureItem> batch = billingBatchFailureItemDao.batchFindAll(batchSize, offset);
         while (!batch.isEmpty()) {
             for (BillingBatchFailureItem item : batch) {
                 try {
                     billingProcessor.processSingleBatch(
                             Collections.singletonList(item.getId().getUserSubscriptionId())
                     );
+                    item.getFailure().setIsResolved(true);
                     successful++;
                 } catch (Exception e) {
-                    failed++;
                     details.add(ManualBillingFailureResponse.builder()
                             .subscriptionId(item.getId().getUserSubscriptionId())
                             .errorMessage(e.getCause().getMessage()) // getCause() т.к. все ошибки Dao оборачиваются
-                            .build());                               // в кастомное исключение, а здесь нужна сама проблема
-                } finally {
-                    offset++;
-                    batch = billingBatchFailureItemDao.batchFindAll(batchSize, offset);
+                            .build()                                // в кастомное исключение, а здесь нужна сама проблема
+                    );
+                    failed++;
                 }
             }
+            batch = billingBatchFailureItemDao.batchFindNotResolvedWithFailure(batchSize);
         }
 
         return BillingResponse.builder()

@@ -110,7 +110,6 @@ public class SubscriptionService {
         tariff = tariffDao.save(tariff); // CascadeType.PERSIST не поможет, т.к. сначала нужно сохранить тариф
 
         SubscriptionTariff subscriptionTariff = subscriptionMapper.toEntity(command, tariff);
-        log.info(subscriptionTariff.toString());
         return subscriptionMapper.toSubscriptionResponse(subscriptionTariffDao.save(subscriptionTariff));
     }
 

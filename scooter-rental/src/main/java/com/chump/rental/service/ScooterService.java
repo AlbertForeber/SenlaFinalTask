@@ -30,6 +30,7 @@ public class ScooterService {
     private final ScooterMapper mapper;
     private final ScooterProducer scooterProducer;
     private final ScooterPendingRedisDao scooterPendingRedisDao;
+    private final TransactionUtils transactionUtils;
 
     @Transactional
     public ScooterResponse addScooter(CreateScooterCommand command) {
@@ -139,7 +140,7 @@ public class ScooterService {
 
         scooter.setStatus(newStatus);
 
-        TransactionUtils.afterCommit(() -> scooterPendingRedisDao.deletePending(scooterId));
+        transactionUtils.afterCommit(() -> scooterPendingRedisDao.deletePending(scooterId));
     }
 
     @Transactional

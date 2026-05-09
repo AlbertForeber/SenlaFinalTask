@@ -22,6 +22,7 @@ public class BillingProcessor {
 
     private final UserSubscriptionDao userSubscriptionDao;
     private final EmailService emailService;
+    private final TransactionUtils transactionUtils;
 
     @SuppressWarnings("BusyWait")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -34,7 +35,7 @@ public class BillingProcessor {
                 List<String> emailsToNotify = userSubscriptionDao.batchDeleteUnableToPayReturnMails(batchIds);
                 userSubscriptionDao.batchProcessBilling(batchIds);
                 userSubscriptionDao.batchUpdateLastBillingDate(batchIds);
-                TransactionUtils.afterCommit(() -> emailsToNotify.forEach(
+                transactionUtils.afterCommit(() -> emailsToNotify.forEach(
                         o -> emailService.asyncSideSendMail(
                                 o,
                                 "Billing",
@@ -45,7 +46,7 @@ public class BillingProcessor {
                 return;
             } catch (Exception e) {
                 if (attempts == 3 || !isRetryable(e)) throw e;
-                log.warn("Billing batch processing failed. Retry {}/3", attempts);
+                log.warn("Billing batch processing failed. Retry {}/3", attempts + 1);
                 sleep(delay);
 
                 attempts++;

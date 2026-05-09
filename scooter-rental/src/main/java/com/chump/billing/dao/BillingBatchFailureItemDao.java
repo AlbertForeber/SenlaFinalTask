@@ -4,9 +4,7 @@ import com.chump.billing.model.BillingBatchFailure;
 import com.chump.billing.model.BillingBatchFailureItem;
 import com.chump.billing.model.BillingBatchFailureItemId;
 import com.chump.common.dao.AbstractHibernateDao;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -44,18 +42,19 @@ public class BillingBatchFailureItemDao extends AbstractHibernateDao<BillingBatc
         }
     }
 
-    public List<BillingBatchFailureItem> batchFindAll(int batchSize, int offset) {
+    public List<BillingBatchFailureItem> batchFindNotResolvedWithFailure(int batchSize) {
         CriteriaBuilder criteriaBuilder = getCurrentSession().getCriteriaBuilder();
         CriteriaQuery<BillingBatchFailureItem> query = criteriaBuilder.createQuery(BillingBatchFailureItem.class);
+
         Root<BillingBatchFailureItem> root = query.from(BillingBatchFailureItem.class);
+        root.fetch("failure");
 
         query.from(BillingBatchFailureItem.class);
-        query.orderBy(criteriaBuilder.asc(root.get("id")));
+        query.where(criteriaBuilder.isFalse(root.get("failure").get("isResolved")));
 
         return getCurrentSession()
                 .createQuery(query)
                 .setMaxResults(batchSize)
-                .setFirstResult(batchSize * offset)
                 .getResultList();
     }
 }

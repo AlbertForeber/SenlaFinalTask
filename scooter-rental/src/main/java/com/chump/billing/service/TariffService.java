@@ -25,7 +25,7 @@ public class TariffService {
         );
 
         if (command.getInterval() != null && tariff.getBillingIntervalMinutes() == null) {
-            throw new UnavaliableActionException("Cannot change interval of subscription");
+            throw new UnavaliableActionException("Forbidden to change interval of subscription");
         }
 
         tariffMapper.updateTariffFromCommand(command, tariff);
@@ -45,7 +45,7 @@ public class TariffService {
         );
 
         if (tariff.getBillingIntervalMinutes() == null) {
-            throw new UnavaliableActionException("Cannot delete subscription. Use /api/subscriptions instead");
+            throw new UnavaliableActionException("Forbidden to delete subscription. Use /api/subscriptions instead");
         }
 
         tariffDao.delete(tariffId);

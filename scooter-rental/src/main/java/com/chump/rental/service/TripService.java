@@ -12,6 +12,7 @@ import com.chump.rental.model.Trip;
 import com.chump.rental.model.status.TripStatus;
 import com.chump.user.dao.UserProfileDao;
 import com.chump.user.model.UserProfile;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,17 +21,13 @@ import java.math.BigDecimal;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TripService {
 
     private final TripDao tripDao;
     private final UserProfileDao userProfileDao;
     private final EmailService emailService;
-
-    public TripService(TripDao tripDao, UserProfileDao userProfileDao, EmailService emailService) {
-        this.tripDao = tripDao;
-        this.userProfileDao = userProfileDao;
-        this.emailService = emailService;
-    }
+    private final TransactionUtils transactionUtils;
 
     // refundForLastSeconds - позволяет вернуть деньги только за последние n секунд поездки (расчет учитывает тариф)
     @Transactional
@@ -52,7 +49,7 @@ public class TripService {
                 () -> new NoRequiredEntityException("No user profile found for trip with id: " + tripId)
         );
 
-        TransactionUtils.afterCommit(() -> {
+        transactionUtils.afterCommit(() -> {
             emailService.asyncSideSendMail(userProfile.getEmail(), "Refund", "One of your trips have been refunded");
         });
 

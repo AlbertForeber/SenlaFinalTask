@@ -1,6 +1,7 @@
 package com.chump.billing.service.query;
 
 import com.chump.billing.dto.response.CurrentSubscriptionResponse;
+import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.billing.dao.SubscriptionTariffDao;
 import com.chump.billing.dao.TariffDao;
@@ -50,7 +51,7 @@ public class SubscriptionQueryService {
         SubscriptionTariff tariff = subscriptionTariffDao.findByIdWithTariff(
                 subscription.getTariff().getId()
         ).orElseThrow(
-                () -> new NoSuchEntityException("No subscription tariff found with id: "
+                () -> new NoRequiredEntityException("No subscription tariff found with id: "
                         + subscription.getTariff().getId())
         );
 

@@ -59,6 +59,7 @@ public class RentalService {
     private final ScooterPendingRedisDao scooterPendingRedisDao;
     private final ScooterWaypointRedisDao scooterWaypointRedisDao;
     private final TripTimeLimitRedisDao tripTimeLimitRedisDao;
+    private final TransactionUtils transactionUtils;
 
     @Value("${rental.minimal-balance}")
     private Integer minToStart;
@@ -96,7 +97,7 @@ public class RentalService {
                 .discountAtStart(userProfile.getDiscount())
                 .build());
 
-        TransactionUtils.afterCommit(() -> {
+        transactionUtils.afterCommit(() -> {
             scooterPendingRedisDao.setPending(scooterId);
             scooterProducer.sendUnlock(scooterId);
 
@@ -113,7 +114,7 @@ public class RentalService {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
         ongoingTrip.setStatus(TripStatus.PAUSED);
 
-        TransactionUtils.afterCommit(() -> {
+        transactionUtils.afterCommit(() -> {
             scooterPendingRedisDao.setPending(scooterId);
             scooterProducer.sendLock(scooterId);
         });
@@ -126,7 +127,7 @@ public class RentalService {
         Trip ongoingTrip = findAndValidateTrip(scooterId, userId);
         ongoingTrip.setStatus(TripStatus.ONGOING);
 
-        TransactionUtils.afterCommit(() -> {
+        transactionUtils.afterCommit(() -> {
             scooterPendingRedisDao.setPending(scooterId);
             scooterProducer.sendUnlock(scooterId);
         });
@@ -187,7 +188,7 @@ public class RentalService {
                 trip
         );
 
-        TransactionUtils.afterCommit(() -> {
+        transactionUtils.afterCommit(() -> {
             scooterWaypointRedisDao.clearWaypoints(scooterId);
             scooterPendingRedisDao.setPending(scooterId);
             tripTimeLimitRedisDao.deleteTimeLimit(trip.getId());
