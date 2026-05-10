@@ -26,7 +26,7 @@ public class TariffDao extends AbstractHibernateDao<Tariff, Integer> {
         this.defaultTariffId = defaultTariffId;
     }
 
-    public Optional<Tariff> getDefaultTariff() {
+    public Optional<Tariff> findDefaultTariff() {
         return findById(defaultTariffId);
     }
 

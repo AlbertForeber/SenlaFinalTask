@@ -69,11 +69,12 @@ public class UserService {
             throw new UnavaliableActionException("Forbidden to delete user with ongoing trips");
         }
 
-        Optional<UserProfile> userProfile = userProfileDao.findById(userId);
-        if (!isForce && userProfile.isPresent() && userProfile.get().getBalance().longValue() > 0) {
-            throw new UnavaliableActionException("Forbidden to delete user with not zero balance. " +
-                    "Use 'force=true' to force delete");
-        }
+        userProfileDao.findById(userId).ifPresent(userProfile -> {
+            if (!isForce && userProfile.getBalance().longValue() > 0) {
+                throw new UnavaliableActionException("Forbidden to delete user with not zero balance. " +
+                        "Use 'force=true' to force delete");
+            }
+        });
 
         userDao.delete(userId);
     }

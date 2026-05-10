@@ -43,7 +43,7 @@ public class RentalSpotQueryServiceTest {
 
     @Test
     @Tag("unit")
-    @DisplayName("Get rental sort scooters method should throw an exception, if rental spot ID is unknown")
+    @DisplayName("Get rental spot scooters method should throw an exception, if rental spot ID is unknown")
     public void getScootersShouldThrowWhenUnknownRentalSpotId() {
         when(rentalSpotDao.findById(anyInt())).thenReturn(Optional.empty());
 
@@ -55,7 +55,7 @@ public class RentalSpotQueryServiceTest {
 
     @Test
     @Tag("unit")
-    @DisplayName("Get rental sort detailed info method should throw an exception, if rental spot ID is unknown")
+    @DisplayName("Get rental spot detailed info method should throw an exception, if rental spot ID is unknown")
     public void getDetailedInfoShouldThrowWhenUnknownRentalSpotId() {
         when(rentalSpotDao.findById(anyInt())).thenReturn(Optional.empty());
 

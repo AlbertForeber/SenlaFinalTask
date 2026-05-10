@@ -137,7 +137,6 @@ public class ScooterService {
 
 
         if (newStatus == null) return;
-
         scooter.setStatus(newStatus);
 
         transactionUtils.afterCommit(() -> scooterPendingRedisDao.deletePending(scooterId));
@@ -148,8 +147,6 @@ public class ScooterService {
         Scooter scooter = scooterRepository.findById(scooterId).orElseThrow(
                 () -> new NoRequiredEntityException("No scooter found with id: " + scooterId)
         );
-
-        log.info("Changing status from {}", scooter.getStatus()); // TODO убрать
 
         switch (scooter.getStatus()) {
             case ACTIVATING -> {

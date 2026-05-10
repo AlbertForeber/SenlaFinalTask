@@ -41,8 +41,9 @@ public class TripQueryServiceTest {
     @Test
     @Tag("unit")
     @DisplayName("Get trip info method should throw an exception, if trip ID is unknown")
-    public void getInfoShouldThrowWhenUnknownScooterId() {
+    public void getInfoShouldThrowWhenUnknownTripId() {
         when(tripDao.findById(anyInt())).thenReturn(Optional.empty());
+
         NoSuchEntityException exception = assertThrows(NoSuchEntityException.class,
                 () -> service.getTripInfo(1));
         assertTrue(exception.getMessage().contains("1"),

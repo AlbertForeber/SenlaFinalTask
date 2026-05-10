@@ -59,8 +59,8 @@ public class JwtServiceTest {
 
     @Test
     @Tag("unit")
-    @DisplayName("Scopes get method must return ID, if token is valid")
-    public void getScopesShouldReturnIdWhenValid() {
+    @DisplayName("Scopes get method must return scopes, if token is valid")
+    public void getScopesShouldReturnScopesWhenValid() {
         List<Scope> scopes = List.of(new Scope(1, "test:scope"));
         User user = User.builder()
                 .id(1)
@@ -87,6 +87,6 @@ public class JwtServiceTest {
     @DisplayName("Scopes get method must throw an exception, if token is not valid")
     public void getScopesShouldThrowWhenNotValid() {
         String token = "random_combination";
-        assertThrows(JwtException.class, () -> service.getUserId(token));
+        assertThrows(JwtException.class, () -> service.getScopes(token));
     }
 }

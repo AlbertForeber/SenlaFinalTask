@@ -28,7 +28,6 @@ public class ScooterQueryServiceTest {
     @Mock private ScooterRepository scooterRepository;
     @Mock private ScooterModelDao scooterModelDao;
     @Mock private ScooterMapper scooterMapper;
-    @Mock private ScooterModelMapper modelMapper;
 
     @InjectMocks
     private ScooterQueryService service;

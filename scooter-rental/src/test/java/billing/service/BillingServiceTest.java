@@ -28,14 +28,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class BillingServiceTest {
 
-    @Mock
-    private UserSubscriptionDao userSubscriptionDao;
-    @Mock
-    private BillingProcessor billingProcessor;
-    @Mock
-    private BillingBatchFailureDao billingBatchFailureDao;
-    @Mock
-    private BillingBatchFailureItemDao billingBatchFailureItemDao;
+    @Mock private UserSubscriptionDao userSubscriptionDao;
+    @Mock private BillingProcessor billingProcessor;
+    @Mock private BillingBatchFailureDao billingBatchFailureDao;
+    @Mock private BillingBatchFailureItemDao billingBatchFailureItemDao;
 
     @InjectMocks
     private BillingService billingService;

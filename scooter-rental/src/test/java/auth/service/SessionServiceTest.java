@@ -219,7 +219,7 @@ public class SessionServiceTest {
     @Test
     @Tag("unit")
     @DisplayName("Terminate method should throw, if user ID is not valid")
-    public void terminateShouldTerminateSessionWhenInvalidUserId() {
+    public void terminateShouldThrowWhenInvalidUserId() {
         when(sessionDao.findById(any())).thenReturn(Optional.of(session));
 
         assertThrows(UnavaliableActionException.class,

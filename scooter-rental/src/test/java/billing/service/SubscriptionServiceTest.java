@@ -37,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Subscription service testing")
 public class SubscriptionServiceTest {
 
-
     @Mock private UserSubscriptionDao userSubscriptionDao;
     @Mock private SubscriptionTariffDao subscriptionTariffDao;
     @Mock private TariffDao tariffDao;

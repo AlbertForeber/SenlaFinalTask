@@ -36,6 +36,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import static java.lang.Math.max;
+
 // TODO Связь с Kafka
 // TODO + должен отправлять сообщение самокату, что он разблокирован/заблокирован
 // TODO + самокат должен начать отправлять данные местоположения в соответствующий топик
@@ -81,7 +83,7 @@ public class RentalService {
 
         boolean isInterval = tariff.getBillingIntervalMinutes() != null;
 
-        if (userProfile.getBalance().longValue() < minToStart && isInterval) {
+        if (isInterval && userProfile.getBalance().longValue() < max(minToStart, tariff.getBasePrice().longValue())) {
             throw new UnavaliableActionException("Not enough money to rent a scooter");
         }
 
@@ -202,11 +204,11 @@ public class RentalService {
 
         // Проверка зоны парковки
         if (!rentalSpotDao.isInParkingRentalSpot(scooter.getLocation()) && !isForce) {
-            throw new UnavaliableActionException("Scooter should be in rental zone");
+            throw new UnavaliableActionException("Scooter should be in parking zone");
         }
 
         UserProfile userProfile = userProfileDao.findById(userId).orElseThrow(
-                () -> new NoSuchEntityException("No user profile found with id:"  + userId)
+                () -> new NoRequiredEntityException("No user profile found with id:"  + userId)
         );
 
         Duration duration = Duration.between(trip.getStartedAt(), Instant.now());
@@ -237,7 +239,7 @@ public class RentalService {
                         .orElseThrow(
                                 () -> new NoSuchEntityException("No tariff found with id: " + tariffId)
                         )
-                : tariffDao.getDefaultTariff()
+                : tariffDao.findDefaultTariff()
                         .orElseThrow(
                                 () -> new NoRequiredEntityException("No default tariff found. Contact support service")
                         );
@@ -254,7 +256,7 @@ public class RentalService {
         return userProfile.getBalance()
                 .divide(trip.getPriceAtStart(), RoundingMode.DOWN)
                 .multiply(intervalSeconds)
-                .add(intervalSeconds) // Добавляем еще один, чтобы пользователь мог уйти в мниус, но минимально возможно
-                .intValue();
+                .add(intervalSeconds.divide(BigDecimal.valueOf(2), RoundingMode.DOWN)) // Добавляем еще половину,
+                .intValue();                             // чтобы пользователь мог уйти в мниус, но минимально возможно
     }
 }
