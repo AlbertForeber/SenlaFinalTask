@@ -60,6 +60,8 @@
         <junit.version>5.10.2</junit.version>
         <mockito.version>5.10.0</mockito.version>
         <test.containers.version>1.19.7</test.containers.version>
+        <json.path.version>3.0.0</json.path.version>
+        <jakarta.el.version>4.0.2</jakarta.el.version>
 
         <!-- EXTRA -->
         <lombok.version>1.18.30</lombok.version>

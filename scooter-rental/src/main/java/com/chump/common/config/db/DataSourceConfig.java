@@ -10,7 +10,7 @@ import org.springframework.context.annotation.PropertySource;
 import javax.sql.DataSource;
 
 @Configuration
-@PropertySource("classpath:db-${spring.profiles.active}.properties")
+@PropertySource("classpath:db-${spring.profiles.active:dev}.properties")
 public class DataSourceConfig {
 
     @Value("${db.url}") String url;

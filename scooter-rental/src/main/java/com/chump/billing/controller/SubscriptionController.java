@@ -65,7 +65,7 @@ public class SubscriptionController {
     @GetMapping(params = "user_id")
     @PreAuthorize("hasAuthority('SCOPE_tariff:view_admin')")
     public ResponseEntity<CurrentSubscriptionResponse> getUserSubscription(
-            @Positive(message = "Param 'user_id' must not be negative")
+            @Positive(message = "Param 'user_id' must be positive")
             @RequestParam(name = "user_id") Integer userId
     ) {
         return ResponseEntity.ok(subscriptionQueryService.getCurrentSubscriptionOfUser(userId));
@@ -95,7 +95,7 @@ public class SubscriptionController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_tariff:manage')")
-    public ResponseEntity<SubscriptionTariffResponse> postSubscriptions(
+    public ResponseEntity<SubscriptionTariffResponse> postSubscription(
             @Valid @RequestBody CreateSubscriptionTariffRequest request
     ) {
         SubscriptionTariffResponse result = subscriptionService

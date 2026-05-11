@@ -12,7 +12,7 @@ import org.locationtech.jts.geom.Point;
 public class CreateScooterRequest {
 
     @Trimmed(message = "Field 'serialNumber' must not contain trailing spaces")
-    @NotNull(message = "Field 'serialNumber' must not be empty")
+    @NotBlank(message = "Field 'serialNumber' must not be empty")
     private String serialNumber;
 
     @NotNull(message = "Field 'modelId' must not be empty")

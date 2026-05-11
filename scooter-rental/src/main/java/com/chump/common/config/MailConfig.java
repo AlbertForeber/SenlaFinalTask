@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @EnableAsync
-@PropertySource("classpath:mail-${spring.profiles.active}.properties")
+@PropertySource("classpath:mail-${spring.profiles.active:dev}.properties")
 public class MailConfig {
 
     @Value("${mail.host}")

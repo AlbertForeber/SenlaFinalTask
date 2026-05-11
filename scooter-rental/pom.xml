@@ -49,7 +49,7 @@
         </dependency>
 
         <!-- ASPECTS TODO возможно уже не пригодится-->
-        <dependency> <!--Аспекты для красивого логирования начала/окончания операций-->
+        <dependency> <!--Аспекты для логирования начала/окончания операций-->
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
             <version>${spring.version}</version>
@@ -213,8 +213,6 @@
             <scope>runtime</scope>
         </dependency>
 
-
-
         <!-- JACKSON -->
         <!-- Версия из jackson-bom -->
         <dependency>
@@ -257,6 +255,25 @@
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+            <version>${spring.security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${json.path.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
+            <version>${jakarta.el.version}</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <!-- TestContainers -->
         <dependency>

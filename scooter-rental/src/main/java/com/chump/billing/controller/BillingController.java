@@ -4,6 +4,7 @@ import com.chump.billing.dto.response.BillingBatchFailureResponse;
 import com.chump.billing.dto.response.BillingResponse;
 import com.chump.billing.service.BillingService;
 import com.chump.billing.service.query.BillingFailureQueryService;
+import com.chump.rental.dto.request.ManualBillingRequest;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +40,8 @@ public class BillingController {
     @PostMapping("/manual")
     @PreAuthorize("hasAuthority('SCOPE_billing:manage_admin')")
     public ResponseEntity<BillingResponse> postManualBatching(
-            @RequestParam(defaultValue = "false", required = false) boolean failedOnly
+            @RequestBody ManualBillingRequest request
     ) {
-        return ResponseEntity.ok(billingService.manualBilling(failedOnly));
+        return ResponseEntity.ok(billingService.manualBilling(request.isFailedOnly()));
     }
 }

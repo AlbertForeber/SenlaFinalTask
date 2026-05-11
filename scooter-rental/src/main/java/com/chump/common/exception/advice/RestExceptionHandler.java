@@ -1,7 +1,6 @@
 package com.chump.common.exception.advice;
 
 import com.chump.common.dto.response.ErrorResponse;
-import com.chump.common.exception.NoSuchEntityException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -69,23 +68,11 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(
-            AuthenticationException exception
-    ) {
-        String error = "Authentication Exception";
-        String message = "Error while authenticating has occurred";
-
-        // Проверка на неправильный username, выдаем одно и то же сообщение
-        // позволяет избежать information disclosure
-        if (exception.getCause() instanceof NoSuchEntityException) {
-            error = "Bad credentials";
-            message = "Check password and username are correct";
-        }
-
+    public ResponseEntity<ErrorResponse> handleAuthenticationException() {
         return new ResponseEntity<>(ErrorResponse.builder()
                 .status(401)
-                .error(error)
-                .message(message)
+                .error("Authentication Exception")
+                .message("Error while authenticating has occurred")
                 .build(), HttpStatus.UNAUTHORIZED);
     }
 
@@ -98,7 +85,6 @@ public class RestExceptionHandler {
                 .stream()
                 .map(error -> error.getPropertyPath() + ": " + error.getMessage())
                 .toList();
-
 
         return new ResponseEntity<>(ErrorResponse.builder()
                 .status(400)

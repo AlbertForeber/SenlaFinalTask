@@ -2,9 +2,11 @@ package com.chump.auth.dto.command;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Builder
 @Getter
+@ToString
 public class LoginCommand {
 
     private String username;

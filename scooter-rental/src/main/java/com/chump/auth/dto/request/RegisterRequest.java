@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class RegisterRequest {
 
     @Trimmed(message = "Field 'username' must not contain trailing spaces")
-    @NotNull(message = "Field 'username' must not be empty")
+    @NotBlank(message = "Field 'username' must not be empty")
     @Size(min = 3, max = 20, message = "Username must be between 3 to 20 characters long")
     private String username;
 
@@ -27,7 +27,7 @@ public class RegisterRequest {
     private LocalDate dateOfBirth;
 
     @NotBlank(message = "Field 'email' must not be empty")
-    @Size(min = 4, max = 100, message = "Email must be between 6 and 100 characters long")
+    @Size(min = 6, max = 100, message = "Email must be between 6 and 100 characters long")
     @Email(message = "Field 'email' must contain well-formed email address")
     private String email;
 }

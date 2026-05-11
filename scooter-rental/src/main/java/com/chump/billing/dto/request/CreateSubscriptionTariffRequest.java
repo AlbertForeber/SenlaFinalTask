@@ -1,5 +1,6 @@
 package com.chump.billing.dto.request;
 
+import com.chump.common.validation.Trimmed;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,8 @@ import java.math.BigDecimal;
 @Setter
 public class CreateSubscriptionTariffRequest {
 
-    @NotEmpty(message = "Field 'name' must not be empty")
+    @NotBlank(message = "Field 'name' must not be empty")
+    @Trimmed(message = "Field 'name' must not contain trailing spaces")
     @Size(max = 256, message = "Tariff name must be less than 256")
     private String name;
 
@@ -19,6 +21,6 @@ public class CreateSubscriptionTariffRequest {
     private BigDecimal basePrice;
 
     @NotNull(message = "Field 'durationDays' must not be empty")
-    @PositiveOrZero(message = "Subscription duration in days must be positive value")
+    @Positive(message = "Subscription duration in days must be positive value")
     private Integer durationDays;
 }

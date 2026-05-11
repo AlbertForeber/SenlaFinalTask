@@ -8,6 +8,7 @@ import com.chump.user.mapper.UserMapper;
 import com.chump.user.model.User;
 import com.chump.user.model.UserProfile;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +32,7 @@ public class UserQueryService {
     @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
         return userDao.findByUsernameWithScopes(username).orElseThrow(
-                () -> new NoSuchEntityException("No user found with username: " + username)
+                () -> new UsernameNotFoundException("No user found with username: " + username)
         );
     }
 }
