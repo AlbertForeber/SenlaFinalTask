@@ -1,4 +1,4 @@
-package com.chump.user.query;
+package com.chump.user.service.query;
 
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.user.dao.RoleDao;

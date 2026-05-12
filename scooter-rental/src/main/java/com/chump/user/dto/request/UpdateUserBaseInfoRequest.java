@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Setter
 public class UpdateUserBaseInfoRequest {
 
-    @Size(min = 4, max = 100, message = "Email must be between 6 and 100 characters long")
+    @Size(min = 6, max = 100, message = "Email must be between 6 and 100 characters long")
     @Email(message = "Field 'email' must contain well-formed email address")
     private String email;
 

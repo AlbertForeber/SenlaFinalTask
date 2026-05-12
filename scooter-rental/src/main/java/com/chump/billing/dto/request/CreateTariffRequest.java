@@ -19,6 +19,6 @@ public class CreateTariffRequest {
     private BigDecimal basePrice;
 
     @NotNull(message = "Field 'interval' must not be empty")
-    @PositiveOrZero(message = "Billing interval in minutes must be positive value")
+    @Positive(message = "Billing interval in minutes must be positive value")
     private Integer interval;
 }

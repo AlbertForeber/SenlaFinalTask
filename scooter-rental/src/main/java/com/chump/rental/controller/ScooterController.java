@@ -110,7 +110,7 @@ public class ScooterController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_scooter:view')")
-    @PostAuthorize("hasAuthority('SCOPE_scooter:view_by_status') || returnObject.body.status == 'FREE'")
+    @PostAuthorize("hasAuthority('SCOPE_scooter:view_by_status') || returnObject.body.status.name() == 'FREE'")
     public ResponseEntity<ScooterResponse> getScooterInfo(
             @PathVariable Integer id
     ) {

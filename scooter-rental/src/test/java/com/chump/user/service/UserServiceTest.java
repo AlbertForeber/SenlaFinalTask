@@ -1,4 +1,4 @@
-package com.chump.user;
+package com.chump.user.service;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
 import com.chump.rental.dao.TripDao;
@@ -11,7 +11,6 @@ import com.chump.user.dto.command.UpdateUserProtectedInfoCommand;
 import com.chump.user.mapper.UserMapper;
 import com.chump.user.model.User;
 import com.chump.user.model.UserProfile;
-import com.chump.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

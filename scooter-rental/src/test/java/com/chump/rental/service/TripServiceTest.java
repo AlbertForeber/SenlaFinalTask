@@ -1,4 +1,4 @@
-package com.chump.rental;
+package com.chump.rental.service;
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
@@ -7,7 +7,6 @@ import com.chump.notification.service.EmailService;
 import com.chump.rental.dao.TripDao;
 import com.chump.rental.model.Trip;
 import com.chump.rental.model.status.TripStatus;
-import com.chump.rental.service.TripService;
 import com.chump.user.dao.UserProfileDao;
 import com.chump.user.model.User;
 import com.chump.user.model.UserProfile;

@@ -1,6 +1,7 @@
 package com.chump.rental.dto.request;
 
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class RentScooterRequest {
 
-    @PositiveOrZero(message = "Tariff ID must not be a negative number")
-    private int tariffId;
+    @NotNull(message = "Field 'tariffId' must not be empty")
+    @Positive(message = "Tariff ID must not be a positive number")
+    private Integer tariffId;
 }

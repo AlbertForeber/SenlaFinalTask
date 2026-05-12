@@ -1,4 +1,4 @@
-package com.chump.user;
+package com.chump.user.service;
 
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
@@ -9,7 +9,6 @@ import com.chump.user.dto.command.RoleCommand;
 import com.chump.user.mapper.RoleMapper;
 import com.chump.user.model.Role;
 import com.chump.user.model.Scope;
-import com.chump.user.service.RoleService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

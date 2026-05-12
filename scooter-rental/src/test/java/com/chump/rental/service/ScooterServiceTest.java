@@ -1,4 +1,4 @@
-package com.chump.rental;
+package com.chump.rental.service;
 
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
@@ -13,7 +13,6 @@ import com.chump.rental.mapper.ScooterMapper;
 import com.chump.rental.model.Scooter;
 import com.chump.rental.model.status.ScooterStatus;
 import com.chump.rental.repo.ScooterRepository;
-import com.chump.rental.service.ScooterService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

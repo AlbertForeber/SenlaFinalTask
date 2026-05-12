@@ -125,7 +125,7 @@ public class SubscriptionControllerTest {
     @Tag("integration")
     @DisplayName("Get subscriptions endpoint should return validation exception error response, if page is not positive")
     @WithMockUserId(scopes = "SCOPE_tariff:view")
-    public void getFailuresShouldReturnErrorWhenPageIsNotPositive() throws Exception {
+    public void getSubscriptionsShouldReturnErrorWhenPageIsNotPositive() throws Exception {
         mockMvc.perform(get("/api/subscriptions")
                         .param("page",  "0"))
                 .andExpect(status().isBadRequest())
@@ -139,7 +139,7 @@ public class SubscriptionControllerTest {
     @Tag("integration")
     @DisplayName("Get subscriptions endpoint should return validation exception error response, if page size is not positive")
     @WithMockUserId(scopes = "SCOPE_tariff:view")
-    public void getFailuresShouldReturnErrorWhenPageSizeIsNotPositive() throws Exception {
+    public void getSubscriptionsShouldReturnErrorWhenPageSizeIsNotPositive() throws Exception {
         mockMvc.perform(get("/api/subscriptions")
                         .param("pageSize",  "0"))
                 .andExpect(status().isBadRequest())
@@ -333,7 +333,7 @@ public class SubscriptionControllerTest {
     @Tag("integration")
     @DisplayName("Post subscription endpoint should return validation exception error response, if subscription name's too big")
     @WithMockUserId(scopes = "SCOPE_tariff:manage")
-    public void postSubscriptionShouldReturnErrorWhenNameTooBig() throws Exception {
+    public void postSubscriptionShouldReturnErrorWhenNameTooLong() throws Exception {
         CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
         request.setName("12345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567" +
                 "812345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567812345678" +
@@ -396,7 +396,7 @@ public class SubscriptionControllerTest {
     @Tag("integration")
     @DisplayName("Post subscription endpoint should return validation exception error response, if base price is too big")
     @WithMockUserId(scopes = "SCOPE_tariff:manage")
-    public void postSubscriptionShouldReturnErrorWhenBasePriceTooBig() throws Exception {
+    public void postSubscriptionShouldReturnErrorWhenBasePriceTooLong() throws Exception {
         CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
         request.setName("test");
         request.setBasePrice(BigDecimal.valueOf(100001));
@@ -434,6 +434,26 @@ public class SubscriptionControllerTest {
 
     @Test
     @Tag("integration")
+    @DisplayName("Post subscription endpoint should return validation exception error response, if duration days is not positive")
+    @WithMockUserId(scopes = "SCOPE_tariff:manage")
+    public void postSubscriptionShouldReturnErrorWhenNotPositiveDurationDays() throws Exception {
+        CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
+        request.setName("test");
+        request.setBasePrice(BigDecimal.ZERO);
+        request.setDurationDays(0);
+
+        mockMvc.perform(post("/api/subscriptions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation exception"))
+                .andExpect(jsonPath("$.details[0]").value(containsString("durationDays")));
+
+        verifyNoInteractions(subscriptionService);
+    }
+
+    @Test
+    @Tag("integration")
     @DisplayName("Patch subscription endpoint should return unauthorized error response, if auth hasn't 'tariff:manage' scope")
     public void patchSubscriptionShouldReturnErrorWhenNoTariffManage() throws Exception {
         mockMvc.perform(patch("/api/subscriptions/1"))
@@ -458,15 +478,13 @@ public class SubscriptionControllerTest {
 
     @Test
     @Tag("integration")
-    @DisplayName("Post subscription endpoint should return validation exception error response, if duration days is empty")
+    @DisplayName("Post subscription endpoint should return validation exception error response, if duration days is not positive")
     @WithMockUserId(scopes = "SCOPE_tariff:manage")
-    public void patchSubscriptionShouldReturnErrorWhenEmptyDurationDays() throws Exception {
-        CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
-        request.setName("test");
-        request.setBasePrice(BigDecimal.ZERO);
-        request.setDurationDays(null);
+    public void patchSubscriptionShouldReturnErrorWhenNotPositiveDurationDays() throws Exception {
+        UpdateSubscriptionTariffRequest request = new UpdateSubscriptionTariffRequest();
+        request.setDurationDays(0);
 
-        mockMvc.perform(post("/api/subscriptions")
+        mockMvc.perform(patch("/api/subscriptions/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())

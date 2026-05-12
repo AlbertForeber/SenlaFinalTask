@@ -1,4 +1,4 @@
-package com.chump.rental.query;
+package com.chump.rental.service.query;
 
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.rental.dao.ScooterModelDao;

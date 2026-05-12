@@ -1,4 +1,4 @@
-package com.chump.rental;
+package com.chump.rental.service;
 
 import com.chump.billing.dao.TariffDao;
 import com.chump.billing.model.Tariff;
@@ -14,7 +14,6 @@ import com.chump.rental.model.Trip;
 import com.chump.rental.model.status.ScooterStatus;
 import com.chump.rental.model.status.TripStatus;
 import com.chump.rental.repo.ScooterRepository;
-import com.chump.rental.service.RentalService;
 import com.chump.user.dao.UserProfileDao;
 import com.chump.user.dao.UserSubscriptionDao;
 import com.chump.user.model.User;

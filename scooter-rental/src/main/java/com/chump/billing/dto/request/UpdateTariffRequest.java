@@ -16,6 +16,6 @@ public class UpdateTariffRequest {
     @Digits(integer = 5, fraction = 2, message = "5 digits total with 2 digits in the fractional part are allowed")
     private BigDecimal basePrice;
 
-    @PositiveOrZero(message = "Billing interval in minutes must be positive value")
+    @Positive(message = "Billing interval in minutes must be positive value")
     private Integer interval;
 }
