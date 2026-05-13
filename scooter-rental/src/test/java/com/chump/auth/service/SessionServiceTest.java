@@ -2,10 +2,9 @@ package com.chump.auth.service;
 
 import com.chump.auth.dao.SessionDao;
 import com.chump.auth.model.Session;
-import com.chump.auth.service.SessionService;
 import com.chump.common.exception.AuthException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.notification.service.EmailService;
 import com.chump.user.dao.UserProfileDao;
@@ -224,7 +223,7 @@ public class SessionServiceTest {
     public void terminateShouldThrowWhenInvalidUserId() {
         when(sessionDao.findById(any())).thenReturn(Optional.of(session));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> sessionService.terminateSession(1, 2));
     }
 }

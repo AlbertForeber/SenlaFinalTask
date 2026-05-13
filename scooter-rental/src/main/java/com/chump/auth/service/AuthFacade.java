@@ -7,7 +7,7 @@ import com.chump.auth.mapper.AuthMapper;
 import com.chump.auth.model.Session;
 import com.chump.common.exception.AuthException;
 import com.chump.common.exception.NoRequiredEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dao.UserDao;
 import com.chump.user.dao.UserProfileDao;
@@ -61,7 +61,7 @@ public class AuthFacade {
     @Transactional
     public TokenResponse register(RegisterCommand command) {
         if (userDao.existsByUsername(command.getUsername())) {
-            throw new UnavaliableActionException("User with such username already exists");
+            throw new UnavailableActionException("User with such username already exists");
         }
 
         User user = createUser(command);
@@ -99,7 +99,7 @@ public class AuthFacade {
 
     private User createUser(RegisterCommand command) {
         Role defaultRole = roleDao.getDefaultRole().orElseThrow(
-                () -> new NoRequiredEntityException("No default role found. Contact support service")
+                () -> new NoRequiredEntityException("No default role found")
         );
 
         User user = authMapper.toUserEntity(command, defaultRole);

@@ -2,7 +2,7 @@ package com.chump.billing.service;
 
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.billing.dao.SubscriptionTariffDao;
 import com.chump.billing.dao.TariffDao;
 import com.chump.billing.dto.command.CreateSubscriptionTariffCommand;
@@ -46,13 +46,13 @@ public class SubscriptionService {
     @Transactional
     public SubscribedResponse subscribe(int tariffId, int userId) {
         if (userSubscriptionDao.findById(userId).isPresent()) {
-            throw new UnavaliableActionException(
+            throw new UnavailableActionException(
                     "Unable to subscribe when there is an active subscription. Please unsubscribe first"
             );
         }
 
         if (!tripDao.findOngoingByUserId(userId).isEmpty()) {
-            throw new UnavaliableActionException(
+            throw new UnavailableActionException(
                     "Unable change subscription with ongoing trips. Please finish them first"
             );
         }
@@ -68,7 +68,7 @@ public class SubscriptionService {
         );
 
         if (profile.getBalance().compareTo(subscriptionTariff.getTariff().getBasePrice()) < 0) {
-            throw new UnavaliableActionException("Not enough money to subscribe");
+            throw new UnavailableActionException("Not enough money to subscribe");
         }
 
         UserSubscription userSubscription = UserSubscription.builder()
@@ -91,7 +91,7 @@ public class SubscriptionService {
     @Transactional
     public void unsubscribe(int userId) {
         if (!tripDao.findOngoingByUserId(userId).isEmpty()) {
-            throw new UnavaliableActionException(
+            throw new UnavailableActionException(
                     "Unable change subscription with ongoing trips. Please finish them first"
             );
         }
@@ -144,7 +144,7 @@ public class SubscriptionService {
 
         if (!subscriptions.isEmpty()) {
             if (!isForce) {
-                throw new UnavaliableActionException("There're active subscriptions for this tariff. " +
+                throw new UnavailableActionException("There're active subscriptions for this tariff. " +
                         "Use 'force=true' to refund before deleting");
             }
 

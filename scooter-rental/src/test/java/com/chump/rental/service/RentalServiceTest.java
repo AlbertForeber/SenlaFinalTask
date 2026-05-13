@@ -4,7 +4,7 @@ import com.chump.billing.dao.TariffDao;
 import com.chump.billing.model.Tariff;
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.*;
 import com.chump.rental.kafka.ScooterProducer;
@@ -89,7 +89,7 @@ public class RentalServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.rentScooter(1, 1, 1));
     }
 
@@ -145,7 +145,7 @@ public class RentalServiceTest {
                 UserSubscription.builder().build()
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.rentScooter(1, 1, 1));
     }
 
@@ -253,7 +253,7 @@ public class RentalServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.rentScooter(1, 1, 1));
     }
 
@@ -293,7 +293,7 @@ public class RentalServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.rentScooter(1, 1, 1));
     }
 
@@ -333,7 +333,7 @@ public class RentalServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.rentScooter(1, 1, 1));
     }
 
@@ -412,7 +412,7 @@ public class RentalServiceTest {
                 ).build()
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.pauseScooter(1, 1));
     }
 
@@ -438,7 +438,7 @@ public class RentalServiceTest {
                 ).build()
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.resumeScooter(1, 1));
     }
 
@@ -468,7 +468,7 @@ public class RentalServiceTest {
         ));
         when(rentalSpotDao.isInParkingRentalSpot(any())).thenReturn(false);
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.returnScooter(1, 1, false));
     }
 

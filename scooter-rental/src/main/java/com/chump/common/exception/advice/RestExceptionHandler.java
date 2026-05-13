@@ -1,10 +1,15 @@
 package com.chump.common.exception.advice;
 
 import com.chump.common.dto.response.ErrorResponse;
+import com.chump.common.exception.DataManipulationException;
+import com.chump.common.exception.NoRequiredEntityException;
+import com.chump.common.exception.NoSuchEntityException;
+import com.chump.common.exception.UnavailableActionException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +17,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,6 +27,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class RestExceptionHandler {
 
@@ -128,6 +135,17 @@ public class RestExceptionHandler {
                 .build(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleArgumentTypeMismatch(
+            HttpMediaTypeNotSupportedException exception
+    ) {
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .status(415)
+                .error("Type not supported exception")
+                .message("The only supported type is JSON")
+                .build(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
     private @Nullable String getHttpMessageNotReadableDetails(@Nullable Throwable cause) {
         return cause == null ? null :
                 cause instanceof InvalidFormatException ?
@@ -141,16 +159,70 @@ public class RestExceptionHandler {
     }
 
     // ------------ ОБРАБОТКА КАСТОМНЫХ ИСКЛЮЧЕНИЙ ------------
-    // TODO заменить
-//    @ExceptionHandler(Exception.class)
-//    private ResponseEntity<ErrorResponse> handleAny(
-//            Exception exception
-//    ) {
-//        return new ResponseEntity<>(ErrorResponse.builder()
-//                .status(500)
-//                .error(exception.getClass().toString())
-//                .message(exception.getMessage())
-//                .details(Collections.singletonList("Temp custom exception handler"))
-//                .build(), HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+    @ExceptionHandler(NoRequiredEntityException.class)
+    private ResponseEntity<ErrorResponse> handleNoRequiredEntityException(
+            NoRequiredEntityException exception
+    ) {
+        log.error("Required entity not found: {}", exception.getMessage());
+
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .status(500)
+                .error("No required entity exception")
+                .message("Some of required data was not found. Please contact support team")
+                .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(NoSuchEntityException.class)
+    private ResponseEntity<ErrorResponse> handleNoSuchEntityException(
+            NoSuchEntityException exception
+    ) {
+        log.warn("Requested entity not found: {}", exception.getMessage());
+
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .status(400)
+                .error("No such entity exception")
+                .message("Requested data was not found")
+                .details(Collections.singletonList(exception.getMessage()))
+                .build(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnavailableActionException.class)
+    private ResponseEntity<ErrorResponse> handleUnavailableActionException(
+            UnavailableActionException exception
+    ) {
+        log.warn("Unavailable action tried to perform: {}", exception.getMessage());
+
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .status(400)
+                .error("Unavailable action exception")
+                .message("You are not able to perform such action")
+                .details(Collections.singletonList(exception.getMessage()))
+                .build(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataManipulationException.class)
+    private ResponseEntity<ErrorResponse> handleDataManipulationException(
+            DataManipulationException exception
+    ) {
+        log.error("Data manipulation exception occurred", exception);
+
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .status(500)
+                .error("Data manipulation exception")
+                .message("Something went wrong during processing your request, please try later")
+                .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(Exception.class)
+    private ResponseEntity<ErrorResponse> handleAny(
+            Exception exception
+    ) {
+        log.error("Unexpected error occurred", exception);
+
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .status(500)
+                .error("Internal server error")
+                .message("Something went wrong, please try again later")
+                .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

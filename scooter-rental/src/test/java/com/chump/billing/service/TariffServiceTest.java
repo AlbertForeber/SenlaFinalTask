@@ -4,9 +4,8 @@ import com.chump.billing.dao.TariffDao;
 import com.chump.billing.dto.command.TariffCommand;
 import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.model.Tariff;
-import com.chump.billing.service.TariffService;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -58,7 +57,7 @@ public class TariffServiceTest {
                 ))
         );
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> tariffService.updateTariff(1, tariffCommand));
     }
 
@@ -87,7 +86,7 @@ public class TariffServiceTest {
                 ))
         );
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> tariffService.deleteTariff(1));
     }
 }

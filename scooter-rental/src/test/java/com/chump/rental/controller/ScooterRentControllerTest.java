@@ -109,11 +109,11 @@ public class ScooterRentControllerTest {
 
     @Test
     @Tag("integration")
-    @DisplayName("Rent scooter endpoint should return validation exception error response, if tariff ID is empty")
+    @DisplayName("Rent scooter endpoint should return validation exception error response, if tariff ID is negative")
     @WithMockUserId(scopes = "SCOPE_scooter:rent")
-    public void rentScooterShouldReturnErrorWhenEmptyTariffId() throws Exception {
+    public void rentScooterShouldReturnErrorWhenNegativeTariffId() throws Exception {
         RentScooterRequest request = new RentScooterRequest();
-        request.setTariffId(null);
+        request.setTariffId(-1);
 
         mockMvc.perform(post("/api/scooters/1/rent")
                         .contentType(MediaType.APPLICATION_JSON)

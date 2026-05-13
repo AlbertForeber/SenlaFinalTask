@@ -6,10 +6,9 @@ import com.chump.billing.mapper.SubscriptionMapper;
 import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.model.SubscriptionTariff;
 import com.chump.billing.model.Tariff;
-import com.chump.billing.service.SubscriptionService;
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.TripDao;
 import com.chump.rental.model.Trip;
@@ -26,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
@@ -55,7 +53,7 @@ public class SubscriptionServiceTest {
     @DisplayName("Subscribe method should throw exception, if user already has a subscription")
     public void subscribeShouldThrowWhenActiveSubscription() {
         when(userSubscriptionDao.findById(anyInt())).thenReturn(Optional.of(UserSubscription.builder().build()));
-        assertThrows(UnavaliableActionException.class, () -> subscriptionService.subscribe(1, 1));
+        assertThrows(UnavailableActionException.class, () -> subscriptionService.subscribe(1, 1));
 
     }
 
@@ -68,7 +66,7 @@ public class SubscriptionServiceTest {
                 Trip.builder().build()
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> subscriptionService.subscribe(1, 1));
     }
 
@@ -121,7 +119,7 @@ public class SubscriptionServiceTest {
                 new UserProfile(1, null, null, null, BigDecimal.ZERO, BigDecimal.ZERO)
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> subscriptionService.subscribe(1, 1));
     }
 
@@ -133,7 +131,7 @@ public class SubscriptionServiceTest {
                 Trip.builder().build()
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> subscriptionService.unsubscribe(1));
     }
 

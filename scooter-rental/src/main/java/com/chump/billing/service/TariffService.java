@@ -1,7 +1,7 @@
 package com.chump.billing.service;
 
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.billing.dao.TariffDao;
 import com.chump.billing.dto.command.TariffCommand;
 import com.chump.billing.dto.response.TariffDetailedResponse;
@@ -29,7 +29,7 @@ public class TariffService {
         );
 
         if (command.getInterval() != null && tariff.getBillingIntervalMinutes() == null) {
-            throw new UnavaliableActionException("Forbidden to change interval of subscription");
+            throw new UnavailableActionException("Forbidden to change interval of subscription");
         }
 
         tariffMapper.updateTariffFromCommand(command, tariff);
@@ -59,7 +59,7 @@ public class TariffService {
         );
 
         if (tariff.getBillingIntervalMinutes() == null) {
-            throw new UnavaliableActionException("Forbidden to delete subscription. Use /api/subscriptions instead");
+            throw new UnavailableActionException("Forbidden to delete subscription. Use /api/subscriptions instead");
         }
 
         tariffDao.delete(tariffId);

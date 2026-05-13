@@ -2,7 +2,7 @@ package com.chump.rental.service;
 
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.common.utils.TripPriceCalculator;
 import com.chump.notification.service.EmailService;
@@ -37,12 +37,12 @@ public class TripService {
         );
 
         if (trip.getStatus() == TripStatus.ONGOING) {
-            throw new UnavaliableActionException("Forbidden to refund ongoing trip with id: " + tripId);
+            throw new UnavailableActionException("Forbidden to refund ongoing trip with id: " + tripId);
         }
 
         // Не используем equalTo, чтобы игнорировать разницу в scale
         if (trip.getTotalPrice().compareTo(BigDecimal.ZERO) == 0) {
-            throw new UnavaliableActionException("Trip with id " + tripId + " is already fully refunded");
+            throw new UnavailableActionException("Trip with id " + tripId + " is already fully refunded");
         }
 
         UserProfile userProfile = userProfileDao.findById(trip.getUser().getId()).orElseThrow(

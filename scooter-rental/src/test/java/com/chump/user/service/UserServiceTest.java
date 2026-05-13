@@ -1,6 +1,6 @@
 package com.chump.user.service;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.rental.dao.TripDao;
 import com.chump.rental.model.Trip;
 import com.chump.user.dao.RoleDao;
@@ -98,7 +98,7 @@ public class UserServiceTest {
                 Trip.builder().build()
         ));
 
-        assertThrows(UnavaliableActionException.class, () -> service.deleteUser(1, false));
+        assertThrows(UnavailableActionException.class, () -> service.deleteUser(1, false));
     }
 
     @Test
@@ -116,6 +116,6 @@ public class UserServiceTest {
             )
         ));
 
-        assertThrows(UnavaliableActionException.class, () -> service.deleteUser(1, false));
+        assertThrows(UnavailableActionException.class, () -> service.deleteUser(1, false));
     }
 }

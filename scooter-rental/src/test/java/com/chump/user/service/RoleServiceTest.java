@@ -1,7 +1,7 @@
 package com.chump.user.service;
 
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dao.ScopeDao;
 import com.chump.user.dao.UserDao;
@@ -110,7 +110,7 @@ public class RoleServiceTest {
     public void deleteRoleShouldThrowWhenUsersWithIt() {
         when(userDao.findIdsByRoleId(anyInt())).thenReturn(Collections.singletonList(1));
 
-        UnavaliableActionException exception = assertThrows(UnavaliableActionException.class,
+        UnavailableActionException exception = assertThrows(UnavailableActionException.class,
                 () -> service.deleteRole(1));
         assertTrue(exception.getMessage().contains("1"),
                 "Exception message should contain IDs of users with this role");

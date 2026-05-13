@@ -2,7 +2,7 @@ package com.chump.rental.service;
 
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.ScooterModelDao;
 import com.chump.rental.dao.ScooterPendingRedisDao;
@@ -56,7 +56,7 @@ public class ScooterService {
         );
 
         if (scooter.getStatus() != ScooterStatus.FREE) {
-            throw new UnavaliableActionException("Unable to start maintenance for scooter with status: "
+            throw new UnavailableActionException("Unable to start maintenance for scooter with status: "
                     + scooter.getStatus());
         }
 
@@ -75,7 +75,7 @@ public class ScooterService {
         );
 
         if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
-            throw new UnavaliableActionException("Unable to finish maintenance for scooter without maintenance status");
+            throw new UnavailableActionException("Unable to finish maintenance for scooter without maintenance status");
         }
 
         scooter.setStatus(ScooterStatus.FREE);
@@ -93,7 +93,7 @@ public class ScooterService {
         );
 
         if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
-            throw new UnavaliableActionException("Start maintenance to update scooter's info");
+            throw new UnavailableActionException("Start maintenance to update scooter's info");
         }
 
         Integer modelId = command.getModelId();
@@ -116,7 +116,7 @@ public class ScooterService {
         );
 
         if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
-            throw new UnavaliableActionException("Start maintenance to replace scooter's battery");
+            throw new UnavailableActionException("Start maintenance to replace scooter's battery");
         }
 
         scooter.setBattery(100);
@@ -137,7 +137,7 @@ public class ScooterService {
         );
 
         if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
-            throw new UnavaliableActionException("Start maintenance to write off scooter");
+            throw new UnavailableActionException("Start maintenance to write off scooter");
         }
 
         log.info("Successfully wrote off scooter with id: {}", scooterId);

@@ -2,7 +2,7 @@ package com.chump.rental.service;
 
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.ScooterModelDao;
 import com.chump.rental.dao.ScooterPendingRedisDao;
@@ -79,7 +79,7 @@ public class ScooterServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.beginMaintenance(1));
     }
 
@@ -128,7 +128,7 @@ public class ScooterServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class, () -> service.finishMaintenance(1));
+        assertThrows(UnavailableActionException.class, () -> service.finishMaintenance(1));
     }
 
     @Test
@@ -176,7 +176,7 @@ public class ScooterServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.updateScooterInfo(1, UpdateScooterInfoCommand.builder().build()));
     }
 
@@ -228,7 +228,7 @@ public class ScooterServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.rechargeScooterBattery(1));
     }
 
@@ -284,7 +284,7 @@ public class ScooterServiceTest {
                 )
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.writeOffScooter(1));
     }
 

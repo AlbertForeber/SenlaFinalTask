@@ -1,7 +1,7 @@
 package com.chump.user.service;
 
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.TripDao;
 import com.chump.user.dao.RoleDao;
@@ -80,12 +80,12 @@ public class UserService {
     @Transactional
     public void deleteUser(int userId, boolean isForce) {
         if (!tripDao.findOngoingByUserId(userId).isEmpty()) {
-            throw new UnavaliableActionException("Forbidden to delete user with ongoing trips");
+            throw new UnavailableActionException("Forbidden to delete user with ongoing trips");
         }
 
         userProfileDao.findById(userId).ifPresent(userProfile -> {
             if (!isForce && userProfile.getBalance().longValue() > 0) {
-                throw new UnavaliableActionException("Forbidden to delete user with not zero balance. " +
+                throw new UnavailableActionException("Forbidden to delete user with not zero balance. " +
                         "Use 'force=true' to force delete");
             }
         });

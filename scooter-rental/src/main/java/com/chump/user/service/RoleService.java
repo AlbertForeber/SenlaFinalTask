@@ -1,7 +1,7 @@
 package com.chump.user.service;
 
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dao.ScopeDao;
@@ -82,7 +82,7 @@ public class RoleService {
     public void deleteRole(int roleId) {
         List<Integer> usersIdsWithRole = userDao.findIdsByRoleId(roleId);
         if (!usersIdsWithRole.isEmpty()) {
-            throw new UnavaliableActionException(
+            throw new UnavailableActionException(
                     "Forbidden to delete role when there're users with it. User IDs:" + usersIdsWithRole
             );
         }

@@ -2,7 +2,7 @@ package com.chump.rental.service;
 
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.common.utils.TripPriceCalculator;
 import com.chump.rental.dao.*;
@@ -78,7 +78,7 @@ public class RentalService {
         boolean isInterval = tariff.getBillingIntervalMinutes() != null;
 
         if (isInterval && userProfile.getBalance().longValue() < max(minToStart, tariff.getBasePrice().longValue())) {
-            throw new UnavaliableActionException("Not enough money to rent a scooter");
+            throw new UnavailableActionException("Not enough money to rent a scooter");
         }
 
         scooter.setStatus(ScooterStatus.ACTIVATING);
@@ -160,7 +160,7 @@ public class RentalService {
         );
 
         if (scooter.getStatus() != ScooterStatus.FREE) {
-            throw new UnavaliableActionException("Forbidden to rent occupied scooter");
+            throw new UnavailableActionException("Forbidden to rent occupied scooter");
         }
 
         return scooter;
@@ -172,7 +172,7 @@ public class RentalService {
         );
 
         if (!trip.getUser().getId().equals(userId)) {
-            throw new UnavaliableActionException("Forbidden to manage someone else's scooter");
+            throw new UnavailableActionException("Forbidden to manage someone else's scooter");
         }
 
         return trip;
@@ -206,7 +206,7 @@ public class RentalService {
 
         // Проверка зоны парковки
         if (!rentalSpotDao.isInParkingRentalSpot(scooter.getLocation()) && !isForce) {
-            throw new UnavaliableActionException("Scooter should be in parking zone");
+            throw new UnavailableActionException("Scooter should be in parking zone");
         }
 
         UserProfile userProfile = userProfileDao.findById(userId).orElseThrow(
@@ -233,7 +233,7 @@ public class RentalService {
         UserSubscription userSubscription = userSubscriptionDao.findByIdWithTariff(userId).orElse(null);
 
         if (tariffId != 0 && userSubscription != null) {
-            throw new UnavaliableActionException("Forbidden to choose tariff with active subscription");
+            throw new UnavailableActionException("Forbidden to choose tariff with active subscription");
         }
 
         Tariff tariff = userSubscription != null ? userSubscription.getTariff() :
@@ -243,11 +243,11 @@ public class RentalService {
                         )
                 : tariffDao.findDefaultTariff()
                         .orElseThrow(
-                                () -> new NoRequiredEntityException("No default tariff found. Contact support service")
+                                () -> new NoRequiredEntityException("No default tariff found")
                         );
 
         if (tariff.getBillingIntervalMinutes() == null && userSubscription == null) {
-            throw new UnavaliableActionException("Forbidden to choose subscription tariff for trip. Use /api/subscriptions instead");
+            throw new UnavailableActionException("Forbidden to choose subscription tariff for trip. Use /api/subscriptions instead");
         }
 
         return new UserContext(userProfile, tariff);

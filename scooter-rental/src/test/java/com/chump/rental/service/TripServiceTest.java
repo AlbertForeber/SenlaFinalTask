@@ -1,7 +1,7 @@
 package com.chump.rental.service;
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.notification.service.EmailService;
 import com.chump.rental.dao.TripDao;
@@ -58,7 +58,7 @@ public class TripServiceTest {
                         .build()
         ));
 
-        assertThrows(UnavaliableActionException.class,
+        assertThrows(UnavailableActionException.class,
                 () -> service.refundTrip(1, 0));
     }
 
@@ -73,7 +73,7 @@ public class TripServiceTest {
                         .build()
         ));
 
-        UnavaliableActionException exception = assertThrows(UnavaliableActionException.class,
+        UnavailableActionException exception = assertThrows(UnavailableActionException.class,
                 () -> service.refundTrip(1, 0));
         assertTrue(exception.getMessage().contains("1"),
                 "Exception message should contain refunded trip ID");

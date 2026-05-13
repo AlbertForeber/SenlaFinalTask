@@ -4,7 +4,7 @@ import com.chump.auth.dao.SessionDao;
 import com.chump.auth.model.Session;
 import com.chump.common.exception.AuthException;
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.exception.UnavailableActionException;
 import com.chump.common.utils.TransactionUtils;
 import com.chump.notification.service.EmailService;
 import com.chump.user.dao.UserProfileDao;
@@ -114,7 +114,7 @@ public class SessionService {
         );
 
         if (session.getUser().getId() != userId) {
-            throw new UnavaliableActionException("Forbidden to terminate other user session");
+            throw new UnavailableActionException("Forbidden to terminate other user session");
         }
 
         session.setTerminated(true);
