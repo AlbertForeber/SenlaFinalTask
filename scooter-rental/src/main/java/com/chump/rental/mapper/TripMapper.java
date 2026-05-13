@@ -23,6 +23,16 @@ public interface TripMapper {
 
     List<TripConciseResponse> toConsiseResponseList(List<Trip> entityList);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "scooter", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "startedAt", ignore = true)
+    @Mapping(target = "priceAtStart", ignore = true)
+    @Mapping(target = "intervalAtStart", ignore = true)
+    @Mapping(target = "discountAtStart", ignore = true)
+    @Mapping(target = "durationSeconds", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateTripFromRouteData(RouteData routeData, @MappingTarget Trip trip);
 }

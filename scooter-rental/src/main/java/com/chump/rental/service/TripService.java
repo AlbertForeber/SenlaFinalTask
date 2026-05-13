@@ -78,6 +78,10 @@ public class TripService {
 
         trip.setTotalPrice(newPrice);
 
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully refunded trip with id {}", tripId)
+        );
+
         return TripRefundResponse.builder()
                 .userId(userProfile.getId())
                 .newBalance(userProfile.getBalance())

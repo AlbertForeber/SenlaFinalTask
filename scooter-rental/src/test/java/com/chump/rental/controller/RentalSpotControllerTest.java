@@ -276,7 +276,7 @@ public class RentalSpotControllerTest {
 
         RentalSpotDetailedResponse response = new RentalSpotDetailedResponse();
         response.setId(1);
-        when(rentalSpotService.openPoint(any())).thenReturn(response);
+        when(rentalSpotService.openSpot(any())).thenReturn(response);
 
         mockMvc.perform(post("/api/rental-spots")
                         .contentType(MediaType.APPLICATION_JSON)

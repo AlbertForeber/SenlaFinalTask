@@ -2,6 +2,7 @@ package com.chump.user.service;
 
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dao.ScopeDao;
 import com.chump.user.dao.UserDao;
@@ -26,6 +27,7 @@ public class RoleService {
     private final ScopeDao scopeDao;
     private final RoleMapper roleMapper;
     private final UserDao userDao;
+    private final TransactionUtils transactionUtils;
 
     @Transactional
     public RoleWithScopesResponse addRole(RoleCommand command) {
@@ -41,6 +43,11 @@ public class RoleService {
         }
 
         Role role = roleDao.save(roleMapper.toEntity(command, scopes));
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully added role with id: {}", role.getId())
+        );
+
         return roleMapper.toResponseWithScopes(role);
     }
 
@@ -64,6 +71,10 @@ public class RoleService {
         roleDao.batchInsertRoleScopes(roleId, foundIds);
         roleDao.refresh(role); // Несмотря на два запроса, оказалось быстрее, чем запрашивать два JOIN-а
 
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully updated role with id: {}", roleId)
+        );
+
         return roleMapper.toResponseWithScopes(role);
     }
 
@@ -76,6 +87,7 @@ public class RoleService {
             );
         }
 
+        log.info("Successfully deleted role with id: {}", roleId);
         roleDao.delete(roleId);
     }
 }

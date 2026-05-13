@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtService {
@@ -40,13 +42,17 @@ public class JwtService {
         Date now = new Date();
         Date expirationTime = new Date(now.getTime() + this.expirationTime);
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .subject(user.getId().toString())
                 .signWith(getSigningKey())
                 .claims(claims)
                 .issuedAt(now)
                 .expiration(expirationTime)
                 .compact();
+
+        log.info("Successfully created token for user with id: {}", user.getId());
+
+        return token;
     }
 
     public Collection<? extends GrantedAuthority> getScopes(String token) {

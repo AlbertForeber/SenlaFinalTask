@@ -12,6 +12,7 @@ import com.chump.billing.mapper.SubscriptionMapper;
 import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.model.SubscriptionTariff;
 import com.chump.billing.model.Tariff;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.TripDao;
 import com.chump.user.dao.UserProfileDao;
 import com.chump.user.dao.UserSubscriptionDao;
@@ -40,6 +41,7 @@ public class SubscriptionService {
     private final TripDao tripDao;
     private final SubscriptionMapper subscriptionMapper;
     private final TariffMapper tariffMapper;
+    private final TransactionUtils transactionUtils;
 
     @Transactional
     public SubscribedResponse subscribe(int tariffId, int userId) {
@@ -78,6 +80,11 @@ public class SubscriptionService {
 
         profile.setBalance(profile.getBalance().subtract(subscriptionTariff.getTariff().getBasePrice()));
         userSubscriptionDao.save(userSubscription);
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully subscribed for user with id: {} to tariff with id: {}", userId, tariffId)
+        );
+
         return subscriptionMapper.toSubscribedResponse(userSubscription);
     }
 
@@ -90,6 +97,8 @@ public class SubscriptionService {
         }
 
         userSubscriptionDao.delete(userId);
+
+        log.info("Successfully unsubscribed for user with id: {}", userId);
     }
 
     @Transactional
@@ -101,6 +110,13 @@ public class SubscriptionService {
         );
 
         subscriptionTariff.setDurationDays(durationDays);
+
+        transactionUtils.afterCommit(() ->
+                log.info(
+                        "Successfully updated duration days to {} for subscription with id: {}", durationDays, tariffId
+                )
+        );
+
         return subscriptionMapper.toSubscriptionResponse(subscriptionTariff);
     }
 
@@ -110,6 +126,11 @@ public class SubscriptionService {
         tariff = tariffDao.save(tariff); // CascadeType.PERSIST не поможет, т.к. сначала нужно сохранить тариф
 
         SubscriptionTariff subscriptionTariff = subscriptionMapper.toEntity(command, tariff);
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully added subscription tariff with id: {}", subscriptionTariff.getId())
+        );
+
         return subscriptionMapper.toSubscriptionResponse(subscriptionTariffDao.save(subscriptionTariff));
     }
 
@@ -131,12 +152,15 @@ public class SubscriptionService {
         }
 
         tariffDao.delete(tariffId);
+        log.info("Successfully deleted subscription tariff with id: {}", tariffId);
     }
 
     private void refund(List<UserSubscription> subscriptions, SubscriptionTariff subscriptionTariff) {
         final LocalDate now = LocalDate.now();
         final BigDecimal basePrice = subscriptionTariff.getTariff().getBasePrice();
         final Integer durationDays = subscriptionTariff.getDurationDays();
+
+        int refunded = 0;
 
         for (UserSubscription subscription : subscriptions) {
             UserProfile subscriber = subscription.getUserProfile();
@@ -146,6 +170,10 @@ public class SubscriptionService {
                     )).divide(BigDecimal.valueOf(durationDays), 2, RoundingMode.HALF_UP);
 
             subscriber.setBalance(subscriber.getBalance().add(toAdd));
+
+            refunded++;
         }
+
+        log.info("{} users have been refunded after subscription deletion", refunded);
     }
 }

@@ -7,16 +7,20 @@ import com.chump.billing.dto.command.TariffCommand;
 import com.chump.billing.dto.response.TariffDetailedResponse;
 import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.model.Tariff;
+import com.chump.common.utils.TransactionUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TariffService {
 
     private final TariffDao tariffDao;
     private final TariffMapper tariffMapper;
+    private final TransactionUtils transactionUtils;
 
     @Transactional
     public TariffDetailedResponse updateTariff(int tariffId, TariffCommand command) {
@@ -29,12 +33,22 @@ public class TariffService {
         }
 
         tariffMapper.updateTariffFromCommand(command, tariff);
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully updated tariff with id: {}", tariffId)
+        );
+
         return tariffMapper.toDetailedResponse(tariff);
     }
 
     @Transactional
     public TariffDetailedResponse addTariff(TariffCommand command) {
         Tariff tariff = tariffMapper.toEntity(command);
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully added tariff with id: {}", tariff.getId())
+        );
+
         return tariffMapper.toDetailedResponse(tariffDao.save(tariff));
     }
 
@@ -49,5 +63,6 @@ public class TariffService {
         }
 
         tariffDao.delete(tariffId);
+        log.info("Successfully deleted tariff with id: {}", tariffId);
     }
 }

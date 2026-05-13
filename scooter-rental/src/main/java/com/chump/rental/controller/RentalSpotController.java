@@ -92,7 +92,7 @@ public class RentalSpotController {
     public ResponseEntity<RentalSpotDetailedResponse> postRentalSpot(
         @Valid @RequestBody CreateRentalSpotRequest request
     ) {
-        RentalSpotDetailedResponse result = rentalSpotService.openPoint(
+        RentalSpotDetailedResponse result = rentalSpotService.openSpot(
                 rentalSpotMapper.toCreateCommand(request)
         );
         URI location = URI.create("/api/rental-spots/" + result.getId());
@@ -108,7 +108,7 @@ public class RentalSpotController {
             @PathVariable Integer id,
             @Valid @RequestBody UpdateRentalSpotRequest request
     ) {
-        RentalSpotDetailedResponse result = rentalSpotService.updatePointInfo(
+        RentalSpotDetailedResponse result = rentalSpotService.updateSpotInfo(
                 id,
                 rentalSpotMapper.toUpdateCommand(request)
         );

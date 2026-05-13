@@ -2,6 +2,7 @@ package com.chump.user.service;
 
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.TripDao;
 import com.chump.user.dao.RoleDao;
 import com.chump.user.dao.UserDao;
@@ -15,9 +16,11 @@ import com.chump.user.model.Role;
 import com.chump.user.model.User;
 import com.chump.user.model.UserProfile;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -27,6 +30,7 @@ public class UserService {
     private final RoleDao roleDao;
     private final UserMapper mapper;
     private final TripDao tripDao;
+    private final TransactionUtils transactionUtils;
 
     @Transactional
     public UserProfileResponse updateUserBaseInfo(int userId, UpdateUserBaseInfoCommand command) {
@@ -35,6 +39,10 @@ public class UserService {
         );
 
         mapper.updateUserBaseInfoFromCommand(command, result);
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully updated user profile base info for user with id: {}", userId)
+        );
+
         return mapper.toUserProfileResponse(result);
     }
 
@@ -45,6 +53,10 @@ public class UserService {
         );
 
         mapper.updateUserProtectedInfoFromCommand(command, result);
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully updated user profile protected info for user with id: {}", userId)
+        );
+
         return mapper.toUserProfileResponse(result);
     }
 
@@ -58,6 +70,10 @@ public class UserService {
         );
 
         user.setRole(role);
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully updated role for user with id: {}. New role id: {}", userId, roleId)
+        );
+
         return mapper.toUserRoleResponse(user);
     }
 
@@ -74,6 +90,7 @@ public class UserService {
             }
         });
 
+        log.info("Successfully deleted user with id: {}", userId);
         userDao.delete(userId);
     }
 }

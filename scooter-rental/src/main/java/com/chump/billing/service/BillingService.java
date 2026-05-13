@@ -103,6 +103,8 @@ public class BillingService {
             batch = billingBatchFailureItemDao.batchFindNotResolvedWithFailure(batchSize);
         }
 
+        log.info("Manual billing completed. Succeed: {}, failed: {}", successful, failed);
+
         return BillingResponse.builder()
                 .failedDetails(details)
                 .totalSuccess(successful)

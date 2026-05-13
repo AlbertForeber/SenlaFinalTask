@@ -10,6 +10,7 @@ import com.chump.billing.service.SubscriptionService;
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.TripDao;
 import com.chump.rental.model.Trip;
 import com.chump.user.dao.UserProfileDao;
@@ -44,6 +45,7 @@ public class SubscriptionServiceTest {
     @Mock private TripDao tripDao;
     @Mock private SubscriptionMapper subscriptionMapper;
     @Mock private TariffMapper tariffMapper;
+    @Mock private TransactionUtils transactionUtils;
 
     @InjectMocks
     private SubscriptionService subscriptionService;

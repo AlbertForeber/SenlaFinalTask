@@ -38,12 +38,6 @@ import java.util.List;
 
 import static java.lang.Math.max;
 
-// TODO Связь с Kafka
-// TODO + должен отправлять сообщение самокату, что он разблокирован/заблокирован
-// TODO + самокат должен начать отправлять данные местоположения в соответствующий топик
-// TODO        откуда, система должна их считывать и записывать в Redis
-// TODO + если пользователь захочет посмотреть поездку до ее завершения - данные подтягиваются из Redis
-// TODO + после завершения поездки данные отправляются в БД (упростить линию)
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -106,6 +100,8 @@ public class RentalService {
             if (isInterval) {
                 tripTimeLimitRedisDao.setTimeLimit(createdTrip.getId(), calculateTimeLimit(createdTrip, userProfile));
             }
+
+            log.info("Successfully rented scooter with id: {}, user id: {}", scooterId, userId);
         });
 
         return tripMapper.toConciseResponse(createdTrip);
@@ -119,6 +115,8 @@ public class RentalService {
         transactionUtils.afterCommit(() -> {
             scooterPendingRedisDao.setPending(scooterId);
             scooterProducer.sendLock(scooterId);
+
+            log.info("Successfully paused scooter with id: {}, user id: {}", scooterId, userId);
         });
 
         return tripMapper.toConciseResponse(ongoingTrip);
@@ -132,6 +130,8 @@ public class RentalService {
         transactionUtils.afterCommit(() -> {
             scooterPendingRedisDao.setPending(scooterId);
             scooterProducer.sendUnlock(scooterId);
+
+            log.info("Successfully resumed scooter with id: {}, user id: {}", scooterId, userId);
         });
 
         return tripMapper.toConciseResponse(ongoingTrip);
@@ -195,6 +195,8 @@ public class RentalService {
             scooterPendingRedisDao.setPending(scooterId);
             tripTimeLimitRedisDao.deleteTimeLimit(trip.getId());
             scooterProducer.sendLock(scooterId);
+
+            log.info("Successfully returned scooter with id: {}, user id: {}", scooterId, trip.getUser().getId());
         });
     }
 

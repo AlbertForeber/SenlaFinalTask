@@ -6,6 +6,7 @@ import com.chump.auth.service.SessionService;
 import com.chump.common.exception.AuthException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.notification.service.EmailService;
 import com.chump.user.dao.UserProfileDao;
 import com.chump.user.model.User;
@@ -34,6 +35,7 @@ public class SessionServiceTest {
     @Mock private SessionDao sessionDao;
     @Mock private UserProfileDao userProfileDao;
     @Mock private EmailService emailService;
+    @Mock private TransactionUtils transactionUtils;
 
     @InjectMocks
     private SessionService sessionService;

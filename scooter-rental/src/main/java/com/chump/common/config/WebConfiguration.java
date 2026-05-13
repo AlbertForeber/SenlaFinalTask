@@ -20,7 +20,6 @@ import java.util.List;
         @ComponentScan.Filter(type = FilterType.ANNOTATION, value = RestController.class),
         @ComponentScan.Filter(type = FilterType.ANNOTATION, value = Controller.class)
 })
-//@EnableAspectJAutoProxy // TODO (На будущее) YAGNI
 public class WebConfiguration implements WebMvcConfigurer {
 
     private final ObjectMapper objectMapper;

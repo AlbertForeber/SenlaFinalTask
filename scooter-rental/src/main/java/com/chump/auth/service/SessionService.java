@@ -5,6 +5,7 @@ import com.chump.auth.model.Session;
 import com.chump.common.exception.AuthException;
 import com.chump.common.exception.NoSuchEntityException;
 import com.chump.common.exception.UnavaliableActionException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.notification.service.EmailService;
 import com.chump.user.dao.UserProfileDao;
 import com.chump.user.model.User;
@@ -26,6 +27,7 @@ public class SessionService {
     private final SessionDao sessionDao;
     private final UserProfileDao userProfileDao;
     private final EmailService emailService;
+    private final TransactionUtils transactionUtils;
 
     @Value("${auth.refresh-token.expiration-time:604800000}")
     private long expirationTime;
@@ -44,7 +46,10 @@ public class SessionService {
                 .createdAt(now)
                 .build();
 
-        return sessionDao.save(session);
+        session = sessionDao.save(session);
+        log.info("Successfully generated session for user with id: {}", user.getId());
+
+        return session;
     }
 
     @Transactional(noRollbackFor = AuthException.class)
@@ -68,6 +73,10 @@ public class SessionService {
         oldToken.setReplacedByToken(updatedSession);
         oldToken.setTerminated(true);
 
+        transactionUtils.afterCommit(() ->
+            log.info("Successfully rotated session for user with id: {}", oldToken.getUser().getId())
+        );
+
         return updatedSession;
     }
 
@@ -82,6 +91,10 @@ public class SessionService {
         }
 
         session.setTerminated(true);
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully terminated session by token: {}; for user with id: {}", token.substring(0, 7), userId)
+        );
     }
 
     @Transactional
@@ -105,14 +118,23 @@ public class SessionService {
         }
 
         session.setTerminated(true);
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully terminated session by id: {}; for user with id: {}", sessionId, userId)
+        );
     }
 
     @Transactional
     public void terminateAllUserSessions(int userId) {
         sessionDao.terminateByUserId(userId);
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully terminated all sessions for user with id: {}", userId)
+        );
     }
 
     private void handleSessionRefreshTokenReuse(Session session) {
+        log.warn("Refresh token reuse detected for user with id: {}", session.getUser().getId());
         sessionDao.terminateChain(session.getRefreshToken());
 
         int userId = session.getUser().getId();
@@ -127,6 +149,13 @@ public class SessionService {
                 "Your account might be in danger",
                 "It looks like someone else tried to access your account. " +
                         "Please assure that your network is secured"
+        );
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully terminated session chain from {} for user with id: {}, for security reasons",
+                        session.getRefreshToken().substring(0, 7),
+                        userId
+                )
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.chump.rental.service.query;
 
 import com.chump.common.exception.NoSuchEntityException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.rental.dao.ScooterModelDao;
 import com.chump.rental.mapper.ScooterMapper;
 import com.chump.rental.mapper.ScooterModelMapper;
@@ -28,6 +29,7 @@ public class ScooterQueryServiceTest {
     @Mock private ScooterRepository scooterRepository;
     @Mock private ScooterModelDao scooterModelDao;
     @Mock private ScooterMapper scooterMapper;
+    @Mock private TransactionUtils transactionUtils;
 
     @InjectMocks
     private ScooterQueryService service;

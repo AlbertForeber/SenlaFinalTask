@@ -41,6 +41,11 @@ public class ScooterService {
         );
 
         Scooter scooter = mapper.toEntity(command, model);
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully added scooter with id: {}", scooter.getId())
+        );
+
         return mapper.toResponse(scooterRepository.save(scooter));
     }
 
@@ -56,6 +61,10 @@ public class ScooterService {
         }
 
         scooter.setStatus(ScooterStatus.MAINTENANCE);
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully began maintenance for scooter with id: {}", scooterId)
+        );
+
         return mapper.toResponse(scooter);
     }
 
@@ -70,6 +79,10 @@ public class ScooterService {
         }
 
         scooter.setStatus(ScooterStatus.FREE);
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully finished maintenance for scooter with id: {}", scooterId)
+        );
+
         return mapper.toResponse(scooter);
     }
 
@@ -89,6 +102,10 @@ public class ScooterService {
         ) : null;
 
         mapper.updateScooterInfoFromCommand(command, model, scooter);
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully updated info for scooter with id: {}", scooterId)
+        );
+
         return mapper.toResponse(scooter);
     }
 
@@ -104,7 +121,11 @@ public class ScooterService {
 
         scooter.setBattery(100);
         // TODO отправка уведомления в Kafka
-        scooterProducer.sendRecharge(scooterId);
+        transactionUtils.afterCommit(() -> {
+                scooterProducer.sendRecharge(scooterId);
+                log.info("Successfully replaced battery for scooter with id: {}", scooterId);
+            }
+        );
 
         return mapper.toResponse(scooter);
     }
@@ -118,6 +139,8 @@ public class ScooterService {
         if (scooter.getStatus() != ScooterStatus.MAINTENANCE) {
             throw new UnavaliableActionException("Start maintenance to write off scooter");
         }
+
+        log.info("Successfully wrote off scooter with id: {}", scooterId);
 
         scooterRepository.delete(scooterId);
     }
@@ -139,7 +162,10 @@ public class ScooterService {
         if (newStatus == null) return;
         scooter.setStatus(newStatus);
 
-        transactionUtils.afterCommit(() -> scooterPendingRedisDao.deletePending(scooterId));
+        transactionUtils.afterCommit(() -> {
+            scooterPendingRedisDao.deletePending(scooterId);
+            log.info("Successfully updated received status for scooter with id: {}. Status: {}", scooterId, newStatus);
+        });
     }
 
     @Transactional

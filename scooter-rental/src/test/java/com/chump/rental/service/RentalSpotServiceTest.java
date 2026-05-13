@@ -31,11 +31,11 @@ public class RentalSpotServiceTest {
     @Test
     @Tag("unit")
     @DisplayName("Open point method should throw exception, if parent ID is unknown")
-    public void openPointShouldThrowWhenUnknownParentId() {
+    public void openSpotShouldThrowWhenUnknownParentId() {
         when(rentalSpotDao.findById(anyInt())).thenReturn(Optional.empty());
 
         NoSuchEntityException exception = assertThrows(NoSuchEntityException.class,
-                () -> service.openPoint(RentalSpotCommand.builder().parentId(1).build()));
+                () -> service.openSpot(RentalSpotCommand.builder().parentId(1).build()));
         assertTrue(exception.getMessage().contains("1"),
                 "Exception message should contain unknown parent ID");
     }
@@ -58,7 +58,7 @@ public class RentalSpotServiceTest {
 
 
         NoSuchEntityException exception = assertThrows(NoSuchEntityException.class,
-                () -> service.updatePointInfo(1, RentalSpotCommand.builder().parentId(2).build()));
+                () -> service.updateSpotInfo(1, RentalSpotCommand.builder().parentId(2).build()));
         assertTrue(exception.getMessage().contains("2"),
                 "Exception message should contain unknown parent ID");
     }
@@ -70,7 +70,7 @@ public class RentalSpotServiceTest {
         when(rentalSpotDao.findById(anyInt())).thenReturn(Optional.empty());
 
         NoSuchEntityException exception = assertThrows(NoSuchEntityException.class,
-                () -> service.updatePointInfo(1, RentalSpotCommand.builder().parentId(2).build()));
+                () -> service.updateSpotInfo(1, RentalSpotCommand.builder().parentId(2).build()));
         assertTrue(exception.getMessage().contains("1"),
                 "Exception message should contain unknown spot ID");
     }

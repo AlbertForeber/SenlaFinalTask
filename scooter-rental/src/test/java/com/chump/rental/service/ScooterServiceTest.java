@@ -245,6 +245,11 @@ public class ScooterServiceTest {
                 ScooterStatus.MAINTENANCE
         );
         when(scooterRepository.findById(anyInt())).thenReturn(Optional.of(scooter));
+        doAnswer(invocationOnMock -> {
+            Runnable action = invocationOnMock.getArgument(0);
+            action.run();
+            return null;
+        }).when(transactionUtils).afterCommit(any());
 
         service.rechargeScooterBattery(1);
 

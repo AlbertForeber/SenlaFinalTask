@@ -1,6 +1,7 @@
 package com.chump.user.service.query;
 
 import com.chump.common.exception.NoSuchEntityException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.user.dao.UserDao;
 import com.chump.user.dao.UserProfileDao;
 import com.chump.user.mapper.UserMapper;
@@ -26,6 +27,7 @@ public class UserQueryServiceTest {
     @Mock private UserProfileDao userProfileDao;
     @Mock private UserMapper userMapper;
     @Mock private UserDao userDao;
+    @Mock private TransactionUtils transactionUtils;
 
     @InjectMocks
     private UserQueryService service;

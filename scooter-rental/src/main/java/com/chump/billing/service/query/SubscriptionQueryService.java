@@ -10,14 +10,17 @@ import com.chump.billing.dto.response.TariffConciseResponse;
 import com.chump.billing.mapper.SubscriptionMapper;
 import com.chump.billing.mapper.TariffMapper;
 import com.chump.billing.model.SubscriptionTariff;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.user.dao.UserSubscriptionDao;
 import com.chump.user.model.UserSubscription;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubscriptionQueryService {
@@ -27,14 +30,23 @@ public class SubscriptionQueryService {
     private final TariffMapper tariffMapper;
     private final TariffDao tariffDao;
     private final UserSubscriptionDao userSubscriptionDao;
+    private final TransactionUtils transactionUtils;
 
     @Transactional(readOnly = true)
     public List<TariffConciseResponse> getAllSubscriptionTariffs(int pageSize, int page) {
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully got all subscription tariffs")
+        );
+
         return tariffMapper.toConciseResponseList(tariffDao.batchFindAllSubscriptionTariffs(pageSize, page - 1));
     }
 
     @Transactional(readOnly = true)
     public SubscriptionTariffResponse getSubscriptionTariff(int subscriptionTariffId) {
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully got subscription tariff with id: {}", subscriptionTariffId)
+        );
+
         SubscriptionTariff result = subscriptionTariffDao.findByIdWithTariff(subscriptionTariffId).orElseThrow(
                 () -> new NoSuchEntityException("No subscription tariff found with id: " + subscriptionTariffId)
         );
@@ -53,6 +65,10 @@ public class SubscriptionQueryService {
         ).orElseThrow(
                 () -> new NoRequiredEntityException("No subscription tariff found with id: "
                         + subscription.getTariff().getId())
+        );
+
+        transactionUtils.afterCommit(() ->
+                log.info("Successfully got current subscription for user with id: {}", userId)
         );
 
         return subscriptionMapper.toCurrentSubscriptionResponse(subscription, tariff);

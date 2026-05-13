@@ -7,6 +7,7 @@ import com.chump.billing.model.Tariff;
 import com.chump.billing.service.query.SubscriptionQueryService;
 import com.chump.common.exception.NoRequiredEntityException;
 import com.chump.common.exception.NoSuchEntityException;
+import com.chump.common.utils.TransactionUtils;
 import com.chump.user.dao.UserSubscriptionDao;
 import com.chump.user.model.UserSubscription;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +35,8 @@ public class SubscriptionQueryServiceTest {
     private TariffDao tariffDao;
     @Mock
     private TariffMapper tariffMapper;
+    @Mock
+    private TransactionUtils transactionUtils;
 
     @InjectMocks
     private SubscriptionQueryService service;
