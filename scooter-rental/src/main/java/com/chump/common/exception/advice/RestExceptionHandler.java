@@ -23,6 +23,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +55,16 @@ public class RestExceptionHandler {
                 .error("Method not allowed")
                 .message("This method cannot be used for this endpoint")
                 .build(), HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoHandlerFound() {
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .status(404)
+                .error("Page not found")
+                .message("Endpoint is not handled by app API")
+                .build(), HttpStatus.NOT_FOUND
+        );
     }
 
     @ExceptionHandler(AccessDeniedException.class)

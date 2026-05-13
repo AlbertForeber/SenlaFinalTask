@@ -1,5 +1,7 @@
 package com.chump.common.config;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -39,6 +41,8 @@ public class RootConfig {
                         .addModule(new JavaTimeModule()) // Для поддержки Instant, LocalDate
                         .addModule(new JtsModule()) // Для поддержки Point, LineString, Polygon
                         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) // Instant как даты, а не как числа
+                        .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS) // Для точности передачи координат
+                        .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
                         .build();
         }
 

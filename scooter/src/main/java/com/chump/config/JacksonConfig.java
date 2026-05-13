@@ -1,5 +1,7 @@
 package com.chump.config;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -15,6 +17,8 @@ public class JacksonConfig {
         return JsonMapper.builder()
                 .addModule(new JtsModule())
                 .addModule(new JavaTimeModule())
+                .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS) // Для сохранения точности
+                .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
                 .build();
     }
 }

@@ -16,10 +16,9 @@ public class GeoConverter {
     private final GeometryFactory geometryFactory;
 
     public String waypointToString(WaypointEntry point) {
-        return String.format("%f,%f,%d",
-                point.getLocation().getX(),
-                point.getLocation().getY(),
-                point.getSendAt().toEpochMilli());
+        return point.getLocation().getX() + "," +
+                point.getLocation().getY() + "," +
+                point.getSendAt().toEpochMilli();
     }
 
     public WaypointEntry stringToWaypoint(int scooterId, String string) {

@@ -3,7 +3,6 @@ package com.chump.rental.dto.response;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.locationtech.jts.geom.Polygon;
 
 import java.util.List;
 
@@ -13,7 +12,6 @@ import java.util.List;
 public class RentalSpotHierarchyResponse {
 
     private Integer id;
-    private List<RentalSpotHierarchyResponse> children;
     private String name;
-    private Polygon area;
+    private List<RentalSpotHierarchyResponse> children;
 }

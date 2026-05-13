@@ -4,4 +4,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/002-create-tables.sql
   - include:
+      file: db/changelog/changes/003-insert-scopes-and-roles.sql
+  - include:
+      file: db/changelog/changes/004-insert-rental-spots.sql
+  - include:
       file: db/changelog/changes/999-add-test-values.sql

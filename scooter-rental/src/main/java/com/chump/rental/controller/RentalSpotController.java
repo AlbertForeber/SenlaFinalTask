@@ -40,7 +40,7 @@ public class RentalSpotController {
         return ResponseEntity.ok(rentalSpotQueryService.getAllRentalSpotsHierarchy());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/where")
     @PreAuthorize("hasAuthority('SCOPE_spot:view')")
     public ResponseEntity<RentalSpotHierarchyResponse> getRentalSpotHierarchy(
             @PathVariable Integer id
@@ -56,7 +56,7 @@ public class RentalSpotController {
         return ResponseEntity.ok(rentalSpotQueryService.getRentalSpotScooters(id));
     }
 
-    @GetMapping("/{id}/info")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_spot:view_admin')")
     public ResponseEntity<RentalSpotDetailedResponse> getRentalSpotDetailedInfo(
             @PathVariable Integer id

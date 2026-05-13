@@ -27,9 +27,9 @@ public class ScooterTelemetryRedisDao {
         try {
             String key = key(scooterId);
             redis.hset(key, Map.of(
-                    "longitude", String.valueOf(entry.getLongitude()),
-                    "latitude", String.valueOf(entry.getLatitude()),
-                    "battery", String.valueOf(entry.getBattery()),
+                    "longitude", Double.toString(entry.getLongitude()),
+                    "latitude", Double.toString(entry.getLatitude()),
+                    "battery", Integer.toString(entry.getBattery()),
                     "updatedAt", Instant.now().toString()
             ));
             redis.expire(key, TELEMETRY_TTL);
@@ -92,8 +92,8 @@ public class ScooterTelemetryRedisDao {
             return TelemetryEntry.builder()
                     .scooterId(scooterId)
                     .battery(Integer.parseInt(fields.get("battery")))
-                    .latitude(Float.parseFloat(fields.get("latitude")))
-                    .longitude(Float.parseFloat(fields.get("longitude")))
+                    .latitude(Double.parseDouble(fields.get("latitude")))
+                    .longitude(Double.parseDouble(fields.get("longitude")))
                     .build();
         } catch (NumberFormatException e) {
             throw new NumberFormatException("Telemetry entry is malformed for scooter with id: " + scooterId);

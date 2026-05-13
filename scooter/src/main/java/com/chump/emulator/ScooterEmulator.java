@@ -18,9 +18,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,14 +30,13 @@ public class ScooterEmulator {
     private final KafkaTemplate<String, Object> fastKafkaTemplate;
     private final KafkaTemplate<String, Object> reliableKafkaTemplate;
 
-    private static final Duration MAX_COMMAND_AGE = Duration.ofMinutes(2);
     private static final Logger logger = LoggerFactory.getLogger(ScooterEmulator.class);
     private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     private final AtomicInteger battery = new AtomicInteger(100);
-    private volatile double latitude = 55.7614868;
-    private volatile double longitude = 37.6099130;
-    private final Stack<Map.Entry<Double, Double>> waypoints = new Stack<>();
+    private volatile double latitude;
+    private volatile double longitude;
+    private final Stack<Map.Entry<Double, Double>> waypoints;
 
     private volatile ScooterStatus status = ScooterStatus.LOCKED;
 
@@ -49,33 +46,9 @@ public class ScooterEmulator {
         this.scooterId = scooterId;
         this.fastKafkaTemplate = fastKafkaTemplate;
         this.reliableKafkaTemplate = reliableKafkaTemplate;
-        waypoints.addAll(List.of(
-                Map.entry(37.6099130, 55.7614868),
-                Map.entry(37.6095271, 55.7619315),
-                Map.entry(37.6101762, 55.7621156),
-                Map.entry(37.6108360, 55.7623329),
-                Map.entry(37.6113403, 55.7625079),
-                Map.entry(37.6118660, 55.7626679),
-                Map.entry(37.6123971, 55.7628339),
-                Map.entry(37.6128799, 55.7629576),
-                Map.entry(37.6127189, 55.7631357),
-                Map.entry(37.6124668, 55.7634013),
-                Map.entry(37.6122093, 55.7636397),
-                Map.entry(37.6120377, 55.7638570),
-                Map.entry(37.6117641, 55.7641920),
-                Map.entry(37.6114690, 55.7645180),
-                Map.entry(37.6111847, 55.7648198),
-                Map.entry(37.6107019, 55.7655713),
-                Map.entry(37.6101923, 55.7659606),
-                Map.entry(37.6098329, 55.7663287),
-                Map.entry(37.6096478, 55.7665113),
-                Map.entry(37.6093233, 55.7667452),
-                Map.entry(37.6091033, 55.7669414),
-                Map.entry(37.6090014, 55.7671451),
-                Map.entry(37.6089129, 55.7672416),
-                Map.entry(37.6090577, 55.7673065),
-                Map.entry(37.6094171, 55.7674423)
-        ));
+        this.waypoints = TestRoutes.END_IN_PARKING;
+        this.longitude = TestRoutes.END_IN_PARKING_START.getKey();
+        this.latitude = TestRoutes.END_NOT_IN_PARKING_START.getValue();
     }
 
     @Scheduled(fixedDelay = 10000L)
@@ -122,11 +95,6 @@ public class ScooterEmulator {
     public void commandListener(ScooterCommand command) {
 
         if (!(command.scooterId() == scooterId)) return;
-        if (command.issuedAt().isBefore(Instant.now().minus(MAX_COMMAND_AGE))) {
-            // TODO а как же компенсирующие команды?
-            logger.warn("Stale command ignored, scooterId: {}, issuedAt: {}", scooterId, command.issuedAt());
-            return;
-        }
 
         if (command instanceof LockCommand) {
             if (status == ScooterStatus.LOCKED) {
