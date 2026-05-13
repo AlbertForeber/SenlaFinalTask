@@ -127,10 +127,4 @@ public class SubscriptionController {
     ) {
         subscriptionService.deleteSubscription(id, force);
     }
-
-    // TODO убрать
-    @GetMapping("/test")
-    public void test() {
-        billingService.processBilling();
-    }
 }

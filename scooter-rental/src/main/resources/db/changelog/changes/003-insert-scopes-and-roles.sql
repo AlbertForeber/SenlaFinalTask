@@ -32,6 +32,7 @@ INSERT INTO scopes VALUES
     (26, 'billing:manage_admin'),
     (27, 'session:view'),
     (28, 'session:manage');
+SELECT setval(pg_get_serial_sequence('scopes', 'id'), COALESCE(MAX(id), 1), true) FROM scopes;
 -- rollback DELETE FROM scopes;
 
 -- changeset albert:2-insert-roles
@@ -40,6 +41,7 @@ INSERT INTO roles VALUES
     (2, 'maintenance'),
     (3, 'admin'),
     (4, 'owner');
+SELECT setval(pg_get_serial_sequence('roles', 'id'), COALESCE(MAX(id), 1), true) FROM roles;
 -- rollback: DELETE FROM roles;
 
 -- changeset albert:3-insert-role-scopes

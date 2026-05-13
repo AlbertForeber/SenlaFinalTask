@@ -156,6 +156,7 @@ INSERT INTO rent_spots VALUES
   ],
   "type": "Polygon"
 }')::geography, true);
+SELECT setval(pg_get_serial_sequence('rent_spots', 'id'), COALESCE(MAX(id), 1), true) FROM rent_spots;
 -- rollback DELETE FROM rent_spots;
 
 

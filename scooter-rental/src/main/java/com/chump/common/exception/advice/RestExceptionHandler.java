@@ -147,9 +147,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleArgumentTypeMismatch(
-            HttpMediaTypeNotSupportedException exception
-    ) {
+    public ResponseEntity<ErrorResponse> handleMediaTypeNotSupported() {
         return new ResponseEntity<>(ErrorResponse.builder()
                 .status(415)
                 .error("Type not supported exception")

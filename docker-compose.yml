@@ -102,20 +102,20 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka_ui
-    depends_on:
-      kafka-1:
-        condition: service_healthy
-    ports:
-      - "8081:8080"
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-    networks:
-      - main_network
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui:latest
+#    container_name: kafka_ui
+#    depends_on:
+#      kafka-1:
+#        condition: service_healthy
+#    ports:
+#      - "8081:8080"
+#    environment:
+#      KAFKA_CLUSTERS_0_NAME: local
+#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9092
+#      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+#    networks:
+#      - main_network
 
   # ------------------------------- REDIS -------------------------------
   redis:
@@ -134,6 +134,22 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    networks:
+      main_network:
+
+  # ------------------------------- SWAGGER -------------------------------
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    ports:
+      - "8082:8080"
+    environment:
+      URL: "http://localhost:8080/openapi.yaml"
+      VALIDATOR_URL: "none"          # отключить внешний валидатор
+      PERSIST_AUTHORIZATION: "true"  # сохранять JWT между перезагрузками страницы
+      DISPLAY_REQUEST_DURATION: "true"
+      FILTER: "true"                 # поиск по эндпоинтам
+    depends_on:
+      - app
     networks:
       main_network:
 

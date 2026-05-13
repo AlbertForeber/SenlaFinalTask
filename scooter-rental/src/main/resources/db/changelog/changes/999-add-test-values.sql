@@ -46,6 +46,7 @@ INSERT INTO trip_points VALUES
 -- changeset albert:7-add-test-tariff-points
 INSERT INTO tariffs VALUES
     (4, 'instant_test', 5000, NULL);
+SELECT setval(pg_get_serial_sequence('tariffs', 'id'), COALESCE(MAX(id), 1), true) FROM tariffs;
 -- rollback DELETE FROM tariffs WHERE id=1;
 
 -- changeset albert:8-add-test-subscription-tariffs

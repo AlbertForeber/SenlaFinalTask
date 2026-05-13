@@ -7,6 +7,7 @@ INSERT INTO tariffs VALUES
     (1, 'By the minute', 10, 1),
     (2, 'By the hour', 400, 60),
     (3, 'Monthly subscription', 1800, NULL);
+SELECT setval(pg_get_serial_sequence('tariffs', 'id'), COALESCE(MAX(id), 1), true) FROM tariffs;
 -- rollback DELETE FROM subscription_tariffs
 
 -- changeset albert:2-insert-subscriptions

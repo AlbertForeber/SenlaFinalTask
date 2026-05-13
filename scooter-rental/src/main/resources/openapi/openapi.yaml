@@ -1,0 +1,2727 @@
+openapi: 3.1.0
+info:
+  title: Scooter Rental API
+  description: REST API for scooter rental system
+  version: 1.0.0
+  contact:
+    name: Albert
+    email: albertforeber2@gmail.com
+servers:
+  - url: 'http://localhost:8080/api'
+    description: Local development
+
+security:
+  - bearerAuth: [ ]
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token
+
+  examples:
+    JsonParseException:
+      summary: "Malformed JSON"
+      description: "Appears when JSON is malformed"
+      value:
+        status: 400
+        error: "Parse exception"
+        message: "Failed to parse your request. Check all fields are correct"
+        details:
+          - "Request JSON body is malformed"
+
+    MismatchedInputException:
+      summary: "Invalid field or field is excessive"
+      description: "Appears when wrong type given (e.g. array instead of single value) in JSON request or field is exessive"
+      value:
+        status: 400
+        error: "Parse exception"
+        message: "Failed to parse your request. Check all fields are correct"
+        details:
+          - "Invalid type for field or field is excessive: not_expected_field_name"
+
+    InvalidFieldValue:
+      summary: "Invalid field value"
+      description: "Appears when field value is wrong (e.g. expected enum, but given value doesn't match any of expected values)"
+      value:
+        status: 400
+        error: "Parse exception"
+        message: "Failed to parse your request. Check all fields are correct"
+        details:
+          - "Invalid value for field: status"
+
+    BodyValidationException:
+      summary: "Body validation exception"
+      description: "Appears when some of request body field failed to validate (e.g. field expected to be filled but sent null)"
+      value:
+        status: 400
+        error: "Validation exception"
+        message: "Some of fields failed to validate"
+        details:
+          - "name: Field 'name' should not be empty"
+
+    SimpleValidationException:
+      summary: "Param validation exception"
+      description: "Appears when some of path variables or params failed to validate (e.g. param expected to be positive but sent negative)"
+      value:
+        status: 400
+        error: "Validation exception"
+        message: "Some of path variables or params failed to validate"
+        details:
+          - "page: Param 'page' must be positive number"
+
+    TypeMismatchException:
+      summary: "Wrong parameter type"
+      description: "Appears when path variable or request param cannot be converted (e.g. non-numeric id)"
+      value:
+        status: 400
+        error: "Type mismatch"
+        message: "Some of given parameters are of the wrong type"
+        details:
+          - "Wrong value for parameter 'id': abc"
+
+    NoSuchEntityException:
+      summary: "No such entity"
+      description: "Appears when user requested entity that doesn't exist"
+      value:
+        status: 400
+        error: "No such entity exception"
+        message: "Requested data was not found"
+        details:
+          - "No tariff found with id: 1"
+
+    UnavailableActionException:
+      summary: "Unavailable action"
+      description: "Appears when user tries to perform unavailable action (e.g rent an occupied scooter)"
+      value:
+        status: 400
+        error: "Unavailable action exception"
+        message: "You are not able to perform such action"
+        details:
+          - "Forbidden to rent occupied scooter"
+
+    InvalidToken:
+      summary: "Invalid token"
+      description: "Appears provided invalid token (e.g expired)"
+      value:
+        status: 401
+        error: "Invalid token"
+        message: "Error during token validation"
+        details:
+          - "JWT expired"
+
+    Unauthorized:
+      summary: "No access token"
+      description: "Appears when endpoints requires authorization but token was not provided"
+      value:
+        status: 401
+        error: "Unauthorized"
+        message: "No access token found"
+
+    BadCredentials:
+      summary: "Bad credentials"
+      description: "Appears when logging in with wrong credentials"
+      value:
+        status: 401
+        error: "Bad credentials"
+        message: "Check password and username are correct"
+
+    AccessDeniedException:
+      summary: "Access denied"
+      description: "Appears when user doesn't have enough permissions to user this endpoint"
+      value:
+        status: 403
+        error: "Access denied"
+        message: "You don't have required permissions"
+
+    NoRequiredEntityException:
+      summary: "No required entity"
+      description: "Appears when request required some entity but server failed to find it (e.g. default tariff not found)"
+      value:
+        status: 500
+        error: "No required entity exception"
+        message: "Some of required data was not found. Please contact support team"
+
+    DataManipulationException:
+      summary: "Data manipulation exception"
+      description: "Appears when server failed to process required data (e.g. database failed to perform some actions)"
+      value:
+        status: 500
+        error: "Data manipulation exception"
+        message: "Something went wrong during processing your request, please try later"
+
+    Exception:
+      summary: "Interval server error"
+      description: "Appears when unexpected error occurred on server side"
+      value:
+        status: 500
+        error: "Internal server error"
+        message: "Something went wrong, please try again later"
+
+  responses:
+    Error400Full:
+      description: "User side errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            JsonParseException:
+              $ref: '#/components/examples/JsonParseException'
+            MismatchedInputException:
+              $ref: '#/components/examples/MismatchedInputException'
+            InvalidFieldValue:
+              $ref: '#/components/examples/InvalidFieldValue'
+            BodyValidationException:
+              $ref: '#/components/examples/BodyValidationException'
+            SimpleValidationException:
+              $ref: '#/components/examples/SimpleValidationException'
+            TypeMismatchException:
+              $ref: '#/components/examples/TypeMismatchException'
+            NoSuchEntityException:
+              $ref: '#/components/examples/NoSuchEntityException'
+            UnavailableActionException:
+              $ref: '#/components/examples/UnavailableActionException'
+
+    Error400NoUnavailable:
+      description: "User side errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            JsonParseException:
+              $ref: '#/components/examples/JsonParseException'
+            MismatchedInputException:
+              $ref: '#/components/examples/MismatchedInputException'
+            InvalidFieldValue:
+              $ref: '#/components/examples/InvalidFieldValue'
+            BodyValidationException:
+              $ref: '#/components/examples/BodyValidationException'
+            SimpleValidationException:
+              $ref: '#/components/examples/SimpleValidationException'
+            TypeMismatchException:
+              $ref: '#/components/examples/TypeMismatchException'
+            NoSuchEntityException:
+              $ref: '#/components/examples/NoSuchEntityException'
+
+    Error400Auth:
+      description: "User side errors (auth endpoints — no path params, no SimpleValidation/TypeMismatch)"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            JsonParseException:
+              $ref: '#/components/examples/JsonParseException'
+            MismatchedInputException:
+              $ref: '#/components/examples/MismatchedInputException'
+            InvalidFieldValue:
+              $ref: '#/components/examples/InvalidFieldValue'
+            BodyValidationException:
+              $ref: '#/components/examples/BodyValidationException'
+            NoSuchEntityException:
+              $ref: '#/components/examples/NoSuchEntityException'
+
+    Error401:
+      description: "Auth errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidToken:
+              $ref: '#/components/examples/InvalidToken'
+            Unauthorized:
+              $ref: '#/components/examples/Unauthorized'
+
+    Error401BadCredentials:
+      description: "Auth errors (login endpoint)"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BadCredentials:
+              $ref: '#/components/examples/BadCredentials'
+
+    Error403:
+      description: "Permission error"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            AccessDeniedException:
+              $ref: '#/components/examples/AccessDeniedException'
+
+    Error500:
+      description: "Server side errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NoRequiredEntityException:
+              $ref: '#/components/examples/NoRequiredEntityException'
+            DataManipulationException:
+              $ref: '#/components/examples/DataManipulationException'
+            Exception:
+              $ref: '#/components/examples/Exception'
+
+  schemas:
+# --------------- COMMON ---------------
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Validation exception
+        message:
+          type: string
+          example: Some of fields failed to validate
+        details:
+          type: array
+          items:
+            type: string
+          example:
+            - "Field 'email' must contain well-formed email address"
+
+    GeoJsonPoint:
+      type: object
+      required: [ type, coordinates ]
+      properties:
+        type:
+          type: string
+          enum: [ Point ]
+        coordinates:
+          type: array
+          description: "[longitude, latitude]"
+          minItems: 2
+          maxItems: 2
+          items:
+            type: number
+      example:
+        type: Point
+        coordinates: [ 37.62, 55.75 ]
+
+    GeoJsonPolygon:
+      type: object
+      required: [ type, coordinates ]
+      properties:
+        type:
+          type: string
+          enum: [ Polygon ]
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                type: number
+
+    GeoJsonLineString:
+      type: object
+      required: [ type, coordinates ]
+      properties:
+        type:
+          type: string
+          enum: [ LineString ]
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: number
+
+    ScooterStatus:
+      type: string
+      enum: [ FREE, OCCUPIED, MAINTENANCE, BLOCKING, ACTIVATING, STOPPING ]
+
+    TripStatus:
+      type: string
+      enum: [ ONGOING, PAUSED, FINISHED ]
+
+# --------------- AUTH ---------------
+    TokenResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          type: string
+          description: "JWT access token for request authentication"
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        refreshToken:
+          type: string
+          description: "Token to update expired access token"
+          example: "8x4f9s2d-8b6g-4c3h-901a-2b3c4d5e6f7g"
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 1
+          pattern: '^S(.*\S)?$'
+          example: "john_doe"
+        password:
+          type: string
+          minLength: 1
+          example: "securedSecret123"
+
+    RefreshRequest:
+      type: object
+      required:
+        - oldRefreshToken
+      properties:
+        oldRefreshToken:
+          type: string
+          minLength: 1
+          description: "Refresh token to refresh"
+          example: "8x4f9s2d-8b6g-4c3h-901a-2b3c4d5e6f7g"
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+        - dateOfBirth
+        - email
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: '^\S(.*\S)?$'
+          example: "john_doe"
+        password:
+          type: string
+          minLength: 8
+          example: "securePassword123"
+        dateOfBirth:
+          type: string
+          format: date
+          description: "Date of birth (must be in the past)"
+          example: "2000-01-15"
+        email:
+          type: string
+          format: email
+          minLength: 6
+          maxLength: 100
+          example: "user@example.com"
+
+    LogoutRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+          description: "Refresh token to revoke"
+          example: "8x4f9s2d-8b6g-4c3h-901a-2b3c4d5e6f7g"
+
+# --------------- SESSIONS ---------------
+    SessionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 1
+        deviceName:
+          type: string
+          example: Chrome on Windows
+        ipAddress:
+          type: string
+          example: 192.168.1.2
+        lastActiveAt:
+          type: string
+          format: date-time
+          example: 2026-05-13T19:00:00.000Z
+
+# --------------- USERS ---------------
+    UpdateUserBaseInfoRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 6
+          maxLength: 100
+          example: test@example.com
+        dateOfBirth:
+          type: string
+          format: date
+          description: "Must be in the past"
+          example: 1999-09-09
+
+    UpdateUserProtectedInfoRequest:
+      type: object
+      properties:
+        balance:
+          type: string
+          description: "BigDecimal as string; up to 8 integer and 2 fraction digits; >= 0"
+        discount:
+          type: string
+          description: "BigDecimal as string; 0..1 (100%)"
+
+    UpdateUserRoleRequest:
+      type: object
+      required: [ newRoleId ]
+      properties:
+        newRoleId:
+          type: integer
+
+    RoleResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: user
+
+    ScopeResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: tariff:view
+
+    RoleWithScopesResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "user"
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeResponse'
+
+    UserRoleResponse:
+      type: object
+      properties:
+        username:
+          type: string
+          example: john_doe
+        role:
+          $ref: '#/components/schemas/RoleResponse'
+
+    UserProfileResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: john_doe
+        email:
+          type: string
+          example: test@example.com
+        dateOfBirth:
+          type: string
+          format: date
+          example: 1999-09-09
+        balance:
+          type: number
+          example: 500.50
+        discount:
+          type: string
+          description: Discount values always between 0 and 1 (0% - 100%)
+          example: 0.45
+        role:
+          $ref: '#/components/schemas/RoleResponse'
+
+# --------------- ROLES ---------------
+    CreateRoleRequest:
+      type: object
+      required: [ name, scopeIds ]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        scopeIds:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+
+    UpdateRoleRequest:
+      type: object
+      properties:
+        name: { type: string }
+        scopeIds:
+          type: array
+          items:
+            type: integer
+
+# --------------- SCOOTERS ---------------
+    ScooterModelResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        vendor:
+          type: string
+          example: some_vendor
+        name:
+          type: string
+          example: some_name
+
+    ScooterResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        serialNumber:
+          type: string
+          example: "A12341VE"
+        model:
+          $ref: '#/components/schemas/ScooterModelResponse'
+        battery:
+          type: integer
+          example: 85
+          description: Always in range 0..100
+        location:
+          $ref: '#/components/schemas/GeoJsonPoint'
+        status:
+          $ref: '#/components/schemas/ScooterStatus'
+
+    CreateScooterRequest:
+      type: object
+      required: [ serialNumber, modelId, battery, location, status ]
+      properties:
+        serialNumber:
+          type: string
+          minLength: 1
+        modelId:
+          type: integer
+          minimum: 1
+        battery:
+          type: integer
+          minimum: 0
+          maximum: 100
+        location:
+          $ref: '#/components/schemas/GeoJsonPoint'
+        status:
+          $ref: '#/components/schemas/ScooterStatus'
+
+    UpdateScooterInfoRequest:
+      type: object
+      properties:
+        serialNumber:
+          type: string
+          example: "A12341VE"
+        modelId:
+          type: integer
+          minimum: 1
+          example: 1
+
+    RentScooterRequest:
+      type: object
+      properties:
+        tariffId:
+          type: integer
+          minimum: 0
+          description: "0 — default tariff"
+          example: 1
+
+# --------------- RENTAL SPOTS ---------------
+    CreateRentalSpotRequest:
+      type: object
+      required: [ name, area, isParking ]
+      properties:
+        parentId:
+          type: integer
+          nullable: true
+          example: 1
+        name:
+          type: string
+          maxLength: 100
+          example: Moscow City
+        area:
+          $ref: '#/components/schemas/GeoJsonPolygon'
+        isParking:
+          type: boolean
+
+    UpdateRentalSpotRequest:
+      type: object
+      properties:
+        parentId:
+          type: integer
+          nullable: true
+          example: 1
+        name:
+          type: string
+          maxLength: 100
+          example: Moscow City
+        area:
+          $ref: '#/components/schemas/GeoJsonPolygon'
+        isParking:
+          type: boolean
+
+    RentalSpotHierarchyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Moscow City
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/RentalSpotHierarchyResponse'
+
+    RentalSpotConciseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Moscow City
+        area:
+          $ref: '#/components/schemas/GeoJsonPolygon'
+
+    RentalSpotDetailedResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        parentId:
+          type: integer
+          nullable: true
+          example: 1
+        name:
+          type: string
+          example: Moscow City
+        area:
+          $ref: '#/components/schemas/GeoJsonPolygon'
+        isParking:
+          type: boolean
+
+    RentalSpotWithScootersResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Moscow City
+        parentId:
+          type: integer
+          nullable: true
+          example: 1
+        totalScooterAmount:
+          type: integer
+          example: 10
+        scootersInSpot:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScooterResponse'
+
+# --------------- TRIPS ---------------
+    TripConciseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        status:
+          $ref: '#/components/schemas/TripStatus'
+        scooterId:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 1
+        startedAt:
+          type: string
+          format: date-time
+          example: 2026-05-13T19:00:00.000Z
+        totalPrice:
+          type: number
+          example: 250.50
+
+
+    TripDetailedResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        status:
+          $ref: '#/components/schemas/TripStatus'
+        scooterId:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 1
+        startedAt:
+          type: string
+          format: date-time
+          example: 2026-05-13T19:00:00.000Z
+        distance:
+          type: number
+          format: double
+          example: 700.501
+        durationSeconds:
+          type: integer
+          example: 351
+        avgSpeedKmh:
+          type: number
+          format: double
+          example: 15.5
+        totalPrice:
+          type: number
+          example: 250.50
+        route:
+          $ref: '#/components/schemas/GeoJsonLineString'
+          nullable: true
+
+    TripPointResponse:
+      type: object
+      properties:
+        tripId:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-05-13T19:00:00.000Z
+        location:
+          $ref: '#/components/schemas/GeoJsonPoint'
+
+    TripRefundResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+          example: 1
+        newBalance:
+          type: number
+          example: 250.50
+        refunded:
+          type: number
+          example: 500.10
+
+    RefundTripRequest:
+      type: object
+      required: [ forLastSeconds ]
+      properties:
+        forLastSeconds:
+          type: integer
+          minimum: 0
+          example: 180
+
+# --------------- TARIFFS ---------------
+    TariffConciseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Per minute
+
+    TariffDetailedResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Per minute
+        basePrice:
+          type: number
+          example: 250.50
+        billingIntervalMinutes:
+          type: string
+          examples: 1
+
+    CreateTariffRequest:
+      type: object
+      required: [ name, basePrice, interval ]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          example: Per minute
+        basePrice:
+          type: number
+          example: 250.50
+          minimum: 1
+        interval:
+          type: integer
+          minimum: 1
+          description: "Billing interval in minutes"
+
+    UpdateTariffRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 256
+        basePrice:
+          type: number
+          example: 250.50
+        interval:
+          type: integer
+          minimum: 1
+          description: "Billing interval in minutes"
+
+# --------------- SUBSCRIPTIONS ---------------
+    SubscriptionTariffResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Per month
+        basePrice:
+          type: number
+          example: 250.50
+        durationDays:
+          type: integer
+          example: 1
+
+    CurrentSubscriptionResponse:
+      type: object
+      properties:
+        tariff:
+          $ref: '#/components/schemas/SubscriptionTariffResponse'
+        nextBillingDate:
+          type: string
+          format: date
+          example: 2026-06-13
+
+    SubscribedResponse:
+      type: object
+      properties:
+        tariff:
+          $ref: '#/components/schemas/TariffConciseResponse'
+        nextBillingDate:
+          nextBillingDate:
+            type: string
+            format: date
+            example: 2026-06-13
+        instantPay:
+          type: number
+          example: 250.50
+
+    CreateSubscriptionTariffRequest:
+      type: object
+      required: [ name, basePrice, durationDays ]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+        basePrice:
+          type: number
+          minimum: 1
+          example: 250.50
+        durationDays:
+          type: integer
+          minimum: 1
+
+    UpdateSubscriptionTariffRequest:
+      type: object
+      properties:
+        durationDays:
+          type: integer
+          minimum: 1
+
+# --------------- BILLING ---------------
+    BillingBatchFailureResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        failedAt:
+          type: string
+          format: date-time
+          example: 2026-05-13T19:00:00.000Z
+        errorMessage:
+          type: string
+          example: Data manipulation exception
+        isResolved:
+          type: boolean
+        subscriptionFailedIds:
+          type: array
+          items:
+            type: integer
+          example:
+            - 1
+
+    ManualBillingFailureResponse:
+      type: object
+      properties:
+        subscriptionId:
+          type: integer
+          example: 1
+        errorMessage:
+          type: string
+          example: Data manipulation exception
+
+    BillingResponse:
+      type: object
+      properties:
+        totalSuccess:
+          type: integer
+          example: 1
+        totalFailed:
+          type: integer
+          example: 1
+        failedDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManualBillingFailureResponse'
+
+    ManualBillingRequest:
+      type: object
+      properties:
+        failedOnly:
+          type: boolean
+          default: false
+
+
+paths:
+
+# --------------- AUTH ---------------
+  /auth/login:
+    post:
+      tags: [ Auth ]
+      summary: "Logging in"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 'Logged in successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/Error400Auth'
+        '401':
+          $ref: '#/components/responses/Error401BadCredentials'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /auth/register:
+    post:
+      tags: [ Auth ]
+      summary: "Signing in"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: 'Registered successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/Error400Auth'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /auth/refresh:
+    post:
+      tags: [ Auth ]
+      summary: "Refreshing token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: 'Refreshed successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/Error400Auth'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /auth/logout:
+    post:
+      tags: [ Auth ]
+      summary: "Logging out"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: 'Logged out successfully'
+        '400':
+          $ref: '#/components/responses/Error400Auth'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- SESSIONS ---------------
+  /auth/sessions:
+    get:
+      tags: [ Sessions ]
+      summary: "List active sessions"
+      description: "Current user active sessions. Required scope `SCOPE_session:view`."
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessionResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [ Sessions ]
+      summary: "Terminate all sessions"
+      description: "Terminate all user's sessions. Required `SCOPE_session:manage`."
+      responses:
+        '204':
+          description: "All sessions terminated"
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /auth/sessions/{id}:
+    delete:
+      tags: [ Sessions ]
+      summary: "Terminate session by id"
+      description: "Terminate certain session. Required `SCOPE_session:manage`."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: "Session terminated"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- USERS ---------------
+  /user/history:
+    get:
+      tags: [ Users ]
+      summary: "Trip history (current user)"
+      description: "Find all user's history with pagination. Required `SCOPE_profile:view`."
+      parameters:
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TripConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /user/profile:
+    get:
+      tags: [ Users ]
+      summary: "Current user profile"
+      description: "Required `SCOPE_profile:view`."
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      tags: [ Users ]
+      summary: "Update base profile fields"
+      description: "Email and date of birth. Required `SCOPE_profile:manage`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserBaseInfoRequest'
+      responses:
+        '200':
+          description: "Updated"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [ Users ]
+      summary: "Delete current user"
+      description: "Deleting user with two modes, force mode - delete even if user has not zero balance. Required `SCOPE_profile:manage`."
+      parameters:
+        - name: force
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        '204':
+          description: "Deleted"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /user/{id}/history:
+    get:
+      tags: [ UsersAdmin ]
+      summary: "Trip history by user id (admin)"
+      description: "Required `SCOPE_profile:view_admin`."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TripConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /user/{id}/profile:
+    get:
+      tags: [ UsersAdmin ]
+      summary: "User profile by id (admin)"
+      description: "Required `SCOPE_profile:view_admin`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      tags: [ UsersAdmin ]
+      summary: "Update protected profile fields (admin)"
+      description: "Balance and discount. Required `SCOPE_profile:manage_admin`."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProtectedInfoRequest'
+      responses:
+        '200':
+          description: "Updated"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [ UsersAdmin ]
+      summary: "Delete user (admin)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: force
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        '204':
+          description: "Deleted"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /user/{id}/role:
+    patch:
+      tags: [ UsersAdmin ]
+      summary: "Change user role"
+      description: "Required `SCOPE_profile:manage_role`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRoleRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- ROLES ---------------
+  /roles:
+    get:
+      tags: [ Roles ]
+      summary: "List roles"
+      description: "`SCOPE_role:view`"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      tags: [ Roles ]
+      summary: "Create role"
+      description: "Required `SCOPE_role:manage`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleRequest'
+      responses:
+        '201':
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleWithScopesResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /roles/{id}:
+    get:
+      tags: [ Roles ]
+      summary: "Role with scopes"
+      description: "`SCOPE_role:view`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleWithScopesResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      tags: [ Roles ]
+      summary: "Update role"
+      description: "`SCOPE_role:manage`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleWithScopesResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [ Roles ]
+      summary: "Delete role"
+      description: "Required `SCOPE_role:manage`."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: "Deleted"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scopes:
+    get:
+      tags: [ Roles ]
+      summary: "Paginated scopes list"
+      description: "Required `SCOPE_role:manage`."
+      parameters:
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScopeResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- SCOOTERS ---------------
+  /scooters:
+    get:
+      tags: [ Scooters ]
+      summary: "List scooters (several modes)"
+      description: |
+        Supported modes:
+        1) Without `longitude`/`latitude`/`radius` and without `status` — free scooters with pagination `pageSize`/`page`. `SCOPE_scooter:view`.
+        2) `longitude`, `latitude`, `radius` — nearby. `SCOPE_scooter:view`.
+        3) `status` — filter by status with pagination. `SCOPE_scooter:view_by_status`.
+      parameters:
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: latitude
+          in: query
+          schema: { type: number, format: float, minimum: -90, maximum: 90 }
+        - name: longitude
+          in: query
+          schema: { type: number, format: float, minimum: -180, maximum: 180 }
+        - name: radius
+          in: query
+          schema: { type: number, format: float, minimum: 0, exclusiveMinimum: true }
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ScooterStatus'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScooterResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      tags: [ Scooters ]
+      summary: "Register scooter"
+      description: "`SCOPE_scooter:manage`"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScooterRequest'
+      responses:
+        '201':
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScooterResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/models:
+    get:
+      tags: [ Scooters ]
+      summary: "Scooter models"
+      description: "`SCOPE_scooter:view_admin`"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScooterModelResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}:
+    get:
+      tags: [ Scooters ]
+      summary: "Scooter by id"
+      description: "Required `SCOPE_scooter:view_by_status` too view all scooters. Otherwise required `SCOPE_scooter:view` to view FREE scooters or scooters rented by user."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScooterResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [ Scooters ]
+      summary: "Write off scooter"
+      description: "Required `SCOPE_scooter:manage`, only for MAINTENANCE scooters"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: "Written off"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}/trips:
+    get:
+      tags: [ Scooters ]
+      summary: "Scooter trip history"
+      description: "Required `SCOPE_scooter:view_admin`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TripConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}/info:
+    patch:
+      tags: [ Scooters ]
+      summary: "Update scooter info"
+      description: "Required `SCOPE_scooter:manage`, only for MAINTENANCE scooters."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScooterInfoRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScooterResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- SCOOTER RENT ---------------
+  /scooters/{id}/rent:
+    post:
+      tags: [ ScooterRent ]
+      summary: "Start rent"
+      description: "Required `SCOPE_scooter:rent`, accepts tariff ID. If body's empty or tariff ID is zero utilize default tariff."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RentScooterRequest'
+      responses:
+        '200':
+          description: "Trip started"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}/return:
+    post:
+      tags: [ ScooterRent ]
+      summary: "Return scooter"
+      description: "Required `SCOPE_scooter:rent`, scooter must be in parking zone"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "Trip finished"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}/pause:
+    post:
+      tags: [ ScooterRent ]
+      summary: "Pause trip"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}/resume:
+    post:
+      tags: [ ScooterRent ]
+      summary: "Resume trip"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}/force-stop:
+    post:
+      tags: [ ScooterRent ]
+      summary: "Force finish trip"
+      description: "Required `SCOPE_scooter:manage`, finish trip even if scooter not in parking zone"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- SCOOTER MAINTENANCE ---------------
+  /scooters/{id}/maintenance/start:
+    post:
+      tags: [ ScooterMaintenance ]
+      summary: "Start maintenance"
+      description: "`Required SCOPE_scooter:maintenance`, scooter must be FREE"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScooterResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}/maintenance/replace-battery:
+    post:
+      tags: [ ScooterMaintenance ]
+      summary: "Replace / recharge battery"
+      description: "`Required SCOPE_scooter:maintenance`, scooter must be MAINTENANCE"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScooterResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /scooters/{id}/maintenance/finish:
+    post:
+      tags: [ ScooterMaintenance ]
+      summary: "Finish maintenance"
+      description: "`Required SCOPE_scooter:maintenance`, scooter must be MAINTENANCE"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScooterResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- RENTAL SPOTS ---------------
+  /rental-spots:
+    get:
+      tags: [ RentalSpots ]
+      summary: "Rental spots (hierarchy or nearby)"
+      description: |
+        Without `latitude`/`longitude`/`radius` — full hierarchy (`SCOPE_spot:view`).
+        With three geo-params — nearby spots (`SCOPE_spot:view`).
+      parameters:
+        - name: latitude
+          in: query
+          schema: { type: number, format: float, minimum: -90, maximum: 90 }
+        - name: longitude
+          in: query
+          schema: { type: number, format: float, minimum: -180, maximum: 180 }
+        - name: radius
+          in: query
+          schema: { type: number, format: float, minimum: 0, exclusiveMinimum: true }
+      responses:
+        '200':
+          description: "OK — либо иерархия, либо краткий список"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/RentalSpotHierarchyResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/RentalSpotConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      tags: [ RentalSpots ]
+      summary: "Create rental spot"
+      description: "`SCOPE_spot:manage`"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRentalSpotRequest'
+      responses:
+        '201':
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalSpotDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /rental-spots/{id}:
+    get:
+      tags: [ RentalSpots ]
+      summary: "Detailed rental spot"
+      description: "`SCOPE_spot:view_admin`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalSpotDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      tags: [ RentalSpots ]
+      summary: "Update rental spot"
+      description: "`SCOPE_spot:manage`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRentalSpotRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalSpotDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [ RentalSpots ]
+      summary: "Close rental spot"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: "Closed"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /rental-spots/{id}/where:
+    get:
+      tags: [ RentalSpots ]
+      summary: "Hierarchy upward from spot"
+      description: "`SCOPE_spot:view`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalSpotHierarchyResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /rental-spots/{id}/scooters:
+    get:
+      tags: [ RentalSpots ]
+      summary: "Scooters in spot"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalSpotWithScootersResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- TRIPS ---------------
+  /trips/current:
+    get:
+      tags: [ Trips ]
+      summary: "Current user ongoing trips"
+      description: "`SCOPE_trip:view`"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TripConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /trips:
+    get:
+      tags: [ Trips ]
+      summary: "Trips in time period"
+      description: "Both request params `from` and `to` are required. `SCOPE_trip:view_period`."
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TripConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /trips/{id}:
+    get:
+      tags: [ Trips ]
+      summary: "Trip details"
+      description: "Requires `SCOPE_trip:view` and `SCOPE_trip:view_admin` to view any user trip."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /trips/{id}/points:
+    get:
+      tags: [ Trips ]
+      summary: "Trip telemetry points"
+      description: "`SCOPE_trip:view_admin`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TripPointResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /trips/{id}/refund:
+    post:
+      tags: [ Trips ]
+      summary: "Refund last N seconds of trip"
+      description: "Required `SCOPE_trip:manage_admin`, trip must be FINISHED and not fully refunded."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundTripRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripRefundResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- BILLING ---------------
+  /billing/failures:
+    get:
+      tags: [ Billing ]
+      summary: "Billing batch failures"
+      description: "`SCOPE_billing:view_admin`"
+      parameters:
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BillingBatchFailureResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /billing/manual:
+    post:
+      tags: [ Billing ]
+      summary: "Manual billing run"
+      description: "Required `SCOPE_billing:manage_admin`. Empty body allowed"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualBillingRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- TARIFFS ---------------
+  /tariffs:
+    get:
+      tags: [ Tariffs ]
+      summary: "List tariffs"
+      description: "`SCOPE_tariff:view`"
+      parameters:
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TariffConciseResponse'
+        '400':
+          $ref: '#/components/responses/Error400NoUnavailable'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      tags: [ Tariffs ]
+      summary: "Create trip tariff"
+      description: "`SCOPE_tariff:manage`"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTariffRequest'
+      responses:
+        '201':
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TariffDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /tariffs/{id}:
+    get:
+      tags: [ Tariffs ]
+      summary: "Tariff by id"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TariffDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      tags: [ Tariffs ]
+      summary: "Update tariff"
+      description: "Required 'SCOPE_tariff:manage`, interval update is forbidden for subscriptions"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTariffRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TariffDetailedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [ Tariffs ]
+      summary: "Delete tariff"
+      description: "Required 'SCOPE_tariff:manage`, interval tariffs only"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: "Deleted"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+# --------------- SUBSCRIPTIONS ---------------
+  /subscriptions:
+    get:
+      tags: [ Subscriptions ]
+      summary: "List subscription tariffs or admin view of user subscription"
+      description: |
+        Without `user_id` — all subscriptions (`SCOPE_tariff:view`).
+        With `user_id` — current user's subscription (`SCOPE_tariff:view_admin`).
+      parameters:
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: user_id
+          in: query
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/TariffConciseResponse'
+                  - $ref: '#/components/schemas/CurrentSubscriptionResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      tags: [ Subscriptions ]
+      summary: "Create subscription tariff"
+      description: "`SCOPE_tariff:manage`"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionTariffRequest'
+      responses:
+        '201':
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionTariffResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /subscriptions/my:
+    get:
+      tags: [ Subscriptions ]
+      summary: "My current subscription"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentSubscriptionResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /subscriptions/unsubscribe:
+    delete:
+      tags: [ Subscriptions ]
+      summary: "Cancel subscription"
+      description: "Required `SCOPE_tariff:subscribe`, unavailable during ongoing trips"
+      responses:
+        '204':
+          description: "Unsubscribed"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /subscriptions/{id}:
+    get:
+      tags: [ Subscriptions ]
+      summary: "Subscription tariff by id"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionTariffResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      tags: [ Subscriptions ]
+      summary: "Update subscription tariff duration"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionTariffRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionTariffResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [ Subscriptions ]
+      summary: "Delete subscription tariff"
+      description: "Force is used to refund all subscriptions and force delete`."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: force
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        '204':
+          description: "Deleted"
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /subscriptions/{id}/subscribe:
+    post:
+      tags: [ Subscriptions ]
+      summary: "Subscribe to tariff"
+      description: "Required `SCOPE_tariff:subscribe`"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '201':
+          description: "Subscribed"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscribedResponse'
+        '400':
+          $ref: '#/components/responses/Error400Full'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
