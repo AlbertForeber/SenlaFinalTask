@@ -21,7 +21,7 @@ public class TariffDao extends AbstractHibernateDao<Tariff, Integer> {
     private final int defaultTariffId;
 
     public TariffDao(SessionFactory sessionFactory,
-                     @Value("${tariff.default-tariff.id}") Integer defaultTariffId) {
+                     @Value("${tariff.default-tariff.id:0}") int defaultTariffId) {
         super(Tariff.class, sessionFactory);
         this.defaultTariffId = defaultTariffId;
     }

@@ -12,7 +12,7 @@ public class TripPriceCalculator {
         Integer interval = trip.getIntervalAtStart();
         BigDecimal discount = trip.getDiscountAtStart();
 
-        BigDecimal fullPrice = null;
+        BigDecimal fullPrice = BigDecimal.ZERO;
 
         if (interval != null) {
             fullPrice = price

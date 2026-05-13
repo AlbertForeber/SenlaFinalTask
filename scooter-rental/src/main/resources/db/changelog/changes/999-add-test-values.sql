@@ -44,15 +44,11 @@ INSERT INTO trip_points VALUES
 -- rollback DELETE FROM trip_points WHERE trip_id=1;
 
 -- changeset albert:7-add-test-tariff-points
-INSERT INTO tariffs(name, base_price, billing_interval_minutes) VALUES
-    ('per_minute_test', 10, 1),
-    ('per_hour_test', 400, 60),
-    ('per_month_test', 1800, NULL),
-    ('instant_test', 5000, NULL);;
+INSERT INTO tariffs VALUES
+    (4, 'instant_test', 5000, NULL);
 -- rollback DELETE FROM tariffs WHERE id=1;
 
 -- changeset albert:8-add-test-subscription-tariffs
 INSERT INTO subscription_tariffs VALUES
-    (3, 30),
-    (4, 0)
--- rollback DELETE FROM subscription_tariffs WHERE tariff_id=2;
+    (4, 0);
+-- rollback DELETE FROM subscription_tariffs WHERE tariff_id=4;

@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.SessionFactory;
 import org.locationtech.jts.geom.Polygon;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,8 +20,14 @@ import java.util.Optional;
 @Component
 public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
 
-    public ScooterPostgresDao(SessionFactory sessionFactory) {
+    private int minimalBattery;
+
+    public ScooterPostgresDao(
+            @Value("${scooter.minimal-battery}") int minimalBattery,
+            SessionFactory sessionFactory
+    ) {
         super(Scooter.class, sessionFactory);
+        this.minimalBattery = minimalBattery;
     }
 
     public List<Scooter> findAllInZone(Polygon polygon) {
@@ -126,7 +133,11 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
         String sql = """
                 UPDATE scooters SET
                     location = CAST(ST_SetSRID(ST_MakePoint(v.longitude, v.latitude), 4326) AS geography),
-                    battery = v.battery
+                    battery = v.battery,
+                    status = CASE
+                        WHEN v.battery <= :minbat THEN 'MAINTENANCE'
+                        ELSE status
+                    END
                 FROM unnest(:scooterIds, :longitude, :latitude, :battery) AS v(scooter_id, longitude, latitude, battery)
                 WHERE scooters.id = v.scooter_id
                 """;
@@ -137,6 +148,7 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
                 .setParameter("longitude", longitude)
                 .setParameter("latitude", latitude)
                 .setParameter("battery", battery)
+                .setParameter("minbat", minimalBattery)
                 .executeUpdate();
     }
 }

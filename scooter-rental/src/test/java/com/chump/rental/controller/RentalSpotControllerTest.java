@@ -121,7 +121,7 @@ public class RentalSpotControllerTest {
     @Tag("integration")
     @DisplayName("Get rental spot endpoint should return unauthorized error response, if auth hasn't 'spot:view' scope")
     public void getRentalSpotShouldReturnErrorWhenNoSpotView() throws Exception {
-        mockMvc.perform(get("/api/rental-spots/1"))
+        mockMvc.perform(get("/api/rental-spots/1/where"))
                 .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(rentalSpotQueryService);
@@ -132,7 +132,7 @@ public class RentalSpotControllerTest {
     @DisplayName("Get rental spot endpoint should return ok, if auth has 'spot:view' scope")
     @WithMockUserId(scopes = "SCOPE_spot:view")
     public void getRentalSpotShouldReturnOkWhenSpotView() throws Exception {
-        mockMvc.perform(get("/api/rental-spots/1"))
+        mockMvc.perform(get("/api/rental-spots/1/where"))
                 .andExpect(status().isOk());
     }
 
@@ -159,7 +159,7 @@ public class RentalSpotControllerTest {
     @Tag("integration")
     @DisplayName("Get rental spot detailed info endpoint should return unauthorized error response, if auth hasn't 'spot:view_admin' scope")
     public void getRentalSpotDetailedInfoShouldReturnErrorWhenNoSpotViewAdmin() throws Exception {
-        mockMvc.perform(get("/api/rental-spots/1/info"))
+        mockMvc.perform(get("/api/rental-spots/1"))
                 .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(rentalSpotQueryService);
@@ -170,7 +170,7 @@ public class RentalSpotControllerTest {
     @DisplayName("Get rental spot detailed info endpoint should return ok, if auth has 'spot:view_admin' scope")
     @WithMockUserId(scopes = "SCOPE_spot:view_admin")
     public void getRentalSpotDetailedInfoShouldReturnOkWhenSpotViewAdmin() throws Exception {
-        mockMvc.perform(get("/api/rental-spots/1/info"))
+        mockMvc.perform(get("/api/rental-spots/1"))
                 .andExpect(status().isOk());
     }
 

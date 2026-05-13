@@ -1,6 +1,7 @@
--- db/changelog/changes/002-create-tables.sql
+-- db/changelog/changes/004-insert-rental-spots.sql
 
 -- liquibase formatted sql
+
 -- changeset albert:1-insert-rental-spots
 INSERT INTO rent_spots VALUES
     (1, NULL, 'Moscow', ST_GeomFromGeoJSON('{

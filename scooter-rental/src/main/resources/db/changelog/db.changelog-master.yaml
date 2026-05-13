@@ -8,4 +8,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/004-insert-rental-spots.sql
   - include:
+      file: db/changelog/changes/005-insert-tariffs.sql
+  - include:
       file: db/changelog/changes/999-add-test-values.sql

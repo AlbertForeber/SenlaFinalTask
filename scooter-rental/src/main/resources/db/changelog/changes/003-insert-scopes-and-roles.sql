@@ -1,4 +1,4 @@
--- db/changelog/changes/002-create-tables.sql
+-- db/changelog/changes/003-insert-scopes-and-roles.sql
 
 -- liquibase formatted sql
 
