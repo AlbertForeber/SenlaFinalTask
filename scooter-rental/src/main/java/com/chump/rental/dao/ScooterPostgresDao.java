@@ -135,7 +135,7 @@ public class ScooterPostgresDao extends AbstractHibernateDao<Scooter, Integer> {
                     location = CAST(ST_SetSRID(ST_MakePoint(v.longitude, v.latitude), 4326) AS geography),
                     battery = v.battery,
                     status = CASE
-                        WHEN v.battery <= :minbat THEN 'MAINTENANCE'
+                        WHEN v.battery <= :minbat and status != 'OCCUPIED' THEN 'MAINTENANCE'
                         ELSE status
                     END
                 FROM unnest(:scooterIds, :longitude, :latitude, :battery) AS v(scooter_id, longitude, latitude, battery)

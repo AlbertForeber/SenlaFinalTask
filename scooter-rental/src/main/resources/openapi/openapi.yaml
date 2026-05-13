@@ -478,11 +478,16 @@ components:
       type: object
       properties:
         balance:
-          type: string
+          type: number
           description: "BigDecimal as string; up to 8 integer and 2 fraction digits; >= 0"
+          minimum: 0
+          example: 250.50
         discount:
-          type: string
+          type: number
           description: "BigDecimal as string; 0..1 (100%)"
+          minimum: 0
+          maximum: 1
+          example: 0.50
 
     UpdateUserRoleRequest:
       type: object

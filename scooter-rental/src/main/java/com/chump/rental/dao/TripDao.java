@@ -32,7 +32,10 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
             Root<Trip> root = query.from(Trip.class);
 
             query.where(criteriaBuilder.equal(root.get("scooter").get("id"), scooterId));
-            query.where(criteriaBuilder.equal(root.get("status"), TripStatus.ONGOING));
+            query.where(criteriaBuilder.or(
+                    criteriaBuilder.equal(root.get("status"), TripStatus.ONGOING),
+                    criteriaBuilder.equal(root.get("status"), TripStatus.PAUSED)
+            ));
 
             return getCurrentSession().createQuery(query).uniqueResultOptional();
         } catch (Exception e) {
