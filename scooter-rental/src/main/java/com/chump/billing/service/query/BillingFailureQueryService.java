@@ -7,6 +7,7 @@ import com.chump.common.utils.TransactionUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class BillingFailureQueryService {
     private final BillingMapper billingMapper;
     private final TransactionUtils transactionUtils;
 
+    @Transactional(readOnly = true)
     public List<BillingBatchFailureResponse> getAllBillingFailures(int pageSize, int page) {
         transactionUtils.afterCommit(() ->
                 log.info("Successfully got all billing failures")

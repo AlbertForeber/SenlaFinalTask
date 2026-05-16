@@ -48,8 +48,6 @@ public class BillingBatchFailureItemDao extends AbstractHibernateDao<BillingBatc
 
         Root<BillingBatchFailureItem> root = query.from(BillingBatchFailureItem.class);
         root.fetch("failure");
-
-        query.from(BillingBatchFailureItem.class);
         query.where(criteriaBuilder.isFalse(root.get("failure").get("isResolved")));
 
         return getCurrentSession()

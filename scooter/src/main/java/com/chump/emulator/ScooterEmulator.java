@@ -33,7 +33,7 @@ public class ScooterEmulator {
     private static final Logger logger = LoggerFactory.getLogger(ScooterEmulator.class);
     private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
-    private final AtomicInteger battery = new AtomicInteger(100);
+    private final AtomicInteger battery = new AtomicInteger(15); // TODO вернуть
     private volatile double latitude;
     private volatile double longitude;
     private final Stack<Map.Entry<Double, Double>> waypoints;
@@ -144,7 +144,7 @@ public class ScooterEmulator {
     }
 
     private void emulateMove() {
-        if (!waypoints.isEmpty()) {
+        if (!waypoints.isEmpty() && battery.get() > 0) {
             Map.Entry<Double, Double> waypoint = waypoints.pop();
             longitude = waypoint.getKey();
             latitude = waypoint.getValue();

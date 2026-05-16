@@ -43,9 +43,9 @@ public class HibernateConfig {
         properties.put("hibernate.order_inserts", true);
         properties.put("hibernate.order_updates", true);
         // TODO в проде убрать:
-        properties.put("hibernate.generate_statistics", true);
-        properties.put("hibernate.show_sql", true);
-        properties.put("hibernate.format_sql", true);
+//        properties.put("hibernate.generate_statistics", true);
+//        properties.put("hibernate.show_sql", true);
+//        properties.put("hibernate.format_sql", true);
 
         return properties;
     }

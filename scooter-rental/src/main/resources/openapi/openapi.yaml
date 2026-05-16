@@ -347,7 +347,7 @@ components:
 
     ScooterStatus:
       type: string
-      enum: [ FREE, OCCUPIED, MAINTENANCE, BLOCKING, ACTIVATING, STOPPING ]
+      enum: [ FREE, OCCUPIED, MAINTENANCE ]
 
     TripStatus:
       type: string
