@@ -289,12 +289,12 @@ public class TariffControllerTest {
         CreateTariffRequest request = new CreateTariffRequest();
         request.setName("test");
         request.setInterval(1);
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
 
         TariffDetailedResponse response = new TariffDetailedResponse();
         response.setId(1);
         response.setName("test");
-        response.setBasePrice(BigDecimal.ZERO);
+        response.setBasePrice(BigDecimal.ONE);
         response.setBillingIntervalMinutes("1");
 
         when(tariffService.addTariff(any())).thenReturn(response);
@@ -314,7 +314,7 @@ public class TariffControllerTest {
         CreateTariffRequest request = new CreateTariffRequest();
         request.setName(null);
         request.setInterval(1);
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
 
         mockMvc.perform(post("/api/tariffs")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -350,7 +350,7 @@ public class TariffControllerTest {
         CreateTariffRequest request = new CreateTariffRequest();
         request.setName("test");
         request.setInterval(null);
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
 
         mockMvc.perform(post("/api/tariffs")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -367,7 +367,7 @@ public class TariffControllerTest {
     public void postTariffShouldReturnErrorWhenNameIsTooLong() throws Exception {
         CreateTariffRequest request = new CreateTariffRequest();
         request.setInterval(1);
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
         request.setName("12345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567" +
                 "812345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567812345678" +
                 "12345678123456781234567812345678123456781234567812345678812345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567812345678" +
@@ -431,7 +431,7 @@ public class TariffControllerTest {
         CreateTariffRequest request = new CreateTariffRequest();
         request.setInterval(0);
         request.setName("test");
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
 
         mockMvc.perform(post("/api/tariffs")
                         .contentType(MediaType.APPLICATION_JSON)

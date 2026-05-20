@@ -275,7 +275,7 @@ public class SubscriptionControllerTest {
     public void postSubscriptionShouldReturnCreatedWhenTariffManage() throws Exception {
         CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
         request.setName("test");
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
         request.setDurationDays(1);
 
         SubscriptionTariffResponse response = new SubscriptionTariffResponse();
@@ -296,7 +296,7 @@ public class SubscriptionControllerTest {
     public void postSubscriptionShouldReturnErrorWhenEmptyName() throws Exception {
         CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
         request.setName(null);
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
         request.setDurationDays(1);
 
         mockMvc.perform(post("/api/subscriptions")
@@ -316,7 +316,7 @@ public class SubscriptionControllerTest {
     public void postSubscriptionShouldReturnErrorWhenTrailingSpacesInName() throws Exception {
         CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
         request.setName("           test");
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
         request.setDurationDays(1);
 
         mockMvc.perform(post("/api/subscriptions")
@@ -339,7 +339,7 @@ public class SubscriptionControllerTest {
                 "812345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567812345678" +
                 "12345678123456781234567812345678123456781234567812345678812345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567812345678" +
                 "12345678123456781234567812345678123456781234567812345678");
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
         request.setDurationDays(1);
 
         mockMvc.perform(post("/api/subscriptions")
@@ -419,7 +419,7 @@ public class SubscriptionControllerTest {
     public void postSubscriptionShouldReturnErrorWhenEmptyDurationDays() throws Exception {
         CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
         request.setName("test");
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
         request.setDurationDays(null);
 
         mockMvc.perform(post("/api/subscriptions")
@@ -439,7 +439,7 @@ public class SubscriptionControllerTest {
     public void postSubscriptionShouldReturnErrorWhenNotPositiveDurationDays() throws Exception {
         CreateSubscriptionTariffRequest request = new CreateSubscriptionTariffRequest();
         request.setName("test");
-        request.setBasePrice(BigDecimal.ZERO);
+        request.setBasePrice(BigDecimal.ONE);
         request.setDurationDays(0);
 
         mockMvc.perform(post("/api/subscriptions")
