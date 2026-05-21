@@ -1,5 +1,6 @@
 package com.chump.billing.dto.request;
 
+import com.chump.common.validation.Trimmed;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,8 @@ import java.math.BigDecimal;
 @Setter
 public class CreateTariffRequest {
 
-    @NotEmpty(message = "Field 'name' must not be empty")
+    @Trimmed(message = "Field 'name' must not contain trailing spaces")
+    @NotBlank(message = "Field 'name' must not be empty")
     @Size(max = 256, message = "Tariff name must be less than 256")
     private String name;
 

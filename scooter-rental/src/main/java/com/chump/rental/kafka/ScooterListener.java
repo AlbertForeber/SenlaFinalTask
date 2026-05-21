@@ -16,7 +16,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-// TODO Listener находятся на том же слое, что и контроллеры
+// Listener находятся на том же слое, что и контроллеры
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -32,7 +32,6 @@ public class ScooterListener {
             containerFactory = "fastListenerFactory"
     )
     public void telemetryListener(TelemetryEvent event) {
-        // TODO сохранение в REDIS - ОБРАБОТКА ОШИБОК (не нужна, т.к. телеметрия)
         scooterTelemetryRedisDao.save(event.getScooterId(), scooterMapper.toTelemetryEntry(event));
     }
 
@@ -47,8 +46,7 @@ public class ScooterListener {
             Acknowledgment ack
     ) {
         try {
-            log.info(event.toString()); // TODO убрать
-            scooterWaypointRedisDao.save(scooterMapper.toWaypointEntry(event)); // TODO сохранение в REDIS
+            scooterWaypointRedisDao.save(scooterMapper.toWaypointEntry(event));
             ack.acknowledge();
         } catch (Exception e) {
             // Отрабатывает Error Handler

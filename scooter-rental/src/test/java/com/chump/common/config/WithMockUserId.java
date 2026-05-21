@@ -1,4 +1,4 @@
-package com.chump.test_config;
+package com.chump.common.config;
 
 import org.springframework.security.test.context.support.WithSecurityContext;
 

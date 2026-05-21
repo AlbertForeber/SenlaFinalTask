@@ -123,24 +123,6 @@ public class TripDao extends AbstractHibernateDao<Trip, Integer> {
                     WHERE trips.id = :id
                     RETURNING route, distance
                     """;
-            String oldSql = """
-                    UPDATE trips SET
-                         route = (
-                            SELECT CASE
-                                WHEN COUNT(*) < 2 THEN NULL
-                                ELSE CAST(ST_SetSRID(ST_SimplifyPreserveTopology(ST_MakeLine(CAST(location AS geometry)), 0.001), 4326) AS geography)
-                            END
-                            FROM trip_points WHERE trip_id = :id
-                        ),
-                        distance = (
-                            SELECT CASE
-                                WHEN COUNT(*) < 2 THEN 0
-                                ELSE ST_Length(CAST(ST_MakeLine(CAST(location AS geometry)) AS geography))
-                            END
-                        )
-                    WHERE id = :id
-                    RETURNING route, ST_Length(route)
-                    """; // TODO убрать
 
             Object[] results = getCurrentSession()
                     .createNativeQuery(sql, Object[].class)

@@ -52,8 +52,6 @@ public class TripPointDao extends AbstractHibernateDao<TripPoint, TripPointId> {
         for (int i = 0; i < entries.size(); i++) {
             WaypointEntry entry = entries.get(i);
 
-            log.info("Processing entry {}", i); // TODO убрать
-
             TripPoint tripPoint = TripPoint.builder()
                     .id(TripPointId.builder()
                             .tripId(tripId)
@@ -65,15 +63,13 @@ public class TripPointDao extends AbstractHibernateDao<TripPoint, TripPointId> {
             getCurrentSession().persist(tripPoint);
 
             if (i > 0 && i % batchSize == 0) {
-                log.info("Flushed!"); // TODO убрать
                 getCurrentSession().flush();
                 getCurrentSession().clear();
             }
         }
 
-        // TODO т.к. результат используется раньше конца транзакции
+        //  т.к. результат используется раньше конца транзакции
         // требуется дополнительный .flush
-        log.info("Flushed final!"); // TODO убрать
         getCurrentSession().flush();
         getCurrentSession().clear();
     }

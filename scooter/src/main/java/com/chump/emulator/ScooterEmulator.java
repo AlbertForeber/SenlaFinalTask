@@ -33,7 +33,7 @@ public class ScooterEmulator {
     private static final Logger logger = LoggerFactory.getLogger(ScooterEmulator.class);
     private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
-    private final AtomicInteger battery = new AtomicInteger(15); // TODO вернуть
+    private final AtomicInteger battery = new AtomicInteger(100);
     private volatile double latitude;
     private volatile double longitude;
     private final Stack<Map.Entry<Double, Double>> waypoints;
@@ -100,16 +100,13 @@ public class ScooterEmulator {
             if (status == ScooterStatus.LOCKED) {
                 logger.debug("Already locked, duplicate command ignored");
             }
-            // TODO поменять лог
             logger.info("Received lock command");
             sendStatusEvent(new LockedEvent(scooterId));
-            // sendWaypoint(); // TODO Отправляем последнюю точку - точку остановки.
             status = ScooterStatus.LOCKED;
         } else if (command instanceof UnlockCommand) {
             if (status == ScooterStatus.UNLOCKED) {
                 logger.debug("Already unlocked, duplicate command ignored");
             }
-            // TODO поменять лог
             logger.info("Received unlock command");
             sendStatusEvent(new UnlockedEvent(scooterId));
             status = ScooterStatus.UNLOCKED;
@@ -117,7 +114,6 @@ public class ScooterEmulator {
             if (battery.get() == 100) {
                 logger.debug("Already charged, command ignored");
             }
-            // TODO поменять лог
             logger.info("Received recharge command");
             battery.set(100);
         } else {

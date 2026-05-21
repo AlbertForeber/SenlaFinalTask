@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/billing")
-@Validated // TODO добавить маппинг везде
+@Validated
 @RequiredArgsConstructor
 public class BillingController {
 

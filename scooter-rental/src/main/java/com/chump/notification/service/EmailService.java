@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     private final JavaMailSender sender;
-    private final String from = "noreply@example.com"; // TODO поместить в application.properties
+    private final String from = "chump.scooter.rental@example.com"; // TODO поместить в application.properties
 
     // Side (от side effect) в названии означает, что метод не пробрасывает исключение
     // т.к. используется по назначению побочного эффекта (при биллинге, компроментации...) и не должен

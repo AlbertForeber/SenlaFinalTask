@@ -1,16 +1,8 @@
 package com.chump.rental.service.query;
 
 import com.chump.common.exception.NoSuchEntityException;
-import com.chump.rental.dao.ScooterModelDao;
 import com.chump.rental.dao.TripDao;
-import com.chump.rental.mapper.ScooterMapper;
-import com.chump.rental.mapper.ScooterModelMapper;
 import com.chump.rental.mapper.TripMapper;
-import com.chump.rental.model.Trip;
-import com.chump.rental.model.status.TripStatus;
-import com.chump.rental.repo.ScooterRepository;
-import com.chump.rental.service.query.ScooterQueryService;
-import com.chump.rental.service.query.TripQueryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -19,8 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

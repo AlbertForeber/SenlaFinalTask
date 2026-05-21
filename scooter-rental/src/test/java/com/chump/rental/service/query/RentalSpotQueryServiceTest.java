@@ -4,7 +4,6 @@ import com.chump.common.exception.NoSuchEntityException;
 import com.chump.rental.dao.RentalSpotDao;
 import com.chump.rental.mapper.RentalSpotMapper;
 import com.chump.rental.repo.ScooterRepository;
-import com.chump.rental.service.query.RentalSpotQueryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

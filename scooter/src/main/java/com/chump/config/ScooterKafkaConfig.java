@@ -83,8 +83,8 @@ public class ScooterKafkaConfig {
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> properties = new HashMap<>();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 //        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true); TODO оставляем дефолтный AckMode.BATCH (коммитит Spring без Kafka)
 //        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 5000L);
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");

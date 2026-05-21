@@ -10,7 +10,7 @@ import com.chump.common.exception.advice.RestExceptionHandler;
 import com.chump.common.security.JwtAuthenticationEntryPoint;
 import com.chump.common.security.SecurityConfig;
 import com.chump.common.utils.DeviceInfoResolver;
-import com.chump.test_config.TestConfig;
+import com.chump.common.config.TestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

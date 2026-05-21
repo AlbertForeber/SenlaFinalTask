@@ -120,7 +120,6 @@ public class ScooterService {
         }
 
         scooter.setBattery(100);
-        // TODO отправка уведомления в Kafka
         transactionUtils.afterCommit(() -> {
                 scooterProducer.sendRecharge(scooterId);
                 log.info("Successfully replaced battery for scooter with id: {}", scooterId);

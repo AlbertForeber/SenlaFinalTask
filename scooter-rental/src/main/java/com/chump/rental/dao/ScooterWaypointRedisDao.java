@@ -24,7 +24,6 @@ public class ScooterWaypointRedisDao {
     private static final String KEY_PATTERN = "scooter:%d:waypoints";
 
     public void save(WaypointEntry entry) {
-        log.info("Saved waypoint {}", entry); // TODO убрать
         try {
             String key = key(entry.getScooterId());
             redis.rpush(key, geoConverter.waypointToString(entry));
@@ -45,7 +44,7 @@ public class ScooterWaypointRedisDao {
                             return geoConverter.stringToWaypoint(scooterId, o);
                         } catch (Exception e) {
                             log.warn("One of waypoints failed to parse: {}", o);
-                            return null; // TODO (или стоит поменять?) Неудачные точки просто пропускаем
+                            return null;
                         }
                     }
             ).filter(Objects::nonNull).toList();

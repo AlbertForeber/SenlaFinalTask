@@ -40,7 +40,6 @@ import org.locationtech.jts.geom.Point;
 public class Scooter {
 
     @Id
-    // TODO настроить batching через GenerationType.SEQUENCE + ручной increment в БД вместо SERIAL
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
