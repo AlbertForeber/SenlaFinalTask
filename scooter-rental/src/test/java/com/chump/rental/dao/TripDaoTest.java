@@ -70,7 +70,7 @@ public class TripDaoTest extends AbstractDaoTest {
         assertAll("Trip must be equal to trip provided to save",
                 () -> assertEquals(finalTrip.getScooter().getId(), savedTrip.get().getScooter().getId()),
                 () -> assertEquals(finalTrip.getUser().getId(), savedTrip.get().getUser().getId()),
-                () -> assertEquals(startedAt, savedTrip.get().getStartedAt())
+                () -> assertEquals(startedAt.toEpochMilli(), savedTrip.get().getStartedAt().toEpochMilli())
         );
     }
 
