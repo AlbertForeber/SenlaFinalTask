@@ -11,6 +11,7 @@ import java.util.List;
 
 // Bean инициализируется лениво, InitializingBean берет на себя ответственность
 // одноразовой отработки для подписки
+// TODO переименовать на KeyEvent
 @Slf4j
 @Component
 @RequiredArgsConstructor

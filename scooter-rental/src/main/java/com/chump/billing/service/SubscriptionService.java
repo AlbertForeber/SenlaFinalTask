@@ -63,6 +63,7 @@ public class SubscriptionService {
                                 + ". Ensure the tariff you are trying to subscribe is subscription"
                 )
         );
+
         UserProfile profile = userProfileDao.findById(userId).orElseThrow(
                 () -> new NoRequiredEntityException("No user found with id: " + userId)
         );

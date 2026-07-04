@@ -31,6 +31,7 @@ public interface ScooterMapper {
     @Mapping(target = "location", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(source = "model", target = "model")
+    @Mapping(target = "id", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateScooterInfoFromCommand(UpdateScooterInfoCommand command, ScooterModel model, @MappingTarget Scooter scooter);
 

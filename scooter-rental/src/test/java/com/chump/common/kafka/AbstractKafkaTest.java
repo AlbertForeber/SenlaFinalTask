@@ -11,7 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.KafkaContainer;
 
 @Tag("integration")
-@Tag("kafka")
+@Tag("container")
 @ExtendWith(SpringExtension.class)
 public class AbstractKafkaTest {
 
